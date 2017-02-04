@@ -1,0 +1,643 @@
+<-- ################################################################# -->
+<-- ##eMuleXP JSON Template## -->
+<-- ## ## -->
+<-- ##BASED ON MODIFIED VERSION BY eMule+## -->
+<-- ##BASED ON TEMPLATE BY Chicane ## -->
+<-- ################################################################# -->
+<--TMPL_VERSION-->
+7
+<--TMPL_VERSION_END-->
+
+<-- ################################################################# -->
+<-- ############################ LOGIN ############################## -->
+<-- ################################################################# -->
+<--TMPL_LOGIN-->
+    [eMuleAppName] [version] - [WebControl]
+    [eMuleAppName] [version] - [WebControl]
+    [WebControl]
+    [Login]
+    <form action="" method="POST" name="login">
+	[EnterPassword]
+	<input type="password" name=p maxlength=12 size=37 value="">
+	<input type="hidden" name=w value="password">
+	<input type="submit" value="[LoginNow]">
+    </form>
+<--TMPL_LOGIN_END-->
+<-- ################################################################# -->
+<-- ######################### MAIN SITE ############################# -->
+<-- ################################################################# -->
+<--TMPL_HEADER-->
+    [CharSet]
+    [eMuleAppName] [version] - [WebControl]
+    [StyleSheet]
+    <a href="http://emule-project.net" target="_blank"><img src="h_emule.gif" alt="[eMuleAppName] | [WebControl]">[WebControl]</a>
+    <a href="?ses=[Session]&amp;w=transfer">
+    [Transfer]
+    </a>
+    <a href="?ses=[Session]&amp;w=kad">
+    [Kad]
+    </a>
+    <a href="?ses=[Session]&amp;w=server">
+    [Server]
+    </a>
+    <a href="?ses=[Session]&amp;w=search">
+    [Search]
+    </a>
+    <a href="?ses=[Session]&amp;w=shared">
+    [Shared]
+    </a>
+    <a href="?ses=[Session]&amp;w=stats">
+    [Stats]
+    </a>
+    <a href="?ses=[Session]&amp;w=graphs">
+    [Graphs]
+    </a>
+    <a href="?ses=[Session]&amp;w=options">
+    [Options]
+    </a>
+    <a href="?ses=[Session]&amp;w=logout">[Logout]</a>
+    <a href="?ses=[Session]&amp;w=myinfo">[MyInfo]</a>
+    <a href="?ses=[Session]&amp;w=log#end">[Log]</a>
+    <a href="?ses=[Session]&amp;w=sinfo#end">[ServerInfo]</a>
+    <a href="?ses=[Session]&amp;w=debuglog#end">[DebugLog]</a>
+    [Connection]:
+    [QuickStats]:
+    [ConState]
+    [ConText]
+    [CurUsers]
+    [CurFiles]
+    [KadConText]
+    [Down]: [CurDownload] ([MaxDownload])
+    [DownloadValue]%
+    [Up]: [CurUpload] ([MaxUpload])
+    [UploadValue]%
+    [Con]: [CurConnection] ([MaxConnection])
+    [ConnectionValue]%" 
+    [Users]: [CurUsers] ([MaxUsers])
+    [UserValue]%
+
+<--TMPL_HEADER_END-->
+<-- ################################################################# -->
+<-- ######################## STYLE SHEETS ########################### -->
+<-- ################################################################# -->
+<--TMPL_HEADER_STYLESHEET-->
+<--TMPL_HEADER_STYLESHEET_END-->
+<--TMPL_FOOTER-->
+<--TMPL_FOOTER_END-->
+
+<-- ################################################################# -->
+<-- ######################## SERVER LIST ############################ -->
+<-- ################################################################# -->
+
+<--TMPL_SERVER_LIST-->
+    [AddServerBox]
+    [ServerList]
+    <a href="?ses=[Session]&amp;w=server&amp;sort=state[SortState]">&times;</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=name[SortName]">[ServernameH][ServernameI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=ip[SortIP]">[AddressH][AddressI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=description[SortDescription]">[DescriptionH][DescriptionI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=ping[SortPing]">[PingH][PingI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=users[SortUsers]">[UsersH][UsersI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=files[SortFiles]">[FilesH][FilesI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=priority[SortPriority]">[PriorityH][PriorityI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=failed[SortFailed]">[FailedH][FailedI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=limit[SortLimit]">[LimitH][LimitI]</a>
+    <a href="?ses=[Session]&amp;w=server&amp;sort=version[SortVersion]">[VersionH][VersionI]</a>
+    [ServersList]
+<--TMPL_SERVER_LIST_END-->
+<--TMPL_SERVER_LINE-->
+    <!-- server line -->	
+    <a href="?ses=[Session]&w=server&c=connect&ip=[ip]&port=[port]">
+    [ServerType]
+    [Servername]
+    [ServerState]
+    [Address]
+    [Description]
+    [Ping]
+    [Users]
+    [Files]
+    [Priority]
+    [Failed]
+    [Limit]
+    [Version]
+    <br/>
+<--TMPL_SERVER_LINE_END-->
+<-- ################################################################# -->
+<-- ####################### ADD SERVER BOX ########################## -->
+<-- ################################################################# -->
+<--TMPL_ADDSERVERBOX-->
+    [ServerOptions]
+    [UpdateServerMetFromURL]
+    [AddServer]
+    
+    <form ID="prefs" action="" method="GET">    
+	<input type="button" value="[Connect]" onclick="window.location.href='[URL_Connect]'">
+	<input type="button" value="[Disconnect]" onclick="window.location.href='[URL_Disconnect]'">
+    </form>
+    
+    <form ID="manual" action="" method="GET">
+	[IP]
+	<input name="serveraddr" type="text" size="15">
+	[Port]
+	<input name="serverport" type="text" size="6">
+	[Name]
+	<input name="servername" type="text" size="30">
+	[Static]
+	<input type='checkbox' name="addtostatic" value='true'>
+	[ConnectNow]
+	<input type='checkbox' name="connectnow" value='true'>
+	[Priority]
+	<select name="priority">
+	<option value="low">[Low]</option>
+	<option value="normal">[Normal]</option>
+	<option value="high" checked>[High]</option>
+	</select>
+	<input type="hidden" name=ses value="[Session]">
+	<input type="hidden" name=w value="server">
+	<input type="hidden" name=c value="options">
+	<input name="addserver" type="hidden" value="true">
+	<input type="submit" value="[Add]">
+    </form>
+    
+    <form ID="server" action="" method="GET">    
+	[IP]
+	<input name="servermeturl" type="text" size="30">
+	<input type="hidden" name=ses value="[Session]">
+	<input type="hidden" name=w value="server">
+	<input type="hidden" name=c value="options">
+	<input name="updateservermetfromurl" type="hidden" value="true">
+	<input type="submit" value="[Apply]">
+	[Message]
+    </form>
+
+<--TMPL_ADDSERVERBOX_END-->
+
+<-- ################################################################# -->
+<-- ######################### TRANSFER ############################## -->
+<-- ################################################################# -->
+<--TMPL_TRANSFER_IMAGES-->
+<--TMPL_TRANSFER_IMAGES_END-->
+<--PROGRESSBARWIDTH-->
+    350
+<--PROGRESSBARWIDTH_END-->
+<--PROGRESSBARIMGS-->
+    [PROGRESSGIFNAME] [PROGRESSGIFINTERNAL]
+<--PROGRESSBARIMGS_END-->
+<--PROGRESSBARPERCENTIMG-->
+    [PROGRESSGIFNAME] [PROGRESSGIFINTERNAL]
+<--PROGRESSBARPERCENTIMG_END-->
+<--TMPL_CATARROW-->
+    <input type="hidden" name="ses" value="[Session]">
+    <input type="hidden" name="w" value="transfer">
+    <input type="image" src="l_catarrow.gif">
+<--TMPL_CATARROW_END-->
+<--TMPL_DOWNARROW-->
+<--TMPL_DOWNARROW_END-->
+<--TMPL_UPARROW-->
+<--TMPL_UPARROW_END-->
+<--TMPL_DNDOUBLEARROW-->
+<--TMPL_DNDOUBLEARROW_END-->
+<--TMPL_UPDOUBLEARROW-->
+<--TMPL_UPDOUBLEARROW_END-->
+
+<--TMPL_TRANSFER_LIST-->
+    [DownloadHeader]
+    {downloadfileslist:[DownloadFilesList]}
+    [DownloadFooter]
+    [UploadHeader]
+    [UploadFilesList]
+    [UploadFooter]
+    [UploadQueue]
+    [UploadQueueFriend]
+    [UploadQueueBanned]
+<--TMPL_TRANSFER_LIST_END-->
+<--TMPL_TRANSFER_DOWN_HEADER-->
+[DownloadList]
+[CATBOX]
+    <a href="?ses=[Session]&amp;w=transfer&clearcompleted=all">clear completed</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dstate[SortDState]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=dtype[SortDType]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=dname[SortDName]">[DFilename][DFilenameI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dsize[SortDSize]">[DSize][DSizeI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dtransferred[SortDTransferred]">[DTransferred][DTransferredI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dprogress[SortDProgress]">[DProgress][DProgressI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dspeed[SortDSpeed]">[DSpeed][DSpeedI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dsources[SortDSources]">[DSources][DSourcesI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dpriority[SortDPriority]">[DPriority][DPriorityI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=dcategory[SortDCategory]">[DCategory][DCategoryI]</a>
+<--TMPL_TRANSFER_DOWN_HEADER_END-->
+<--TMPL_TRANSFER_DOWN_FOOTER-->
+    [TotalDown]
+    [TotalDownSize]
+    [TotalDownTransferred]
+    [TotalDownSpeed]
+    [TotalFiles]
+<--TMPL_TRANSFER_DOWN_FOOTER_END-->
+<--TMPL_TRANSFER_DOWN_LINE-->
+    {{'filetype':'[FileType]','filename':'[ShortFileName]','filehash':'[filehash]','downstate':'[DownState]'},
+    <!-- downline -->
+<!--
+    [FileType]
+    [FileCommentIcon]
+    [ShortFileName]
+    [DownState]
+    [2]
+    [3]
+    [PROGRESSBARWIDTHVAL]
+    [DownloadBar]
+    [5]
+    [PrioVal]
+    [Category]
+    [ISACTIVE]<a href="?ses=[Session]&w=transfer&op=resume&file=[filehash]">
+    [Resume]
+    [ISACTIVE_END]
+    [!ISACTIVE]
+    <a href="?ses=[Session]&w=transfer&op=stop&file=[filehash]">[Stop]</a>
+    <a href="?ses=[Session]&w=transfer&op=pause&file=[filehash]">[Pause]</a>
+    [!ISACTIVE_END]
+    <a href="?ses=[Session]&w=transfer&op=cancel&file=[filehash]" onclick="return confirm(removeconfirm)">[Cancel]</a>
+    [HASCOMMENT]
+	<a href="?ses=[Session]&w=commentlist&filehash=[filehash]" target="_blank">[FileComments]</a>
+    [HASCOMMENT_END]
+    <a href="javascript:alert('[finfo]');">finfo</a>
+-->{}}
+    <br/>    
+<--TMPL_TRANSFER_DOWN_LINE_END-->
+<--TMPL_TRANSFER_UP_HEADER-->
+    [UploadList]
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=uspeed[SortUSpeed]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=uclient[SortUClient]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=uuser[SortUUser]">[UUser][UUserI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=uversion[SortUVersion]">[UVersion][UVersionI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=ufilename[SortUFilename]">[UFilename][UFilenameI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=utransferred[SortUTransferred]">[UTransferred][UTransferredI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=uspeed[SortUSpeed]">[USpeed][USpeedI]</a>
+<--TMPL_TRANSFER_UP_HEADER_END-->
+<--TMPL_TRANSFER_UP_FOOTER-->
+    [TotalUp]    
+    [TotalUpTransferred]
+    [TotalUpSpeed]
+<--TMPL_TRANSFER_UP_FOOTER_END-->
+<--TMPL_TRANSFER_UP_LINE-->
+    [ClientState]
+    [ClientSoft]
+    [ClientExtra]
+    [1] 
+    [ClientSoftV]
+    [2]
+    [3]
+    [4]
+    <br/>
+<--TMPL_TRANSFER_UP_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_SHOW-->
+    <a href="#">[ShowUploadQueue]</a>
+    [CounterAll] ([CounterAllSecure])
+    <a href="?ses=[Session]&amp;w=transfer&amp;showuploadqueue=false">remove</a>[UploadQueueList]
+    [CounterQueue] ([CounterQueueSecure])
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qscore[SortQScore]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=qclient[SortQClient]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=quser[SortQUser]">[UserNameTitle][UserNameTitleI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qversion[SortQVersion]">[Version][VersionI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qfilename[SortQFilename]">[FileNameTitle][FileNameTitleI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qscore[SortQScore]">[ScoreTitle][ScoreTitleI]</a>
+    [QueueList]
+<--TMPL_TRANSFER_UP_QUEUE_SHOW_END-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_SHOW-->
+    <a href="?ses=[Session]&amp;w=transfer&amp;showuploadqueuebanned=false">remove</a>[UploadQueueBannedList]
+    [CounterQueueBanned] ([CounterQueueBannedSecure])
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qscore[SortQScore]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=qclient[SortQClient]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=quser[SortQUser]">[UserNameTitle][UserNameTitleI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qversion[SortQVersion]">[Version][VersionI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qfilename[SortQFilename]">[FileNameTitle][FileNameTitleI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qscore[SortQScore]">[ScoreTitle][ScoreTitleI]</a>   
+    [QueueListBanned]
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_SHOW_END-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_SHOW-->
+    <a href="?ses=[Session]&amp;w=transfer&amp;showuploadqueuefriend=false"><img src="l_remove.gif"></a>[UploadQueueFriendList]
+    [CounterQueueFriend] ([CounterQueueFriendSecure])
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qscoret[SortQScore]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=qclient[SortQClient]">&times;</a><a href="?ses=[Session]&amp;w=transfer&amp;sort=quser[SortQUser]">[UserNameTitle][UserNameTitleI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qversion[SortQVersion]">[Version][VersionI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qfilename[SortQFilename]">[FileNameTitle][FileNameTitleI]</a>
+    <a href="?ses=[Session]&amp;w=transfer&amp;sort=qscore[SortQScore]">[ScoreTitle][ScoreTitleI]</a>
+    [QueueListFriend]
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_SHOW_END-->
+<--TMPL_TRANSFER_UP_QUEUE_LINE-->
+    [ClientState] 
+    [ClientStateSpecial]
+    [ClientSoft]
+    [ClientExtra]
+    [UserName]
+    [ClientSoftV]
+    [FileName]
+    [Score]
+<--TMPL_TRANSFER_UP_QUEUE_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_LINE-->
+    [ClientState]
+    [ClientStateSpecial]
+    [ClientSoft]
+    [ClientExtra]
+    [UserName]
+    [ClientSoftV]
+    [FileName]
+    [Score]
+    
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_LINE-->
+    [ClientState]
+    [ClientStateSpecial]
+    [ClientSoft]
+    [ClientExtra].
+    [UserName]
+    [ClientSoftV]
+    [FileName]
+    [Score]
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_CREDIT_LINE-->
+
+    [ClientStateSpecial]
+    [ClientSoft]
+    [ClientExtra]
+    [UserName]
+    [ClientState]
+    [ClientSoftV]
+    [FileName]
+    [Score]
+    <br/>
+<--TMPL_TRANSFER_UP_QUEUE_CREDIT_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_HIDE-->
+    [ShowUploadQueue]
+    [CounterAll] ([CounterAllSecure])
+    <a href="?ses=[Session]&amp;w=transfer&amp;showuploadqueue=true"><img src="l_add.gif"></a>[ShowUploadQueueList]
+    [CounterQueue] ([CounterQueueSecure])
+<--TMPL_TRANSFER_UP_QUEUE_HIDE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_HIDE-->
+    <a href="?ses=[Session]&amp;w=transfer&amp;showuploadqueuebanned=true"><img src="l_add.gif"></a>[ShowUploadQueueListBanned]
+    [CounterQueueBanned] ([CounterQueueBannedSecure])
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_HIDE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_HIDE-->
+    <a href="?ses=[Session]&amp;w=transfer&amp;showuploadqueuefriend=true"><img src="l_add.gif"></a>[ShowUploadQueueListFriend]
+    [CounterQueueFriend] ([CounterQueueFriendSecure])
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_HIDE_END-->
+
+<-- ################################################################# -->
+<-- ########################### SEARCH ############################## -->
+<-- ################################################################# -->
+
+<--TMPL_SEARCH-->
+
+    [Search]
+    FileDonkey [Search]
+    [Ed2klink]
+
+    <form ID="search" action="" method="GET">
+        [Name]
+        <input name="tosearch" type="text" size="30">
+        <input type="checkbox" checked name="unicode">[Unicode]
+        [Type]
+        <select name="type">
+        <option value="">[Any]</option>
+        <option value="Arc">[Archive] (.zip .rar .ace...)</option>
+        <option value="Audio">[Audio] (.mp3 .ogg .wav...)</option>
+        <option value="Iso">[CDImage] (.iso .bin .nrg...)</option>
+        <option value="Doc">[Document] (.doc .txt .pdf...)</option>
+        <option value="Image">[Image] (.jpg .gif .png...)</option>
+        <option value="Pro">[Program] (.exe .zip .rar...)</option>
+        <option value="Video">[Video] (.avi .mpg .ogm...)</option>
+        </select>
+        [SizeMin]
+        <input name="min" type="text" size="10">
+        [SizeMax]
+        <input name="max" type="text" size="10">
+        [Availabl]
+        <input name="avail" type="text" size="10">
+        [Extention]
+        <input name="ext" type="text" size="10">
+        [METHOD]
+        <input value="server" type="radio" name="method" checked>[USESSERVER]
+        <input value="global" type="radio" name="method">[Global]
+        <input value="kademlia" type="radio" name="method">[USEKADEMLIA]
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value="search">
+       <input type="submit" value="[Search]">
+    </form>
+    <br/>
+    <form action="./" method="GET">
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value=transfer>
+        <textarea name="ed2k" cols="70" rows="7"></textarea>
+        <input type="submit" value="[Start]">[CATBOX]
+        <a href="#">[Result]</a>
+        <a href="?ses=[Session]&amp;w=search">([Message])</a>
+    </form>
+    <br/>
+    <form action="/" method="GET">
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value="search">
+        [RESULTLIST]
+        <input type="submit" value="[Download]">[CATBOX]
+    </form>
+
+<--TMPL_SEARCH_END-->
+
+<--TMPL_SEARCH_RESULT_HEADER-->
+
+    <a href="?ses=[Session]&amp;w=search&amp;sort=3&amp;sortAsc=[SORTASCVALUE3]">&times;</a>
+    <a href="?ses=[Session]&amp;w=search&amp;sort=5&amp;sortAsc=[SORTASCVALUE5]">&times;</a>
+    <a href="?ses=[Session]&amp;w=search&amp;sort=0&amp;sortAsc=[SORTASCVALUE0]">[FilenameH][FilenameI]</a>
+    <a href="?ses=[Session]&amp;w=search&amp;sort=1&amp;sortAsc=[SORTASCVALUE1]">[FilesizeH][FilesizeI]</a>
+    <a href="?ses=[Session]&amp;w=search&amp;sort=2&amp;sortAsc=[SORTASCVALUE2]">[FilehashH][FilehashI]</a>
+    <a href="?ses=[Session]&amp;w=search&amp;sort=3&amp;sortAsc=[SORTASCVALUE3]">[SourcesH][SourcesI]</a>
+
+<--TMPL_SEARCH_RESULT_HEADER_END-->
+
+<--TMPL_SEARCH_RESULT_LINE-->
+    %s %s %s %s %s %s %s
+    <input type="checkbox" name="downloads" value="%s">
+    <br/>
+<--TMPL_SEARCH_RESULT_LINE_END-->
+
+<-- ################################################################# -->
+<-- ###################### SHARED FILES LIST ######################## -->
+<-- ################################################################# -->
+
+<--TMPL_SHARED_LIST-->
+
+    <a href="#">[SharedList]</a>[Message]
+    <a href="?ses=[Session]&amp;w=shared&[SortState]">&times;</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortType]">&times;</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortName]">[Filename][FilenameI]</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortTransferred]">[FileTransferred][FileTransferredI]</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortRequests]">[FileRequests][FileRequestsI]</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortAccepts]">[FileAccepts][FileAcceptsI]</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortSize]">[Size][SizeI]</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortCompletes]">[Completes][CompletesI]</a>
+    <a href="?ses=[Session]&amp;w=shared&[SortPriority]">[Priority][PriorityI]</a>
+    [SharedFilesList]
+    <form>
+        <input type="button" name="queue" value="[Reload]" onClick="self.location.href='/?ses=[Session]&w=shared&reload=true'">
+    </form>
+
+<--TMPL_SHARED_LIST_END-->
+<--TMPL_SHARED_LINE-->
+    [FileState]
+    [FileIsPriority]
+    [FileType]
+    [FileName]
+    [FileHash]
+    [ShortFileName]
+    [FileTransferred][FileAllTimeTransferred]
+    [FileRequests][FileAllTimeRequests]
+    [FileAccepts][FileAllTimeAccepts]
+    [FileSize]
+    [Completes]
+    [Priority]
+    
+    [IFDOWNLOADABLE]
+        <a href="?ses=[Session]&w=getfile&filehash=[FileHash]"><img src="downloading.gif"></a>
+    [/IFDOWNLOADABLE]
+<--TMPL_SHARED_LINE_END-->
+
+<-- ################################################################# -->
+<-- ########################## STATISTICS ########################### -->
+<-- ################################################################# -->
+
+<--TMPL_STATS-->
+    [menu] [Stats]
+<--TMPL_STATS_END-->
+
+<-- ################################################################# -->
+<-- ########################### GRAPHS ############################## -->
+<-- ################################################################# -->
+
+<--TMPL_GRAPHS-->
+    [GraphDownload]
+    [MaxDownload]
+    [TxtDownload]: Max [MaxDownload] [KByteSec], [TxtTime]: [ScaleTime]
+    [GraphUpload]
+    [MaxUpload]
+    [TxtUpload]: Max [MaxUpload] [KByteSec], [TxtTime]: [ScaleTime]
+    [GraphConnections]
+    [MaxConnections]
+    [TxtConnections]: Max [MaxConnections], [TxtTime]: [ScaleTime]
+<--TMPL_GRAPHS_END-->
+
+<-- ################################################################# -->
+<-- ######################### PREFERENCES ########################### -->
+<-- ################################################################# -->
+
+<--TMPL_PREFERENCES-->
+
+    <form action="./" method="GET">
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value=options>
+        <input type="hidden" name=saveprefs value="true">
+        [WebControl]
+        [UseGzipForm]
+        <input type="checkbox" name=gzip [UseGzipVal] value="ON">
+        [UseGzipComment]
+        [RefreshTimeForm]
+        [RefreshTimeComment] <input type="text" name=refresh size="5" class=dinput value="[RefreshVal]">
+        [eMuleAppName]
+        [SpeedCapForm]
+        [MaxCapDown]: <input type="text" name=maxcapdown size="5" class=dinput value="[MaxCapDownVal]"> [KBS]
+        [MaxCapUp]: <input type="text" name=maxcapup size="5" class=dinput value="[MaxCapUpVal]"> [KBS]
+        [SpeedForm]
+        [MaxDown]: <input type="text" name=maxdown size="5" class=dinput value="[MaxDownVal]"> [KBS]
+        [MaxUp]: <input type="text" name=maxup size="5" class=dinput value="[MaxUpVal]"> [KBS]
+        [LimitForm]
+        [MaxSources]
+        <input type="text" name=maxsources size="5" class=dinput value="[MaxSourcesVal]">
+        [MaxConnections]
+        <input type="text" name=maxconnections size="5" class=dinput value="[MaxConnectionsVal]">
+        [MaxConnectionsPer5]
+        <input type="text" name=maxconnectionsperfive size="5" class=dinput value="[MaxConnectionsPer5Val]">
+        <input type="submit" value="[Apply]">
+    </form>
+    <br/>
+    <form>
+        <input type=button onClick="window.open('[CONNECTIONTESTLINK]');" value="[CONNECTIONTESTLABEL]">
+    </form>
+<--TMPL_PREFERENCES_END-->
+
+<-- ################################################################# -->
+<-- ######################### SERVER INFO ########################### -->
+<-- ################################################################# -->
+
+<--TMPL_SERVERINFO-->
+    [ServerInfo]
+    <form action="./" method="GET">
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value=sinfo>
+        <input type="hidden" name=clear value=yes>
+        <input type="submit" value="[Clear]">
+    </form>
+<--TMPL_SERVERINFO_END-->
+
+<-- ################################################################# -->
+<-- ############################ LOGS ############################### -->
+<-- ################################################################# -->
+
+<--TMPL_LOG-->
+    [Log]
+    <form action="./" method="GET">
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value=log>
+        <input type="hidden" name=clear value=yes>
+        <input type="submit" value="[Clear]">
+    </form>
+<--TMPL_LOG_END-->
+
+<-- ################################################################# -->
+<-- ######################### DEBUG LOG ############################# -->
+<-- ################################################################# -->
+
+<--TMPL_DEBUGLOG-->
+    [DebugLog]
+    <form action="./" method="GET">
+        <input type="hidden" name=ses value="[Session]">
+        <input type="hidden" name=w value=debuglog>
+        <input type="hidden" name=clear value=yes>
+        <input type="submit" value="[Clear]">
+    </form>
+<--TMPL_DEBUGLOG_END-->
+
+<-- ################################################################# -->
+<-- ######################### My Info ############################### -->
+<-- ################################################################# -->
+
+<--TMPL_MYINFO-->
+    [MYINFOLOG]
+<--TMPL_MYINFO_END-->
+
+<-- ################################################################# -->
+<-- ########################## KAD################################# -->
+<-- ################################################################# -->
+<--TMPL_BOOTSTRAPLINE-->
+    <form action="" method="GET">
+        [BOOTSTRAP] [BS_IP]:
+        <input name="ip" type="text" size="16">
+        [BS_PORT]:
+        <input name="port" type="text" size="6">
+        <input type="hidden" name="ses" value="[Session]">
+        <input type="hidden" name="w" value="kad">
+        <input type="hidden" name="bootstrap" value="kad">
+        <input type="submit" value="[BOOTSTRAP]">
+    </form>
+    <br/>
+<--TMPL_BOOTSTRAPLINE_END-->
+
+<--TMPL_KADDLG-->
+    [KAD]
+    [STATUS]
+    [KADSTATUS]
+    [KADACTION]
+    [BOOTSTRAPLINE]
+    [KADSTAT]
+    [KADSTATSLABELS]
+    [KADSTATSDATA]
+<--TMPL_KADDLG_END-->
+<-- ################################################################# -->
+<-- ########################## Comment List######################## -->
+<-- ################################################################# -->
+
+<--TMPL_COMMENTLIST-->
+    [CharSet] [COMMENTS] [COMMENTS] [USERNAME] [FILENAME] [COMMENT] [RATING] [COMMENTLINES]	
+<--TMPL_COMMENTLIST_END-->
+
+<--TMPL_COMMENTLIST_LINE-->
+    %s %s %s %s
+    <br/>
+<--TMPL_COMMENTLIST_LINE_END-->

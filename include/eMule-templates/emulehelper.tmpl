@@ -1,0 +1,184 @@
+<-- ################################################################# -->
+<-- ##eMuleXP JSON Template by dp## -->
+<-- ## ## -->
+<-- ##BASED ON MODIFIED VERSION BY eMule+## -->
+<-- ##BASED ON TEMPLATE BY Chicane ## -->
+<-- ################################################################# -->
+<--TMPL_VERSION-->
+7
+<--TMPL_VERSION_END-->
+
+<-- ################################################################# -->
+<-- ############################ LOGIN ############################## -->
+<-- ################################################################# -->
+<--TMPL_LOGIN-->
+<?xml version="1.0" encoding="[CharSet]"?>
+<response>
+    <status>login</status>
+</response>
+
+<--TMPL_LOGIN_END-->
+<-- ################################################################# -->
+<-- ######################### MAIN SITE ############################# -->
+<-- ################################################################# -->
+<--TMPL_HEADER-->
+<?xml version="1.0" encoding="[CharSet]"?>
+<response>
+    <status>ok</status>
+    <ses>[Session]</ses>
+<--TMPL_HEADER_END-->
+
+
+<--TMPL_FOOTER-->
+
+</response>
+<--TMPL_FOOTER_END-->
+
+
+
+<-- ################################################################# -->
+<-- ######################### TRANSFER ############################## -->
+<-- ################################################################# -->
+<--TMPL_TRANSFER_LIST-->
+    <type>transferlist</type>
+    <filelist>
+	[DownloadFilesList]
+    </filelist>
+<--TMPL_TRANSFER_LIST_END-->
+
+<--TMPL_TRANSFER_DOWN_LINE-->
+
+	<file>
+	    <fname>[fname]</fname>
+	    <ed2khash>[filehash]</ed2khash>
+		<sizetotal>[2]</sizetotal>
+		<sizecompleted>[3]</sizecompleted>
+		<speed>[4]</speed>
+		<sources>[5]</sources>
+		<fsize>[fsize]</fsize>
+		<finfo>[finfo]</finfo>
+		<filetype>[FileType]</filetype>
+	</file>
+
+<--TMPL_TRANSFER_DOWN_LINE_END-->
+<-- ################################################################# -->
+<-- ########################### SEARCH ############################## -->
+<-- ################################################################# -->
+
+<--TMPL_SEARCH-->
+    <type>searchresultlist</type>
+    <filelist>
+    [RESULTLIST]
+    </filelist>
+<--TMPL_SEARCH_END-->
+
+<--TMPL_SEARCH_RESULT_HEADER-->
+<--TMPL_SEARCH_RESULT_HEADER_END-->
+
+<--TMPL_SEARCH_RESULT_LINE-->
+
+	<file>
+	    <!--REMOVE
+	    <id>%s</id>
+	    REMOVE-->
+	    <ed2klink>%s</ed2klink>
+	    <!--REMOVE
+	    <something>%s</something>
+	    REMOVE-->
+	    <type>%s</type>
+	</file>
+
+<--TMPL_SEARCH_RESULT_LINE_END-->
+
+<-- ################################################################# -->
+<-- ########################## KAD################################# -->
+<-- ################################################################# -->
+<--TMPL_KADDLG-->
+    <type>kad</type>
+    <kadstatus>[KADSTATUS]</kadstatus>
+    <kadaction>[KADACTION]</kadaction>
+<--TMPL_KADDLG_END-->
+
+
+<--TMPL_HEADER_STYLESHEET-->
+<--TMPL_HEADER_STYLESHEET_END-->
+<--TMPL_SERVER_LIST-->
+<--TMPL_SERVER_LIST_END-->
+<--TMPL_SERVER_LINE-->
+<--TMPL_SERVER_LINE_END-->
+<--TMPL_ADDSERVERBOX-->
+<--TMPL_ADDSERVERBOX_END-->
+<--TMPL_TRANSFER_IMAGES-->
+<--TMPL_TRANSFER_IMAGES_END-->
+<--PROGRESSBARWIDTH-->
+<--PROGRESSBARWIDTH_END-->
+<--PROGRESSBARIMGS-->
+<--PROGRESSBARIMGS_END-->
+<--PROGRESSBARPERCENTIMG-->
+<--PROGRESSBARPERCENTIMG_END-->
+<--TMPL_CATARROW-->
+<--TMPL_CATARROW_END-->
+<--TMPL_DOWNARROW-->
+<--TMPL_DOWNARROW_END-->
+<--TMPL_UPARROW-->
+<--TMPL_UPARROW_END-->
+<--TMPL_DNDOUBLEARROW-->
+<--TMPL_DNDOUBLEARROW_END-->
+<--TMPL_UPDOUBLEARROW-->
+<--TMPL_UPDOUBLEARROW_END-->
+<--TMPL_TRANSFER_DOWN_HEADER-->
+<--TMPL_TRANSFER_DOWN_HEADER_END-->
+<--TMPL_TRANSFER_DOWN_FOOTER-->
+<--TMPL_TRANSFER_DOWN_FOOTER_END-->
+<--TMPL_TRANSFER_UP_HEADER-->
+<--TMPL_TRANSFER_UP_HEADER_END-->
+<--TMPL_TRANSFER_UP_FOOTER-->
+<--TMPL_TRANSFER_UP_FOOTER_END-->
+<--TMPL_TRANSFER_UP_LINE-->
+<--TMPL_TRANSFER_UP_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_SHOW-->
+<--TMPL_TRANSFER_UP_QUEUE_SHOW_END-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_SHOW-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_SHOW_END-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_SHOW-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_SHOW_END-->
+<--TMPL_TRANSFER_UP_QUEUE_LINE-->
+<--TMPL_TRANSFER_UP_QUEUE_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_LINE-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_LINE-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_CREDIT_LINE-->
+<--TMPL_TRANSFER_UP_QUEUE_CREDIT_LINE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_HIDE-->
+<--TMPL_TRANSFER_UP_QUEUE_HIDE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_HIDE-->
+<--TMPL_TRANSFER_UP_QUEUE_BANNED_HIDE_END-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_HIDE-->
+<--TMPL_TRANSFER_UP_QUEUE_FRIEND_HIDE_END-->
+<--TMPL_SEARCH_RESULT_HEADER-->
+<--TMPL_SEARCH_RESULT_HEADER_END-->
+<--TMPL_SHARED_LIST-->
+<--TMPL_SHARED_LIST_END-->
+<--TMPL_SHARED_LINE-->
+<--TMPL_SHARED_LINE_END-->
+<--TMPL_STATS-->
+<--TMPL_STATS_END-->
+<--TMPL_GRAPHS-->
+<--TMPL_GRAPHS_END-->
+<--TMPL_PREFERENCES-->
+<--TMPL_PREFERENCES_END-->
+<--TMPL_SERVERINFO-->
+<--TMPL_SERVERINFO_END-->
+<--TMPL_LOG-->
+<--TMPL_LOG_END-->
+<--TMPL_DEBUGLOG-->
+<--TMPL_DEBUGLOG_END-->
+<--TMPL_MYINFO-->
+<--TMPL_MYINFO_END-->
+<--TMPL_BOOTSTRAPLINE-->
+<--TMPL_BOOTSTRAPLINE_END-->
+<--TMPL_COMMENTLIST-->
+<--TMPL_COMMENTLIST_END-->
+<--TMPL_COMMENTLIST_LINE-->
+<--TMPL_COMMENTLIST_LINE_END-->
