@@ -49,6 +49,7 @@
 	2016-09-22 22:59:19 - base 2 to base 3
 	2016-09-22 23:05:38
 	2016-11-08 23:33:41 - bugfix, base 2 to base 3 leftovers
+	2017-02-25 21:49:19 - editing mailer to use php mail function
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -84,7 +85,8 @@
 	# define('EMULEWEBURL', 'http://'.EMULEHOST.':4711/');
 
    # path to a suitable mailing application, set to false to disable
-   define('MAILER', '/var/scripts/sysmail ###EMAIL### ###SUBJECT### ###BODY###');
+   # not used in favour of php mail function
+   # define('MAILER', '/var/scripts/sysmail ###EMAIL### ###SUBJECT### ###BODY###');
 
 	# bad words detected in filenames
 	$blacklist = array('preteen', 'child', 'underage', '.exe','.zip', '.com', '.rar', 'kids', 'stargate');
@@ -693,10 +695,10 @@
 
 	# to reverse-engineer the collection_id based on the fullpath of a file including filename
 	# /known/collection/path/to/file.txt -> array(id_collections => x, basepath => path/to/)
-	# /unknown/path/to/file.txt => array(id_collections => 0, basepath = > /unknown/path/to/) 
+	# /unknown/path/to/file.txt => array(id_collections => 0, basepath = > /unknown/path/to/)
 	function identify_collection($fulltargetpath) {
 		global $link;
-	
+
 		# get all collections
 		$sql = 'SELECT * FROM collections';
 		$collections = db_query($link, $sql);
@@ -704,7 +706,7 @@
 			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 			die();
 		}
-		
+
 		# walk the collections
 		foreach ($collections as $collection) {
 
@@ -714,56 +716,56 @@
 				cl('Malformed URL format of destination '.$collection['url'].' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 				continue 2;
 			}
-		
+
 			$rootpath = false;
 
 			# find out what type of source this is
 			switch (strtolower($collection['url']['scheme'])) {
 				# samba connection
 				case 'smb':
-				
+
 					$rootpath = MOUNT_ROOTPATH.$collection['name'];
-					
+
 					break;
 				# local path
-				case 'file':								
+				case 'file':
 					$collection['fullpath'] = substr($collection['url']['path'], -1) !== '/' ? $collection['url']['path'].'/' : $collection['url']['path'];
 					if (!is_dir($collection['fullpath'])) {
 						cl('Local path '.$collection['fullpath'].' not found'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 						continue 3;
 					}
-				
+
 					$rootpath = $collection['fullpath'];
 					break;
 				default:
 					cl('Unknown scheme: '.strtolower($collection['url']['scheme']).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					continue 3;
 			}
-		
+
 			# no rootpath or fullpath is shorter than rootpath?
 			if($rootpath === false || !strlen($rootpath) || strlen($fulltargetpath) < strlen($rootpath)) {
 				# go next collection
 				continue;
 			}
-			
+
 			# /collection/rootpath != /path/to/file/ ?
 			if (substr($fulltargetpath, 0, strlen($rootpath)) !== $rootpath) {
 				# go next collection
 				continue;
 			}
-			
+
 			return array(
 				'id_collections' => (int)$collection['id'],
 				'basepath' => substr(
-						$fulltargetpath, 
-						strlen($rootpath) - 0, 
+						$fulltargetpath,
+						strlen($rootpath) - 0,
 						# if only rootpath then it should be empty as collection provides last slash
-						# if rootpath and subfolder, then it should be subfolder/						
+						# if rootpath and subfolder, then it should be subfolder/
 						strrpos($fulltargetpath, '/') + 1 - strlen($rootpath)
 				)
-			);		
-		} # eof-foreach-collections	 	
-		
+			);
+		} # eof-foreach-collections
+
 		# no matching collection, return the fullpath to the item with no collection selected
 		return array(
 			'id_collections' => (int)FILES_ID_COLLECTIONS_NO_COLLECTION,
@@ -811,19 +813,19 @@
 
 				# find out what collection it belongs to now
 				# problem: what to do if it is a smb collection, then is it connected?
-				
+
 				#$sql = 'SELECT * FROM collections';
 				#$collections = db_query($link, $sql);
 				#if ($collections === false) {
 				#	cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 				#	die();
 				#}
-				 
+
 				# by default assume that the file has left the collections
 				# $id_collections = FILES_ID_COLLECTIONS_NO_COLLECTION;
 				# set the base path to a full path - outside any collection
 				# $basepath = substr($fulltargetpath, 0, strrpos($fulltargetpath, '/') + 1);
-				
+
 				# walk collections
 				# foreach ($collections as $collection) {
 					# does this rootpath match the new location?
@@ -843,14 +845,14 @@
 				$identified_collection = identify_collection($fulltargetpath);
 				$sql = '
 						UPDATE
-							files 
+							files
 						SET
 							id_collections="'.dbres($link, $identified_collection['id_collections']).'",
 							path="'.dbres($link, $identified_collection['basepath']).'",
-							moved='.FILES_MOVED_OK.', 
-							name="'.dbres($link, basename($fulltargetpath)).'", 
-							existing=1, 
-							fakecheck='.$fakecheck.' 
+							moved='.FILES_MOVED_OK.',
+							name="'.dbres($link, basename($fulltargetpath)).'",
+							existing=1,
+							fakecheck='.$fakecheck.'
 						WHERE id="'.dbres($link, $item['id']).'"
 						';
 				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
@@ -923,7 +925,7 @@
 			'email_last_sent' => '0000-00-00 00:00:00',
 			'email_timeout' => 3600 # 1 hour
 		);
-		
+
 		$sql = 'SELECT
 						*
 				FROM
@@ -933,17 +935,17 @@
 		$result = db_query($link, $sql);
 		if ($result === false) {
 			die(json_encode(array(
-				'status' => 'error', 
+				'status' => 'error',
 				'data' => array(
 					'message' => db_error($link)
 				)
 			)));
 		}
 
-		# walk row by row			
+		# walk row by row
 		foreach ($result as $row) {
 			$parameters[$row['parameter']] = $row['value'];
-		}		
+		}
 		return $parameters;
 	}
 
@@ -1048,8 +1050,8 @@
 					if ($result_update_searches === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 						die();
-					}					
-					
+					}
+
 				}
 				continue;
 			}
@@ -1101,16 +1103,16 @@
 				$r[0]['movetopath'] = substr($r[0]['movetopath'], -1) === '/' ? $r[0]['movetopath'] : $r[0]['movetopath'].'/';
 				# try to move file
 				if (move_file($file['fullpath'], $r[0]['movetopath'].$filename, $r[0], $link)) {
-				
-					# email				
+
+					# email
 					$sql = 'UPDATE searches SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $r[0]['id_searches']).'"';
 					cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 					$result_update_searches = db_query($link, $sql);
 					if ($result_update_searches === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 						die();
-					}					
-					
+					}
+
 				}
 
 				continue;
@@ -1202,8 +1204,8 @@
 							if ($result_update_moverules === false) {
 								cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 								die();
-							}							
-							
+							}
+
 						}
 						continue 2; # go next file
 					}
@@ -1214,11 +1216,11 @@
 
 		# is there a mailer defined and any addresses to mail to and the last time a mail was sent has passed?
 		if (
-			MAILER && 
+			MAILER &&
 			(int)$parameters['email_enabled'] === 1 &&
 			((int)strtotime($parameters['email_last_sent']) + (int)$parameters['email_timeout']) < time()
 		) {
-			
+
 			# check email address
 			if (!filter_var($parameters['email_address'], FILTER_VALIDATE_EMAIL)) {
 				cl('Skipping invalid mail address: '.$parameters['email_address'], VERBOSE_DEBUG);
@@ -1232,7 +1234,7 @@
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 				die();
 			}
-			$totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];			
+			$totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];
 
 			# sum the move rules
 			$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM moverules WHERE filessincelastmail>0';
@@ -1241,7 +1243,7 @@
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 				die();
 			}
-			$totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];			
+			$totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];
 
 			# any news?
 			if ($totalfilessincelastmail > 0) {
@@ -1258,8 +1260,9 @@
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
 				}
-				
+
 				# replace the template locations in the mailer string with our versions
+				/*
 				$cmd = str_replace(
 					array(
 						'###EMAIL###',
@@ -1273,26 +1276,44 @@
 					),
 					MAILER
 				);
+				*/
 
-				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+
+				# cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+				cl('Sending mail to: '.$parameters['email_address'], VERBOSE_DEBUG_DEEP);
 				# try to send the mail
-				exec($cmd, $output, $retval);
+				# exec($cmd, $output, $retval);
+
+				# send mail
+				mail(
+					# to
+					$parameters['email_address'],
+					# subject
+					$totalfilessincelastmail.' new files',
+					# body
+					$totalfilessincelastmail.' new files has arrived',
+					# headers
+					implode("\r\n", array(
+						'From: '.MAIL_ADDRESS_FROM
+					))
+				);
+
 
 				# check and update the last email sent-parameter
 				$r = db_query($link, 'SELECT * FROM parameters WHERE parameter="email_last_sent"');
-				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);				
+				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
 				if ($r === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
 				}
-				
+
 				if (count($r)) {
 					$sql = 'UPDATE parameters SET value="'.dbres($link, date('Y-m-d H:i:s')).'" WHERE parameter="email_last_sent"';
 				} else {
 					$sql = 'INSERT INTO parameters (parameter, value) VALUES("email_last_sent", "'.dbres($link, date('Y-m-d H:i:s')).'")';
 				}
 				$r = db_query($link, $sql);
-				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);				
+				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
 				if ($r === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
@@ -1935,7 +1956,7 @@
 			return ed2khash($filename);
 		}
 	}
-	
+
 	# --- translation ----
 
 	function is_logged_in() {
@@ -2141,6 +2162,6 @@
 		$translations['current']['locale'] = reset($translations['languages'][$translations['current']['index']]['locales']);
 		$_SESSION['translation_index'] = $translations['current']['index'];
 	}
-	
-	
+
+
 ?>
