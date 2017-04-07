@@ -49,7 +49,8 @@
 	2016-09-22 22:59:19 - base 2 to base 3
 	2016-09-22 23:05:38
 	2016-11-08 23:33:41 - bugfix, base 2 to base 3 leftovers
-	2017-02-25 21:49:19 - editing mailer to use php mail function
+	2017-02-25 21:50:05 - editing mailer to use php mail function
+	2017-04-07 19:01:31 - bugfix, invalid id in move rules and leftovers from mailer
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -1198,7 +1199,7 @@
 						)) {
 
 							# email
-							$sql = 'UPDATE moverules SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $r[0]['id']).'"';
+							$sql = 'UPDATE moverules SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $moverule['id']).'"';
 							cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 							$result_update_moverules = db_query($link, $sql);
 							if ($result_update_moverules === false) {
@@ -1216,7 +1217,7 @@
 
 		# is there a mailer defined and any addresses to mail to and the last time a mail was sent has passed?
 		if (
-			MAILER &&
+			# MAILER &&
 			(int)$parameters['email_enabled'] === 1 &&
 			((int)strtotime($parameters['email_last_sent']) + (int)$parameters['email_timeout']) < time()
 		) {
