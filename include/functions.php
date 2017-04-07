@@ -51,6 +51,7 @@
 	2016-11-08 23:33:41 - bugfix, base 2 to base 3 leftovers
 	2017-02-25 21:50:05 - editing mailer to use php mail function
 	2017-04-07 19:01:31 - bugfix, invalid id in move rules and leftovers from mailer
+	2017-04-07 22:33:23 - bugfix, leftovers from mailer
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -1250,13 +1251,17 @@
 			if ($totalfilessincelastmail > 0) {
 
 				# clear the counters
-				$r = db_query($link, 'UPDATE searches SET filessincelastmail = 0');
+				$sql = 'UPDATE searches SET filessincelastmail = 0';
+				$r = db_query($link, $sql);
+				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 				if ($r === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
 				}
 
-				$r = db_query($link, 'UPDATE moverules SET filessincelastmail = 0');
+				$sql = 'UPDATE moverules SET filessincelastmail = 0';
+				$r = db_query($link, $sql);
+				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 				if ($r === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
@@ -1302,7 +1307,7 @@
 
 				# check and update the last email sent-parameter
 				$r = db_query($link, 'SELECT * FROM parameters WHERE parameter="email_last_sent"');
-				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+				# cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
 				if ($r === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
@@ -1314,7 +1319,8 @@
 					$sql = 'INSERT INTO parameters (parameter, value) VALUES("email_last_sent", "'.dbres($link, date('Y-m-d H:i:s')).'")';
 				}
 				$r = db_query($link, $sql);
-				cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+				# cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 				if ($r === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 					die();
