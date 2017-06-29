@@ -529,18 +529,18 @@ foreach ($arguments as $k => $v) {
 							# does it exist according to db?
 							if ((int)$r[0]['existing']) {
 								# set it as verfied and fakechecked
-								$sql = 'UPDATE 
+								$sql = 'UPDATE
 											files
 										SET
 											verified=1,
 											fakecheck='.$fakecheck.'
-										WHERE 
+										WHERE
 											id="'.dbres($link, $r[0]['id']).'"
 										';
 							# or does it not exist already according to db?
 							} else {
 								# set it as verified, also update existence and fakecheck
-								$sql = 'UPDATE 
+								$sql = 'UPDATE
 											files
 										SET
 											existing=1,
@@ -642,10 +642,10 @@ foreach ($arguments as $k => $v) {
 					# try to get by ed2khash
 					$sql = 'SELECT
 								*
-							FROM 
+							FROM
 								files
 							WHERE
-								ed2khash="'.dbres($link, $hash).'" AND 
+								ed2khash="'.dbres($link, $hash).'" AND
 								verified=0
 							LIMIT 1';
 					cl($intro.'SQL: '.$sql, VERBOSE_DEBUG_DEEP);

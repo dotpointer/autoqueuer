@@ -51,7 +51,8 @@
 	2016-11-08 23:33:41 - bugfix, base 2 to base 3 leftovers
 	2017-02-25 21:50:05 - editing mailer to use php mail function
 	2017-04-07 19:01:31 - bugfix, invalid id in move rules and leftovers from mailer
-	2017-04-07 22:33:23 - bugfix, leftovers from mailer
+	2017-04-07 22:33:35 - bugfix, leftovers from mailer
+	2017-06-29 22:33:14 - adding cmdaftermove to moverules
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -61,7 +62,7 @@
 	CREATE TABLE collections(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, host TEXT NOT NULL, hostpath TEXT NOT NULL, username TEXT NOT NULL, password TEXT NOT NULL, rootpath TEXT NOT NULL,  enabled int not null default 1, updated DATETIME NOT NULL, created DATETIME NOT NULL);
 	CREATE TABLE files (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_collections bigint not null default 0, id_searches INT NOT NULL DEFAULT 0, name TINYTEXT NOT NULL, path TINYTEXT NOT NULL, ed2khash VARCHAR(32) NOT NULL, size BIGINT NOT NULL DEFAULT 0, verified INT NOT NULL DEFAULT 1, existing INT NOT NULL DEFAULT 0, fakecheck INT NOT NULL, moved INT NOT NULL DEFAULT 0, modified DATETIME NOT NULL, created DATETIME NOT NULL, updated DATETIME NOT NULL DEFAULT 0);
 	CREATE TABLE logmessages (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_logmessages_parent BIGINT NOT NULL DEFAULT  0, id_files INT NOT NULL DEFAULT 0, type INT NOT NULL DEFAULT 0, message TEXT NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
-	CREATE TABLE moverules(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, regex TEXT NOT NULL, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, matches INT NOT NULL DEFAULT 0, filessincelastmail INT NOT NULL DEFAULT 0, status INT NOT NULL DEFAULT 1);
+	CREATE TABLE moverules(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, regex TEXT NOT NULL, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, matches INT NOT NULL DEFAULT 0,  cmdaftermove TINYTEXT NOT NULL, filessincelastmail INT NOT NULL DEFAULT 0, status INT NOT NULL DEFAULT 1);
 	CREATE TABLE parameters(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, parameter TINYTEXT NOT NULL, value TEXT NOT NULL);
 	CREATE TABLE searches (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_clientpumps INT NOT NULL DEFAULT 0, search TINYTEXT NOT NULL, type TINYTEXT NOT NULL, sizemin BIGINT NOT NULL DEFAULT 0, sizemax BIGINT NOT NULL DEFAULT 0, extension TINYTEXT NOT NULL, method TINYTEXT NOT NULL, executiontimeout BIGINT NOT NULL DEFAULT 3600, executiontimeoutbase BIGINT NOT NULL DEFAULT 3600, executiontimeoutrandbase BIGINT NOT NULL DEFAULT 3600, status int not null default 0, executions BIGINT NOT NULL DEFAULT 0, resultscans INT NOT NULL DEFAULT 0, queuedfiles INT NOT NULL DEFAULT 0, filessincelastmail INT NOT NULL DEFAULT 0, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, executed DATETIME NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
 
@@ -1206,6 +1207,29 @@
 							if ($result_update_moverules === false) {
 								cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 								die();
+							}
+
+							if (strlen($moverule['cmdaftermove'])) {
+								cl('Running command after move: '.$moverule['cmdaftermove'], VERBOSE_INFO);
+								exec($moverule['cmdaftermove'], $output, $return);
+
+								$output = trim(implode("\n", $output));
+
+								# was return value ok
+								if ($return === 0) {
+									cl('Command return value: '.$return, VERBOSE_DEBUG);
+									if (strlen($output)) {
+										cl('Command output: '.$output, VERBOSE_DEBUG);
+									}
+								# or did it fail
+								} else {
+									cl('Command return value: '.$return, VERBOSE_ERROR);
+									if (strlen($output)) {
+										cl('Command output: '.$output, VERBOSE_ERROR);
+									}
+
+								}
+
 							}
 
 						}
