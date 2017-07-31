@@ -13,6 +13,7 @@
 # 2016-02-23 13:43:31 - removing email parameter, adding email parameters
 # 2016-03-05 22:09:02 - cleanup
 # 2016-09-22 22:53:42 - base 2 to base 3
+# 2017-07-31 14:22:37 - adding nickname
 
 if (!isset($action)) exit;
 
@@ -38,7 +39,7 @@ switch ($action) {
 				WHERE
 					id="'.dbres($link, $id_clientpumps).'"
 				';
-		cl('SQL: '.$sql, VERBOSE_DEBUG);		
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
 		$result = db_query($link, $sql);
 		if ($result === false) {
 			die(json_encode(array(
@@ -48,11 +49,11 @@ switch ($action) {
 				)
 			)));
 		}
-		
+
 		die(json_encode(array(
 			'status' => 'ok',
 			'data' => array()
-		)));	
+		)));
 
 	case 'delete_dumped_files': # to delete selected files that have been dumped, eg are in collection -2
 
@@ -71,7 +72,7 @@ switch ($action) {
 					id IN ('.implode($id_files, ',').') AND
 					id_collections=-2
 				';
-		cl('SQL: '.$sql, VERBOSE_DEBUG);		
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
 		$result = db_query($link, $sql);
 		if ($result === false) {
 			die(json_encode(array(
@@ -104,7 +105,7 @@ switch ($action) {
 				WHERE
 					id="'.dbres($link, $id_searches).'"
 				';
-		cl('SQL: '.$sql, VERBOSE_DEBUG);		
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
 		$result = db_query($link, $sql);
 		if ($result === false) {
 			die(json_encode(array(
@@ -138,7 +139,7 @@ switch ($action) {
 			'port' => $port,
 			'status' => $status,
 			'`type`' => $type,
-			'username' => $username	
+			'username' => $username
 		);
 
 		# shall password be set?
@@ -193,7 +194,7 @@ switch ($action) {
 				)));
 			}
 		}
-		
+
 		die(json_encode(array(
 			'status' => 'ok',
 			'data' => array()
@@ -212,7 +213,7 @@ switch ($action) {
 
 		foreach ($parameters as $parameter => $value) {
 
-			# check if this parameter is in database		
+			# check if this parameter is in database
 			$sql = '
 					SELECT
 						*
@@ -243,7 +244,7 @@ switch ($action) {
 						)
 					)));
 				}
-			
+
 			# or is it not in db?
 			} else {
 
@@ -297,6 +298,7 @@ switch ($action) {
 			'extension' => $extension,
 			'method' => $method,
 			'movetopath' => $movetopath,
+			'nickname' => $nickname,
 			'search' => $search,
 			'sizemax' => $sizemax,
 			'sizemin' => $sizemin,
@@ -351,16 +353,16 @@ switch ($action) {
 				)));
 			}
 		}
-		
+
 		die(json_encode(array(
 			'status' => 'ok',
 			'data' => array()
 		)));
-	
+
 	case 'quickfind': # JSON - to request an eMule find directly
 
-		$output = array('status' => 'ok', 'data' => array('searchresultlist' => array()));	
-		
+		$output = array('status' => 'ok', 'data' => array('searchresultlist' => array()));
+
 		# which client to ask?
 		$tmp = false;
 		foreach ($clientpumps as $pumpname => $pump) {
@@ -370,7 +372,7 @@ switch ($action) {
 			}
 		}
 		$pumpname = $tmp;
-		
+
 		# no suitable pump found?
 		if ($pumpname === false) {
 			# then get out
@@ -379,16 +381,16 @@ switch ($action) {
 				'data' => array(
 					'message' => 'Pump is not active or found.'
 				)
-			)));		
+			)));
 		}
 
-		# try to run the search	
+		# try to run the search
 		$r = $clientpumps[$pumpname]['pump']->search($search, array(
 			'max'	=> $sizemax,
 			'min'	=> $sizemin,
 			'type'	=> $type
 		));
-		
+
 		# did it fail?
 		if ($r === false) {
 			die(json_encode(array(
@@ -396,27 +398,27 @@ switch ($action) {
 				'data' => array(
 					'message' => 'Failed requesting search on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true)
 				)
-			)));		
-		}		
-		
+			)));
+		}
+
 		$output['data']['searchresultlist'] = web_check_results($conn, $r, $link, $show_download);
-		
+
 		die(json_encode($output));
 
 	case 'quickfind_download': # JSON - to request a download, based on filehashes
-		
+
 		# this MUST be recorded in db!
-		
+
 		# which client to ask?
 		$tmp = false;
 		foreach ($clientpumps as $pumpname => $pump) {
 			if ((int)$id_clientpumps === (int)$pump['data']['id'] && (int)$pump['data']['status'] === 1) {
 				$tmp = $pumpname;
 				break;
-			}	 
+			}
 		}
 		$pumpname = $tmp;
-		
+
 		# no suitable pump found?
 		if ($pumpname === false) {
 			# then get out
@@ -425,18 +427,18 @@ switch ($action) {
 				'data' => array(
 					'message' => 'Pump is not active or found.'
 				)
-			)));		
+			)));
 		}
-		
+
 		if (!$clientpumps[ $pumpname ]['pump'] ->download($id)){
-			# did it fail? why?			
+			# did it fail? why?
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
 					'message' => 'Failed requesting download from '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true)
 				)
-			)));				
-		}	
+			)));
+		}
 
 		die(json_encode(array(
 			'status' => 'ok',

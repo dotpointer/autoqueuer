@@ -53,6 +53,7 @@
 	2017-04-07 19:01:31 - bugfix, invalid id in move rules and leftovers from mailer
 	2017-04-07 22:33:35 - bugfix, leftovers from mailer
 	2017-06-29 22:33:14 - adding cmdaftermove to moverules
+	2017-07-31 14:16:46 - new files report with nickname addition
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -1254,15 +1255,26 @@
 			}
 
 			# sum the searches
-			$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM searches WHERE filessincelastmail>0';
+			/*$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM searches WHERE filessincelastmail>0';
 			$r = db_query($link, $sql);
 			if ($r === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 				die();
 			}
-			$totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];
+			$totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];*/
+
+			$sql = 'SELECT nickname, filessincelastmail FROM searches WHERE filessincelastmail>0';
+			$r = db_query($link, $sql);
+			if ($r === false) {
+				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+				die();
+			}
+
+			$filessincelastmail = $r;
+
 
 			# sum the move rules
+			/*
 			$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM moverules WHERE filessincelastmail>0';
 			$r = db_query($link, $sql);
 			if ($r === false) {
@@ -1270,9 +1282,21 @@
 				die();
 			}
 			$totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];
+			*/
+			$sql = 'SELECT nickname, filessincelastmail FROM moverules WHERE filessincelastmail>0';
+			$r = db_query($link, $sql);
+			if ($r === false) {
+				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+				die();
+			}
+
+			foreach ($r as $row) {
+				$filessincelastmail[] = $row;
+			}
 
 			# any news?
-			if ($totalfilessincelastmail > 0) {
+			# if ($totalfilessincelastmail > 0) {
+			if (count($filessincelastmail) > 0) {
 
 				# clear the counters
 				$sql = 'UPDATE searches SET filessincelastmail = 0';
@@ -1314,6 +1338,14 @@
 				# try to send the mail
 				# exec($cmd, $output, $retval);
 
+				# summarize
+				$totalfilessincelastmail = 0;
+				$body = array();
+				foreach ($filessincelastmail as $row) {
+					$totalfilessincelastmail += $row['filessincelastmail'];
+					$body[] = $row['filessincelastmail'].' '.(strlen($row['nickname']) ? $row['nickname'] : 'unnamed');
+				}
+
 				# send mail
 				mail(
 					# to
@@ -1321,7 +1353,8 @@
 					# subject
 					$totalfilessincelastmail.' new files',
 					# body
-					$totalfilessincelastmail.' new files has arrived',
+					#$totalfilessincelastmail.' new files has arrived',
+					implode("\r\n", $body),
 					# headers
 					implode("\r\n", array(
 						'From: '.MAIL_ADDRESS_FROM

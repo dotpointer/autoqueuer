@@ -11,12 +11,13 @@
 /*
    # changelog
    # 2015-06-05 17:39:01
-   # 2015-07-27 02:27:51 - adding email  
+   # 2015-07-27 02:27:51 - adding email
    # 2016-02-23 13:44:56 - replacing email field with email parameters, adding parameters gui
    # 2016-02-23 15:43:56 - translations
    # 2016-03-14 23:30:39 - translations
    # 2016-08-26 19:59:28 - making it validate on jslint again
    # 2016-08-26 20:15:19 - bugfix on translation after jslint validation
+   # 2017-07-31 14:17:10 - adding nickname
 */
 
 var	e = {
@@ -64,12 +65,12 @@ var	e = {
 				}
 			//}
 			});
-			
+
 			if (found !== false) {
 				return found;
 			}
-			
-			
+
+
 			return s;
 		};
 
@@ -131,7 +132,7 @@ var	e = {
 			filesize: function(file_size_in_bytes) {
 				var ix = -1;
 				var byte_units = [" kB", " MB", " GB", " TB", "PB", "EB", "ZB", "YB"];
-				
+
 				do {
 					file_size_in_bytes = file_size_in_bytes / 1024;
 					ix = ix + 1;
@@ -173,7 +174,7 @@ var	e = {
 			request_find: function(input_data, callback_when_done) {
 				input_data.action = "quickfind";
 
-				e.requests.push($.postJSON("?format=json", input_data, function(data){					
+				e.requests.push($.postJSON("?format=json", input_data, function(data){
 					// things below should treat the errors, therefore no error check here
 					if (typeof callback_when_done === "function") {
 						callback_when_done(data);
@@ -229,7 +230,7 @@ var	e = {
 
 		// to render search result list
 		e.pages.quickfind.render_results = function(searchresultlist) {
-		
+
 			var event_tr_click = null;
 			var event_tr_dblclick = null;
 			var fileinfo;
@@ -296,7 +297,7 @@ var	e = {
 
 
 						fileinfo = e.tools.split_ed2klink(searchresultlist[i].link);
-					
+
 						// did the split succeed?
 						if (typeof fileinfo === "object") {
 
@@ -360,7 +361,7 @@ var	e = {
 				}
 			// } // foreach
 			});
-			
+
 			$("#quickfind_results tbody tr.loading").remove();
 		};
 
@@ -491,7 +492,7 @@ var	e = {
 									$("<td/>").append(columns[i])
 								);
 
-							
+
 					}
 				}
 			// }
@@ -588,10 +589,10 @@ var	e = {
 
 			// find out what view that was requested
 			switch (view) {
-			
+
 				case "clientpumps":
 					// do a descriptive text
-					e.make.textbox("", e.t("Client pumps are the collection name for the underlaying downloading softwares that are remoted to download the content you want. Supported client pump softwares are") + " eMule xTreme Mod " + e.t("and") + " mlnet. " + e.t("On this page you setup the connection to these, multiple ones may be configured and controlled. Note that you need to setup the softwares itself too."));				
+					e.make.textbox("", e.t("Client pumps are the collection name for the underlaying downloading softwares that are remoted to download the content you want. Supported client pump softwares are") + " eMule xTreme Mod " + e.t("and") + " mlnet. " + e.t("On this page you setup the connection to these, multiple ones may be configured and controlled. Note that you need to setup the softwares itself too."));
 
 					// do a table
 					e.make.table("clientpumps", [
@@ -600,7 +601,7 @@ var	e = {
 						e.t("Host"),
 						e.t("Port"),
 						e.t("Username"),
-						e.t("Password"),						
+						e.t("Password"),
 						e.t("Searched"),
 						e.t("Searches"),
 						e.t("Queued files"),
@@ -654,7 +655,7 @@ var	e = {
 										.append(
 											$("<br/>")
 										)
-										
+
 										.append(
 											$("<label/>").text(e.t("Host") + ":")
 										)
@@ -665,8 +666,8 @@ var	e = {
 										)
 										.append(
 											$("<br/>")
-										)										
-										
+										)
+
 									.append(
 											$("<label/>").text( e.t("Port") + ":")
 										)
@@ -677,8 +678,8 @@ var	e = {
 										)
 										.append(
 											$("<br/>")
-										)											
-										
+										)
+
 										.append(
 											$("<label/>").text(e.t("Username") + ":")
 										)
@@ -689,9 +690,9 @@ var	e = {
 										)
 										.append(
 											$("<br/>")
-										)										
-										
-										
+										)
+
+
 										.append(
 											$("<label/>").text(e.t("Password") + ":")
 										)
@@ -706,7 +707,7 @@ var	e = {
 										.append(
 											$("<br/>")
 										)
-										
+
 										.append(
 											$("<label/>").text(e.t("Incoming path") + ":")
 										)
@@ -717,8 +718,8 @@ var	e = {
 										)
 										.append(
 											$("<br/>")
-										)											
-																			
+										)
+
 										.append(
 											$("<label/>").text(e.t("Status") + ":")
 										)
@@ -727,9 +728,9 @@ var	e = {
 												.attr("name","status")
 												.append(
 													e.obj_to_options({
-														"0": e.t("Inactive"), 
+														"0": e.t("Inactive"),
 														"1": e.t("Active")
-													})													
+													})
 												)
 										)
 										.append(
@@ -786,7 +787,7 @@ var	e = {
 						var div_manage = null;
 						// var i;
 						// var j;
-						
+
 						// var password_container;
 						// var password_text = "";
 
@@ -823,7 +824,7 @@ var	e = {
 							$("#insert_or_update_clientpump_form input[name='username']").val(rowdata.username);
 							$("#insert_or_update_clientpump_form select[name='status']").val(rowdata.status);
 							$("#insert_or_update_clientpump_form select[name='type']").val(rowdata.type);
-							
+
 							evt.preventDefault();
 							return false;
 						};
@@ -865,25 +866,25 @@ var	e = {
 								data.data.clientpumps[i].id,
 								data.data.clientpumps[i].type,
 								data.data.clientpumps[i].host,
-								data.data.clientpumps[i].port,	
+								data.data.clientpumps[i].port,
 								data.data.clientpumps[i].username,
-								"********",// password_container,								
+								"********",// password_container,
 								{inner_html: e.tools.format_date(data.data.clientpumps[i].searched), classes: "date"},
 								{inner_html: data.data.clientpumps[i].searches, classes: "counter"},
 								{inner_html: data.data.clientpumps[i].queuedfiles, classes: "counter"},
 								data.data.clientpumps[i].status === 1 ? e.t("On") : e.t("Off"),
 								{inner_html: div_manage.children(), classes: "manage"}
 							], function(data, tr) {
-							
-							
+
+
 								if (data.status === 1) {
 									tr.addClass("active");
 								} else {
 									tr.addClass("inactive");
 								}
-							
+
 								return tr;
-							
+
 							});
 						// } for-clientpumps
 						});
@@ -897,8 +898,8 @@ var	e = {
 						e.lock_form("#insert_or_update_clientpump_form", false);
 					});
 
-					return true;			
-			
+					return true;
+
 				case "quickfind":
 
 					e.make.textbox("", e.t("Here you can do a direct search using the configured client pump softwares."));
@@ -910,7 +911,7 @@ var	e = {
 								.attr("id", "quickfind_find_form")
 								.append(
 									$("<fieldset/>")
-									
+
 										.append(
 											$("<label/>").text(e.t("Client pump") + ":")
 
@@ -926,12 +927,12 @@ var	e = {
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Choose the program used to do the download."))
 										)
 										.append(
 											$("<br/>")
-										)																		
+										)
 										.append(
 											$("<label/>").text(e.t("Search") + ":")
 										)
@@ -942,9 +943,9 @@ var	e = {
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Specify the search words here."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -967,7 +968,7 @@ var	e = {
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Choose the desired content type."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -984,9 +985,9 @@ var	e = {
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Choose the used method."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1003,12 +1004,12 @@ var	e = {
 											$("<span/>")
 												.text("MB")
 												.addClass("suffix")
-										)										
+										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Enter the minimum file size."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1024,12 +1025,12 @@ var	e = {
 											$("<span/>")
 												.text("MB")
 												.addClass("suffix")
-										)										
+										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Enter the maximum file size."))
-										)											
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1044,9 +1045,9 @@ var	e = {
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Specify the file extension."))
-										)											
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1060,17 +1061,17 @@ var	e = {
 												.attr("name","show_download")
 												.append(
 													e.obj_to_options({
-														"0": e.t("No"), 
+														"0": e.t("No"),
 														"1": e.t("Yes")
 													})
 												)
 										)
-										
+
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("To show the results directly or not, if not you may click Update to refresh."))
-										)											
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1096,8 +1097,8 @@ var	e = {
 
 					// get current client pumps
 					e.emule.get("clientpumps", {}, function(data) {
-						
-						
+
+
 						// var event_tr_dblclick = null,
 						// var i;
 
@@ -1127,12 +1128,12 @@ var	e = {
 							}
 						//}
 						});
-						
+
 						// remove loader option
 						$("#quickfind_find_form select[name=\"id_clientpumps\"] option[value=\"\"]").remove();
-						
+
 						e.lock_form("#quickfind_find_form", false);
-					});					
+					});
 
 					e.make.table("quickfind_results", ["",e.t("Name"), e.t("Size"), e.t("Info")], false);
 
@@ -1153,13 +1154,13 @@ var	e = {
 							sizemin:		$("input[name='sizemin']").val(),
 							type: 			$("select[name='type']").val()
 						}, function(data) {
-						
-						
+
+
 							if (!e.verify_response(data)) {
 								e.lock_form("#quickfind_find_form", false);
 								return false;
-							}						
-						
+							}
+
 							// when done
 							e.pages.quickfind.render_results(data.data.searchresultlist);
 							e.lock_form("#quickfind_find_form", false);
@@ -1232,9 +1233,9 @@ var	e = {
 
 							progressbar = $("<div/>").addClass("progressbar");
 
-							
+
 							percentage = data.data[i].completed;
-							// percentage = percentage.substr(percentage.lastIndexOf("(") + 1	, percentage.length);							
+							// percentage = percentage.substr(percentage.lastIndexOf("(") + 1	, percentage.length);
 
 							progressbar
 							.append(
@@ -1264,12 +1265,13 @@ var	e = {
 					return true;
 
 				case "searches":
-				
+
 					e.make.textbox(false, e.t("On this page you manage the scheduled searches that are carried out automatically so you can do other things."));
-				
+
 					// do a table
 					e.make.table("searches", [
 						e.t("Search"),
+						e.t("Nickname"),
 						e.t("Type"),
 						e.t("Min"),
 						e.t("Max"),
@@ -1335,6 +1337,22 @@ var	e = {
 											$("<br/>")
 										)
 										.append(
+											$("<label/>").text(e.t("Nickname") + ":")
+										)
+										.append(
+											$("<input/>")
+												.addClass("text")
+												.attr("name","nickname")
+										)
+										.append(
+											$("<span/>")
+												.addClass("description")
+												.text(e.t("A nickname used in mail reports for identification."))
+										)
+										.append(
+											$("<br/>")
+										)
+										.append(
 											$("<label/>").text(e.t("Type") + ":")
 										)
 										.append(
@@ -1354,7 +1372,7 @@ var	e = {
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Choose the desired content type."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1372,7 +1390,7 @@ var	e = {
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Choose the desired method."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1388,12 +1406,12 @@ var	e = {
 											$("<span/>")
 												.text("MB")
 												.addClass("suffix")
-										)										
+										)
 										.append(
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Enter the minimum file size."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1409,12 +1427,12 @@ var	e = {
 											$("<span/>")
 												.text("MB")
 												.addClass("suffix")
-										)										
+										)
 										.append(
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Enter the maximum file size."))
-										)										
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1454,12 +1472,12 @@ var	e = {
 												.text("s")
 												.addClass("suffix")
 										)
-										
+
 										.append(
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("How long to wait between searches."))
-										)											
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1475,7 +1493,7 @@ var	e = {
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Enter the file extension."))
-										)											
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1491,7 +1509,7 @@ var	e = {
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("A path to move the downloaded files to when they complete."))
-										)																															
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1504,7 +1522,7 @@ var	e = {
 												.attr("name","status")
 												.append(
 													e.obj_to_options({
-														"0": e.t("Inactive"), 
+														"0": e.t("Inactive"),
 														"1": e.t("Active")
 													})
 												)
@@ -1513,7 +1531,7 @@ var	e = {
 											$("<span/>")
 												.addClass("description")
 												.text(e.t("Whether the search is active or not."))
-										)											
+										)
 										.append(
 											$("<br/>")
 										)
@@ -1558,7 +1576,7 @@ var	e = {
 								e.lock_form("#insert_or_update_search_form", false);
 								return false;
 							}
-							
+
 							e.reload_page();
 						}));
 
@@ -1609,8 +1627,9 @@ var	e = {
 							$("#insert_or_update_search_form select[name='status']").val(rowdata.status);
 							$("#insert_or_update_search_form select[name='method']").val(rowdata.method);
 							$("#insert_or_update_search_form input[name='movetopath']").val(rowdata.movetopath);
+							$("#insert_or_update_search_form input[name='nickname']").val(rowdata.nickname);
 							$("#insert_or_update_search_form select[name='type']").val(rowdata.type);
-							
+
 							evt.preventDefault();
 							return false;
 						};
@@ -1637,6 +1656,7 @@ var	e = {
 							e.make.table_tr("#searches tbody", data.data.searches[i],
 							[
 								data.data.searches[i].search,
+								data.data.searches[i].nickname,
 								data.data.searches[i].type,
 								data.data.searches[i].sizemin + " MB",
 								data.data.searches[i].sizemax + " MB",
@@ -1650,15 +1670,15 @@ var	e = {
 								data.data.searches[i].status === 1 ? e.t("On") : e.t("Off"),
 								{inner_html: div_manage.children(), classes: "manage"}
 							], function(data, tr) {
-							
+
 								if (data.status === 1) {
 									tr.addClass("active");
 								} else {
 									tr.addClass("inactive");
 								}
-							
+
 								return tr;
-							
+
 							});
 						// }
 						});
@@ -1770,7 +1790,7 @@ var	e = {
 							e.make.table_tr("#latest_queued tbody", data.data.files_queued[i], [data.data.files_queued[i].name, {inner_html: tmp, classes: "unimportant"}, data.data.files_queued[i].created]);
 						// }
 						});
-						
+
 						// remove loading
 						$("#latest_queued tbody tr.loading").remove();
 					});
@@ -1799,7 +1819,7 @@ var	e = {
 								window.alert(e.t("Bad response from server"));
 							}
 						}
-						
+
 						trmaker = function(data, tr) {
 
 							// var i = 0;
@@ -1809,7 +1829,7 @@ var	e = {
 							// tr maker callback
 							if (data.data.toLowerCase().indexOf("running search") !== -1) {
 								tr.addClass("logcategory_search");
-								
+
 							} else if (data.data.toLowerCase().indexOf("scanning") !== -1) {
 								tr.addClass("logcategory_scan");
 							} else if (data.data.toLowerCase().indexOf("queued") !== -1) {
@@ -1820,7 +1840,7 @@ var	e = {
 								parsed_json = $.parseJSON(data.data);
 
 								if (typeof parsed_json === "object") {
-								
+
 									// walk data
 									//for (i in parsed_json) {
 									Object.keys(parsed_json).forEach(function(i) {
@@ -1838,7 +1858,7 @@ var	e = {
 										}
 									//}
 									});
-									
+
 									tr
 									.find("td:eq(1)")
 									.empty()
@@ -1853,9 +1873,9 @@ var	e = {
 						// for (i = 0; i < data.data.logmessages.length; i += 1) {
 						Object.keys(data.data.logmessages).forEach(function(i) {
 							e.make.table_tr(
-								$("#log>tbody"), 
+								$("#log>tbody"),
 								data.data.logmessages[i],
-								[e.t(e.logmessage_type_descriptions_short[data.data.logmessages[i].type]), data.data.logmessages[i].data, data.data.logmessages[i].created], 
+								[e.t(e.logmessage_type_descriptions_short[data.data.logmessages[i].type]), data.data.logmessages[i].data, data.data.logmessages[i].created],
 								trmaker
 							);
 						//}
@@ -1921,9 +1941,9 @@ var	e = {
 
 					return true;
 				case "parameters":
-				
+
 					e.make.textbox("", e.t("On this page you can manage settings."));
-				
+
 					// do the form
 					$("#content")
 						.append(
@@ -1939,19 +1959,19 @@ var	e = {
 												.attr("name","email_enabled")
 												.append(
 													e.obj_to_options({
-														"0": e.t("Inactive"), 
+														"0": e.t("Inactive"),
 														"1": e.t("Active")
 													})
 												)
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Used to activate the e-mail function."))
-										)										
+										)
 										.append(
 											$("<br/>")
-										)																		
+										)
 										.append(
 											$("<label/>").text(e.t("E-mail address") + ":")
 										)
@@ -1962,13 +1982,13 @@ var	e = {
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("An e-mail adress to send reports to."))
-										)										
+										)
 										.append(
 											$("<br/>")
-										)										
-										
+										)
+
 									.append(
 											$("<label/>").text(e.t("E-mail timeout") + ":")
 										)
@@ -1981,16 +2001,16 @@ var	e = {
 											$("<span/>")
 												.text("s")
 												.addClass("suffix")
-										)											
+										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Timeout to wait between e-mails."))
-										)										
+										)
 										.append(
 											$("<br/>")
-										)	
-										
+										)
+
 										.append(
 											$("<label/>").text(e.t("E-mail last sent") + ":")
 										)
@@ -2002,12 +2022,12 @@ var	e = {
 										)
 										.append(
 											$("<span/>")
-												.addClass("description")											
+												.addClass("description")
 												.text(e.t("Last time an e-mail was sent."))
-										)										
+										)
 										.append(
 											$("<br/>")
-										)																														
+										)
 										.append(
 											$("<button/>")
 												.addClass("marginated")
@@ -2016,8 +2036,8 @@ var	e = {
 										)
 										.append(
 											$("<br/>")
-										)											
-								)								
+										)
+								)
 						);
 
 					e.lock_form("#insert_or_update_parameters_form", true);
@@ -2036,7 +2056,7 @@ var	e = {
 							post[data[i].name] = data[i].value;
 						//}
 						});
-						
+
 						post.action = "insert_or_update_parameters";
 
 						e.requests.push($.postJSON(".", post, function(data) {
@@ -2053,12 +2073,12 @@ var	e = {
 						evt.preventDefault();
 						return false;
 					});
-					
-					
+
+
 					// get current client pumps
 					e.emule.get("parameters", {}, function(data) {
-						
-						
+
+
 						// var i;
 
 						// invalid status?
@@ -2082,10 +2102,10 @@ var	e = {
 							}
 						// }
 						});
-						
+
 						e.lock_form("#insert_or_update_parameters_form", false);
-					});						
-					
+					});
+
 
 					return true;
 
@@ -2117,20 +2137,20 @@ var	e = {
 			// make a key press timeout
 			e.timeouts.findbox = window.setTimeout(function() {
 				// run request
-				
+
 				var find = $.trim($("#findbox #find").val());
-				
+
 				// nothing to search for?
 				if (!find.length) {
 					// empty the find results table, if there is one
 					$("#content table#findresult").empty();
 					return true;
 				}
-		
+
 				e.requests.push($.getJSON("?format=json&view=find&find=" + $("#findbox #find").val(), function(data){
 					// var i;
 					var tbody = $("<tbody/>");
-				
+
 					if (!e.verify_response(data)) {
 						return false;
 					}
@@ -2160,8 +2180,8 @@ var	e = {
 														$("<th/>")
 															.text(e.t("Created"))
 													)
-											)											
-											
+											)
+
 									)
 							)
 							;
@@ -2170,7 +2190,7 @@ var	e = {
 						// remove the tbody from the table
 						$("#content table#findresult tbody").remove();
 					}
-						
+
 					// walk results
 					// for (i in data.data.findresult) {
 					Object.keys(data.data.findresult).forEach(function(i) {
@@ -2198,13 +2218,13 @@ var	e = {
 													data.data.findresult[i].created
 												)
 										)
-										
+
 								);
 						}
 					// }
 					});
-						
-						
+
+
 					$("#content table#findresult").append(tbody);
 
 				}));

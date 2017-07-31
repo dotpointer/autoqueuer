@@ -14,6 +14,7 @@
 # 2016-02-23 13:42:47 - replacing email parameter with multiple email parameters
 # 2016-02-23 15:44:14 - translations
 # 2016-03-05 22:16:09 - cleanup
+# 2017-07-31 14:22:52 - adding nickname
 
 session_start();
 
@@ -49,6 +50,7 @@ $id_files 					= isset($_REQUEST['id_files']) ? $_REQUEST['id_files'] : array();
 $id_searches 				= isset($_REQUEST['id_searches']) ? $_REQUEST['id_searches'] : false;
 $method 					= isset($_REQUEST['method']) ? $_REQUEST['method'] : '';
 $movetopath 				= isset($_REQUEST['movetopath']) ? $_REQUEST['movetopath'] : '';
+$nickname 					= isset($_REQUEST['nickname']) ? $_REQUEST['nickname'] : '';
 $password 					= isset($_REQUEST['password']) ? $_REQUEST['password'] : '';
 $path_incoming 				= isset($_REQUEST['path_incoming']) ? $_REQUEST['path_incoming'] : '';
 $port 						= isset($_REQUEST['port']) ? $_REQUEST['port'] : 0;
