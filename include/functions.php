@@ -54,6 +54,7 @@
 	2017-04-07 22:33:35 - bugfix, leftovers from mailer
 	2017-06-29 22:33:14 - adding cmdaftermove to moverules
 	2017-07-31 14:16:46 - new files report with nickname addition
+	2017-08-30 00:47:00 - php7 workarounds
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -718,11 +719,12 @@
 			# parse the URL from where to get the files
 			if (!($collection['url'] = parse_url($collection['url']))) {
 				cl('Malformed URL format of destination '.$collection['url'].' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				continue 2;
+				continue;
 			}
 
 			$rootpath = false;
 
+            $continue_foreach = true;
 			# find out what type of source this is
 			switch (strtolower($collection['url']['scheme'])) {
 				# samba connection
@@ -736,14 +738,20 @@
 					$collection['fullpath'] = substr($collection['url']['path'], -1) !== '/' ? $collection['url']['path'].'/' : $collection['url']['path'];
 					if (!is_dir($collection['fullpath'])) {
 						cl('Local path '.$collection['fullpath'].' not found'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						continue 3;
+						$continue_foreach = false;
+						break;
 					}
 
 					$rootpath = $collection['fullpath'];
 					break;
 				default:
 					cl('Unknown scheme: '.strtolower($collection['url']['scheme']).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					continue 3;
+                    $continue_foreach = false;
+                    break;
+			}
+
+			if (!$continue_foreach) {
+                break;
 			}
 
 			# no rootpath or fullpath is shorter than rootpath?
@@ -1251,152 +1259,150 @@
 			# check email address
 			if (!filter_var($parameters['email_address'], FILTER_VALIDATE_EMAIL)) {
 				cl('Skipping invalid mail address: '.$parameters['email_address'], VERBOSE_DEBUG);
-				continue;
-			}
+			} else {
 
-			# sum the searches
-			/*$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM searches WHERE filessincelastmail>0';
-			$r = db_query($link, $sql);
-			if ($r === false) {
-				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
-			}
-			$totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];*/
+                # sum the searches
+                /*$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM searches WHERE filessincelastmail>0';
+                $r = db_query($link, $sql);
+                if ($r === false) {
+                    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                    die();
+                }
+                $totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];*/
 
-			$sql = 'SELECT nickname, filessincelastmail FROM searches WHERE filessincelastmail>0';
-			$r = db_query($link, $sql);
-			if ($r === false) {
-				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
-			}
+                $sql = 'SELECT nickname, filessincelastmail FROM searches WHERE filessincelastmail>0';
+                $r = db_query($link, $sql);
+                if ($r === false) {
+                    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                    die();
+                }
 
-			$filessincelastmail = $r;
-
-
-			# sum the move rules
-			/*
-			$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM moverules WHERE filessincelastmail>0';
-			$r = db_query($link, $sql);
-			if ($r === false) {
-				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
-			}
-			$totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];
-			*/
-			$sql = 'SELECT nickname, filessincelastmail FROM moverules WHERE filessincelastmail>0';
-			$r = db_query($link, $sql);
-			if ($r === false) {
-				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
-			}
-
-			foreach ($r as $row) {
-				$filessincelastmail[] = $row;
-			}
-
-			# any news?
-			# if ($totalfilessincelastmail > 0) {
-			if (count($filessincelastmail) > 0) {
-
-				# clear the counters
-				$sql = 'UPDATE searches SET filessincelastmail = 0';
-				$r = db_query($link, $sql);
-				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
-				if ($r === false) {
-					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
-				}
-
-				$sql = 'UPDATE moverules SET filessincelastmail = 0';
-				$r = db_query($link, $sql);
-				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
-				if ($r === false) {
-					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
-				}
-
-				# replace the template locations in the mailer string with our versions
-				/*
-				$cmd = str_replace(
-					array(
-						'###EMAIL###',
-						'###SUBJECT###',
-						'###BODY###'
-					),
-					array(
-						escapeshellarg($parameters['email_address']),
-						'\''.$totalfilessincelastmail.' new files\'',
-						'\''.$totalfilessincelastmail.' new files has arrived.\''
-					),
-					MAILER
-				);
-				*/
+                $filessincelastmail = $r;
 
 
-				# cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
-				cl('Sending mail to: '.$parameters['email_address'], VERBOSE_DEBUG_DEEP);
-				# try to send the mail
-				# exec($cmd, $output, $retval);
+                # sum the move rules
+                /*
+                $sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM moverules WHERE filessincelastmail>0';
+                $r = db_query($link, $sql);
+                if ($r === false) {
+                    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                    die();
+                }
+                $totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];
+                */
+                $sql = 'SELECT nickname, filessincelastmail FROM moverules WHERE filessincelastmail>0';
+                $r = db_query($link, $sql);
+                if ($r === false) {
+                    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                    die();
+                }
 
-				# summarize
-				$totalfilessincelastmail = 0;
-				$body = array();
-				foreach ($filessincelastmail as $row) {
-					$totalfilessincelastmail += $row['filessincelastmail'];
-					$body[] = $row['filessincelastmail'].' '.(strlen($row['nickname']) ? $row['nickname'] : 'unnamed');
-				}
+                foreach ($r as $row) {
+                    $filessincelastmail[] = $row;
+                }
 
-				# send mail
-				mail(
-					# to
-					$parameters['email_address'],
-					# subject
-					$totalfilessincelastmail.' new files',
-					# body
-					#$totalfilessincelastmail.' new files has arrived',
-					implode("\r\n", $body),
-					# headers
-					implode("\r\n", array(
-						'From: '.MAIL_ADDRESS_FROM
-					))
-				);
+                # any news?
+                # if ($totalfilessincelastmail > 0) {
+                if (count($filessincelastmail) > 0) {
 
+                    # clear the counters
+                    $sql = 'UPDATE searches SET filessincelastmail = 0';
+                    $r = db_query($link, $sql);
+                    cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
+                    if ($r === false) {
+                        cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                        die();
+                    }
 
-				# check and update the last email sent-parameter
-				$r = db_query($link, 'SELECT * FROM parameters WHERE parameter="email_last_sent"');
-				# cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
-				if ($r === false) {
-					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
-				}
+                    $sql = 'UPDATE moverules SET filessincelastmail = 0';
+                    $r = db_query($link, $sql);
+                    cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
+                    if ($r === false) {
+                        cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                        die();
+                    }
 
-				if (count($r)) {
-					$sql = 'UPDATE parameters SET value="'.dbres($link, date('Y-m-d H:i:s')).'" WHERE parameter="email_last_sent"';
-				} else {
-					$sql = 'INSERT INTO parameters (parameter, value) VALUES("email_last_sent", "'.dbres($link, date('Y-m-d H:i:s')).'")';
-				}
-				$r = db_query($link, $sql);
-				# cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
-				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
-				if ($r === false) {
-					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
-				}
-
-				# make logmessage about it
-				logmessage(
-					$link,
-					LOGMESSAGE_TYPE_EMAIL_SENT,
-					array(
-						'new_files' => $totalfilessincelastmail,
-						'to' => $parameters['email_address']
-					),
-					false,
-					0
-				);
+                    # replace the template locations in the mailer string with our versions
+                    /*
+                    $cmd = str_replace(
+                        array(
+                            '###EMAIL###',
+                            '###SUBJECT###',
+                            '###BODY###'
+                        ),
+                        array(
+                            escapeshellarg($parameters['email_address']),
+                            '\''.$totalfilessincelastmail.' new files\'',
+                            '\''.$totalfilessincelastmail.' new files has arrived.\''
+                        ),
+                        MAILER
+                    );
+                    */
 
 
-			}
+                    # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+                    cl('Sending mail to: '.$parameters['email_address'], VERBOSE_DEBUG_DEEP);
+                    # try to send the mail
+                    # exec($cmd, $output, $retval);
+
+                    # summarize
+                    $totalfilessincelastmail = 0;
+                    $body = array();
+                    foreach ($filessincelastmail as $row) {
+                        $totalfilessincelastmail += $row['filessincelastmail'];
+                        $body[] = $row['filessincelastmail'].' '.(strlen($row['nickname']) ? $row['nickname'] : 'unnamed');
+                    }
+
+                    # send mail
+                    mail(
+                        # to
+                        $parameters['email_address'],
+                        # subject
+                        $totalfilessincelastmail.' new files',
+                        # body
+                        #$totalfilessincelastmail.' new files has arrived',
+                        implode("\r\n", $body),
+                        # headers
+                        implode("\r\n", array(
+                            'From: '.MAIL_ADDRESS_FROM
+                        ))
+                    );
+
+
+                    # check and update the last email sent-parameter
+                    $r = db_query($link, 'SELECT * FROM parameters WHERE parameter="email_last_sent"');
+                    # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+                    if ($r === false) {
+                        cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                        die();
+                    }
+
+                    if (count($r)) {
+                        $sql = 'UPDATE parameters SET value="'.dbres($link, date('Y-m-d H:i:s')).'" WHERE parameter="email_last_sent"';
+                    } else {
+                        $sql = 'INSERT INTO parameters (parameter, value) VALUES("email_last_sent", "'.dbres($link, date('Y-m-d H:i:s')).'")';
+                    }
+                    $r = db_query($link, $sql);
+                    # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+                    cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
+                    if ($r === false) {
+                        cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                        die();
+                    }
+
+                    # make logmessage about it
+                    logmessage(
+                        $link,
+                        LOGMESSAGE_TYPE_EMAIL_SENT,
+                        array(
+                            'new_files' => $totalfilessincelastmail,
+                            'to' => $parameters['email_address']
+                        ),
+                        false,
+                        0
+                    );
+                }
+            }
 
 		}
 
