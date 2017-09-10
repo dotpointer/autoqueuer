@@ -15,6 +15,8 @@
 	# 2015-08-22 10:11:50
 	# 2016-11-08 23:24:04 - bugfix min max
 	# 2017-09-10 17:33:00 - sorting functions
+	# 2017-09-10 17:53:00 - adding generate preview
+	# 2017-09-10 23:46:00 - adding preview to transfers, adding id, putting preview into production
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -22,6 +24,7 @@
 
 		private $c 			= false;
 		private $host 		= 'localhost';
+		private $id			= 0;
 		private $messages	= array();
 		private $password 	= '';
 		private $port 		= 4080;
@@ -71,6 +74,7 @@
 				return false;
 			}
 
+			$this->id				= isset($config['id']) 				!== false	? $config['id']				: $this->id;
 			$this->host				= isset($config['host']) 			!== false	? $config['host']			: $this->host;
 			$this->password			= isset($config['password']) 		!== false	? $config['password']		: $this->password;
 			$this->port				= isset($config['port'])			!== false	? $config['port']			: $this->port;
@@ -146,6 +150,148 @@
 			}
 
 			# otherwise all ok
+			return true;
+		}
+
+		# to generate preview files
+		public function generatePreviews() {
+
+			# get settings page with file paths
+			$data = $this->curl(array(
+				CURLOPT_URL => $this->getUrl().'submit?q=voo+5' # .http_build_query(array('q' => 'voo+5'))
+			));
+			if ($data === false) {
+				# then raise error
+				$this->message('Settings page request failed, invalid response: '.var_export($r, true));
+				return false;
+			}
+
+			# extract temporary directory path
+			# value=temp_directory><input style="font-family: verdana; font-size: 10px;"
+            # type=text name=value onchange="track_changed(this)" size=20 value="/examplehost/download/unfinished"></td></form>
+			preg_match_all('/value\=temp_directory\>\<input\s*style\=\"font\-family\:\s*verdana\;\s*font\-size\:\s*10px\;\"\s*type\=text\s*name\=value\s*onchange\=\"track_changed\(this\)\"\s*size\=20\s*value=\"(.*?)\"\>/m', $data, $m);
+			if (!isset($m[1], $m[1][0])) {
+				# then raise error
+				$this->message('Failed extracting temporary directory.');
+				return false;
+			}
+
+			$originalpath = $m[1][0];
+			if (!is_dir($originalpath)) {
+				# then raise error
+				$this->message('Extracted temporary directory "'.$originalpath.'" is not a directory.');
+				return false;
+			}
+
+			# do a real path of it
+			$originalpath = realpath($m[1][0]);
+			if (!is_dir($originalpath)) {
+				# then raise error
+				$this->message('Extracted temporary directory "'.$originalpath.'" is not a directory.');
+				return false;
+			}
+
+			# make sure it's long enough
+			if (strlen($originalpath) < 2) {
+				# then raise error
+				$this->message('Extracted temporary directory "'.$originalpath.'" is too short.');
+				return false;
+			}
+
+			# make sure it ends with a slash
+			$originalpath = substr($originalpath, -1) === '/' ? $originalpath : $originalpath.'/';
+
+			# search for files
+			exec('find '.escapeshellarg($originalpath).' -type f', $o, $r);
+			if ($r !== 0) {
+				# then raise error
+				$this->message('Failed searching incoming '.$originalpath.' folder for files: '.var_export($o, true).' ('.$r.')');
+				return false;
+			}
+
+			$originalfiles = $o;
+
+			# ends with slash
+			$previewpath = PREVIEW_DIR.$this->id.'/';
+			if (!is_dir($previewpath)) {
+				if (!mkdir($previewpath, 0777, true)) {
+					$this->message('Failed creating preview directory: '.$previewpath);
+					return false;
+				}
+			}
+
+			# walk files
+			foreach ($originalfiles as $origfile) {
+
+				if (strpos(basename($origfile), 'urn_ed2k') !== 0) {
+					continue;
+				}
+
+				$modifytime = filemtime($origfile);
+				$ed2k = substr(basename($origfile), 9);
+				$normalthumbpath = $previewpath.$ed2k.'.preview.jpg';
+
+				# thumb exists and we got modify time for it
+				if (file_exists($normalthumbpath) && $modifytime !== false) {
+					$previewtime = filemtime($normalthumbpath);
+					# is the thumb time before the file time
+					if ($previewtime < $modifytime) {
+						//fwrite(STDOUT, 'Thumbnail outdated [T: '.date('Y-m-d H:i:s', $previewtime).' / F: '.date('Y-m-d H:i:s', $modifytime).'] on '.$normalthumbpath."\n");
+						# then remove the thumbnail
+						unlink($normalthumbpath);
+					}
+				}
+
+				# no main thumb?
+				if (!file_exists($normalthumbpath)) {
+					unset($c, $r);
+					# run video sheet to make it
+					$c = 'php '.DPTOOLS_DIR.'videosheet --filename='.escapeshellarg($origfile).' --format=jpeg --number=4 --column=2 --quality=75 --thumbsize=512,-1 --gridonly --output='.escapeshellarg($normalthumbpath);
+					passthru($c, $r);
+
+					if ($r === 0 && file_exists($normalthumbpath)) {
+						# if it succeeded, set the date of the file to the same as the file
+						touch($normalthumbpath, $modifytime);
+					}
+				}
+			}
+
+			# remove thumbnails without parent
+			exec('find '.escapeshellarg($previewpath).' -type f', $o, $r);
+			if ($r !== 0) {
+				# then raise error
+				$this->message('Failed searching preview folder '.$previewpath.' for files: '.var_export($o, true).' ('.$r.')');
+				return false;
+			}
+
+			$previews = $o;
+			foreach ($previews as $previewfile) {
+				$preview_filename = basename($previewfile);
+
+				# make sure it ends with .preview.jpg
+				if (substr($preview_filename, - strlen('.preview.jpg')) !== '.preview.jpg') {
+					continue;
+				}
+
+				# get original filename out of the filename - urn_ed2k_<something>.preview.jpg
+				$origname = 'urn_ed2k_'.substr($preview_filename, 0, strlen($preview_filename) - strlen('.preview.jpg'));
+				$found = false;
+
+				# check if it exists in file list
+				foreach ($originalfiles as $origfile) {
+					if (basename($origfile) === $origname) {
+						$found = true;
+						break;
+					}
+				}
+
+				# was not found, wants to delete it then
+				if (!$found) {
+					# fwrite(STDOUT, 'Removing leftover thumbnail: '.$previewfile."\n");
+					unlink($previewfile);
+				}
+			}
+
 			return true;
 		}
 
@@ -243,8 +389,7 @@
 				
 				# '/onMouseOver=\"mOvr\(this\)\;setTimeout\(\'popLayer\(\\\\\'(.*?)&lt;br&gt;File\#: (\d+)&lt.*?\"loaded\" style\=\"height:2px\" width\=\"(.*?)\"/',
 				'/onMouseOver=\"mOvr\(this\)\;setTimeout\(\'popLayer\(\\\\\'(.*?)&lt;br&gt;File\#: (\d+)&lt.*?\"loaded\" style\=\"height:2px\" width\=\"(\d+)%\"/sim',
-				
-				
+
 				$data,
 				$matches
 			);

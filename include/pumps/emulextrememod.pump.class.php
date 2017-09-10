@@ -11,12 +11,14 @@
 	# 2014-09-03 22:44:28 - bugfix kadReconnect missed old connection code
 	# 2015-03-10 22:17:51 - making filesize a float instead of an int
 	# 2015-08-21 11:31:09 - cleanup
+	# 2017-09-10 22:46:00 - adding id
 
 	class eMuleXtremeModPump {
 
 		# where to store session tempfile
 		private $c = false;
 		private $host = 'localhost';
+		private $id = 0;
 		private $messages;
 		private $password = '';
 		private $port = 4711;
@@ -64,6 +66,7 @@
 			}
 
 			# set defaults
+			$this->id			= isset($config['id']) 			!== false	? $config['id']				: $this->id;
 			$this->host			= isset($config['host']) 		!== false	? $config['host']			: $this->host;
 			$this->password		= isset($config['password']) 	!== false	? $config['password']		: $this->password;
 			$this->port			= isset($config['port'])		!== false	? $config['port']			: $this->port;

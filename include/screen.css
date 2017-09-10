@@ -197,6 +197,10 @@ table thead th.date {
 	}
 }
 
+table tbody td img.preview {
+	width: 160px;
+}
+
 table tbody td.counter {
 	font-family: monospace;
 	text-align: center;

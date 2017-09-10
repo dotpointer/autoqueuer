@@ -55,6 +55,7 @@
 	2017-06-29 22:33:14 - adding cmdaftermove to moverules
 	2017-07-31 14:16:46 - new files report with nickname addition
 	2017-08-30 00:47:00 - php7 workarounds
+	2017-09-10 23:45:00 - preview added
 
 	# SQL setup
 	CREATE DATABASE emulehelper;
@@ -84,6 +85,9 @@
 
 	# tree root where to mount samba shares - ends with a slash
 	define('MOUNT_ROOTPATH', '/mnt/emulehelper/');
+
+	# folder to store preview files, must be read and writeable by www-data user
+	define('PREVIEW_DIR', '/examplehost/download/autoqueue-preview/');
 
 	# eMule setup - eMule MUST have special XML-template loaded as web interface
 	# define('EMULEHOST', 'hostname');
@@ -299,6 +303,7 @@
 		$clientpumps[$clientpump['type'].'@'.$clientpump['host']] = array(
 			'data' => $clientpump,
 			'pump' => new $clientpumpclasses[$clientpump['type']](array(
+				'id'		=> $clientpump['id'],
 				'username'	=> $clientpump['username'],
 				'password'	=> $clientpump['password'],
 				'host'		=> $clientpump['host'],

@@ -14,6 +14,7 @@
 # 2016-03-05 22:09:02 - cleanup
 # 2016-09-22 22:53:42 - base 2 to base 3
 # 2017-07-31 14:22:37 - adding nickname
+# 2017-09-10 23:43:00 - newline removed
 
 if (!isset($action)) exit;
 
@@ -277,7 +278,6 @@ switch ($action) {
 			'status' => 'ok',
 			'data' => array()
 		)));
-
 
 	case 'insert_or_update_search': # make a new search or update an existing one
 

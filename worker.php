@@ -31,6 +31,7 @@
 	2016-03-05 22:24:02 - cleanup
 	2016-09-22 23:04:19 - base 2 to base 3
 	2016-11-09 11:14:27 - bugfix, base 2 to base 3
+	2017-09-10 23:46:00 - preview added
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -47,7 +48,7 @@ $force = false;
 $unmount = true;
 
 # get arguments
-$arguments = getopt("c:dfhj:uv::", array(
+$arguments = getopt("c:dfhj:puv::", array(
 	'download::',
 	'dryrun',
 	'dry-run',
@@ -59,6 +60,7 @@ $arguments = getopt("c:dfhj:uv::", array(
 	'kadcheck',
 	'list::',
 	'move',
+	'preview',
 	'results',
 	'scan::',
 	'search::',
@@ -886,6 +888,15 @@ foreach ($arguments as $k => $v) {
 			move_downloaded_files($link);
 			break;
 
+		case 'p':
+		case 'preview':
+			cl('Action: generate previews', VERBOSE_DEBUG);
+			foreach ($clientpumps as $pumpname => $pump) {
+				if (method_exists($pump['pump'], 'generatePreviews')) {
+					$pump['pump']->generatePreviews();
+				}
+			}
+			break;
 
 		# --- results printout ---
 		case 'results': # get search results

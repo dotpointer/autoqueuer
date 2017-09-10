@@ -16,9 +16,33 @@
 # 2016-02-23 12:51:15 - parameters
 # 2016-03-05 21:50:56 - cleanup
 # 2016-09-22 22:50:35 - base 2 to base 3
+# 2017-09-10 23:45:00 - adding preview
 
 # make sure there is something above this file
 if (!isset($view)) exit;
+
+switch ($view) {
+	case 'preview':
+		if (!is_numeric($id_clientpumps) || !strlen($filehash)) {
+			echo 'Missing parameters id_clientpumps or filehash.';
+			die(1);
+		}
+
+		$filehash = preg_replace("/[^a-zA-Z0-9]+/i", "", $filehash);;
+		$id_clientpumps = (int)$id_clientpumps;
+		$previewfile = PREVIEW_DIR.$id_clientpumps.'/'.$filehash.'.preview.jpg';
+
+		if (!file_exists($previewfile)) {
+			echo 'File does not exist. Make sure subfolder below the pump id folders is readable by web server.';
+			die(1);
+		}
+
+		header('Content-Disposition: inline; filename='.$filehash.'.preview.jpg');
+		header('Content-Type: image/jpeg');
+		header('Content-Length: '.filesize($previewfile));
+		readfile($previewfile);
+		die();
+}
 
 # is format json?
 if ($format === 'json') {
@@ -474,8 +498,13 @@ if ($format === 'json') {
 
 				# enrichen data
 				foreach ($rtmp as $k => $v) {
-					$rtmp[$k]['pumpname'] = $pumpname;
 					$rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
+					$rtmp[$k]['pumpname'] = $pumpname;
+					if (isset($rtmp[$k]['ed2k'])) {
+						$rtmp[$k]['preview'] = file_exists(PREVIEW_DIR.(int)$pump['data']['id'].'/'.$rtmp[$k]['ed2k'].'.preview.jpg');
+					} else {
+						$rtmp[$k]['preview'] = false;
+					}
 				}
 
 				# merge together

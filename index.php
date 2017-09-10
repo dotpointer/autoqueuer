@@ -15,6 +15,7 @@
 # 2016-02-23 15:44:14 - translations
 # 2016-03-05 22:16:09 - cleanup
 # 2017-07-31 14:22:52 - adding nickname
+# 2017-09-10 23:45:00 - newline removed
 
 session_start();
 

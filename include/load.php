@@ -3,12 +3,7 @@
 	session_start();
 	require_once('functions.php');
 
-	start_translations();
-?>
-/*jslint white: true, this: true, browser: true */
-/*global clientpumptypes,window,$,jQuery,toggler,Highcharts,files_queued_stats,view,types,methods*/
-
-/*
+	# changelog
    # changelog
    # 2015-06-05 17:39:01
    # 2015-07-27 02:27:51 - adding email
@@ -18,7 +13,12 @@
    # 2016-08-26 19:59:28 - making it validate on jslint again
    # 2016-08-26 20:15:19 - bugfix on translation after jslint validation
    # 2017-07-31 14:17:10 - adding nickname
-*/
+   # 2017-09-10 23:56:00 - preview added, moving up changelog to php
+
+	start_translations();
+?>
+/*jslint white: true, this: true, browser: true */
+/*global clientpumptypes,window,$,jQuery,toggler,Highcharts,files_queued_stats,view,types,methods*/
 
 var	e = {
 	timeouts: {},
@@ -1201,6 +1201,8 @@ var	e = {
 					// make a table
 
 					e.make.table("transfers", [
+						e.t("Preview"),
+						{inner_html: '', classes: "unimportant"},
 						e.t("Name"),
 						{inner_html: e.t("Type"), classes: "unimportant"},
 						e.t("Size"),
@@ -1246,6 +1248,32 @@ var	e = {
 							);
 
 							e.make.table_tr("#transfers tbody", data.data[i], [
+								data.data[i].preview
+									?
+										$('<a/>')
+											.attr({
+												alt: e.t("Preview of") + ' ' + data.data[i].name,
+												href: '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k,
+												title: e.t("Preview of") + ' ' + data.data[i].name
+											})
+											.append(
+												$('<img/>')
+													.attr('src', '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k)
+													.addClass('preview')
+											)
+											.click(function(event) {
+
+											var opened = window.open($(this).attr('href'), '_blank');
+
+												if (opened) {
+													opened.focus();
+												} else {
+													window.alert(e.t('Failed opening new window, popups may be blocked.'));
+												}
+												event.preventDefault();
+												return false;
+											})
+									: '',
 								data.data[i].name,
 								{inner_html: data.data[i].type, classes: "unimportant"},
 								data.data[i].sizetotal,

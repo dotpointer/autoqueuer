@@ -3,6 +3,7 @@
 # changelog
 # 2015-08-29 22:51:40
 # 2016-03-14 23:30:04
+# 2017-09-10 23:43:00 - preview added
 
 # store this into translations
 $translations['languages'][] = array(
@@ -51,6 +52,7 @@ $translations['languages'][] = array(
 		array('Executed', 'Kördes'),
 		array('Extension', 'Filändelse'),
 		array('Ext.', 'Änd.'),
+		array('Failed opening new window, popups may be blocked.', 'Misslyckades med att öppna nytt fönster, popupfönster kan vara blockerade.'),
 		array('File','Fil'),
 		array('files', 'filer'),
 		array('Files', 'Filer'),
@@ -91,6 +93,7 @@ $translations['languages'][] = array(
 		array('Password','Lösenord'),
 		array('Path' ,'Sökväg'),
 		array('Port','Port'),
+		array('Preview of', 'Förhandsgranskning av'),
 		array('Program','Program'),
 		array('Pumps','Pumpar'),
 		array('Queued files', 'Köade filer'),
@@ -132,3 +135,4 @@ $translations['languages'][] = array(
 		array('Yes', 'Ja')
 	)
 );
+?>
