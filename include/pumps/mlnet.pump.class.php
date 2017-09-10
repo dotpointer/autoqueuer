@@ -14,6 +14,7 @@
 	# 2015-08-21 11:24:56 - cleanup
 	# 2015-08-22 10:11:50
 	# 2016-11-08 23:24:04 - bugfix min max
+	# 2017-09-10 17:33:00 - sorting functions
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -39,38 +40,6 @@
 			'Video'		=> 'Video'
 		);
 
-		# when object is made
-		public function __construct($config=array()) {
-
-			# invalid config - then get out now
-			if (!is_array($config)) {
-				return false;
-			}
-
-			$this->host				= isset($config['host']) 			!== false	? $config['host']			: $this->host;
-			$this->password			= isset($config['password']) 		!== false	? $config['password']		: $this->password;
-			$this->port				= isset($config['port'])			!== false	? $config['port']			: $this->port;
-			$this->username			= isset($config['username']) 		!== false	? $config['username']		: $this->username;
-
-			# connection should not be made here, as emh creates object during loading
-
-			return true;
-		}
-
-		# when object is destroyed
-		public function __destruct() {
-			# is there a curl connection?
-			if ($this->c) {
-				# then close it
-				curl_close($this->c);
-			}
-		}
-
-		# to get an url
-		private function getUrl() {
-			return 'http://'.$this->username.':'.$this->password.'@'.$this->host.':'.$this->port.'/';
-		}
-
 		# as PHP:s built-in array_merge does not do a real merge with overwriting of int-keys, we do it ourself
 		private function arrayMergeKeepKeys(/* dynamic */) {
 			$result = array();
@@ -90,6 +59,24 @@
 				CURLOPT_URL => $this->getUrl().'files?'.http_build_query(array('cancel' => $id, 'selectPriority9' => '=0'))
 			));
 			if ($data === false) return false;
+
+			return true;
+		}
+
+		# when object is made
+		public function __construct($config=array()) {
+
+			# invalid config - then get out now
+			if (!is_array($config)) {
+				return false;
+			}
+
+			$this->host				= isset($config['host']) 			!== false	? $config['host']			: $this->host;
+			$this->password			= isset($config['password']) 		!== false	? $config['password']		: $this->password;
+			$this->port				= isset($config['port'])			!== false	? $config['port']			: $this->port;
+			$this->username			= isset($config['username']) 		!== false	? $config['username']		: $this->username;
+
+			# connection should not be made here, as emh creates object during loading
 
 			return true;
 		}
@@ -132,6 +119,39 @@
 				return false;
 			}
 			return $r;
+		}
+
+		# when object is destroyed
+		public function __destruct() {
+			# is there a curl connection?
+			if ($this->c) {
+				# then close it
+				curl_close($this->c);
+			}
+		}
+
+		# to request download
+		public function download($ed2klink) {
+
+			$data = $this->curl(array(
+				CURLOPT_URL => $this->getUrl().'submit?'.http_build_query(array('q' => 'dllink '.$ed2klink))
+			));
+			if ($data === false) return false;
+
+			# no suitable response texts?
+			if (strpos($data, 'Added link') === false && strpos($data, 'File is already in download queue') === false) {
+				# then raise error
+				$this->message('Download request failed, invalid response: '.var_export($r, true));
+				return false;
+			}
+
+			# otherwise all ok
+			return true;
+		}
+
+		# to get an url
+		private function getUrl() {
+			return 'http://'.$this->username.':'.$this->password.'@'.$this->host.':'.$this->port.'/';
 		}
 
 		# to make a message
@@ -202,26 +222,6 @@
 			}
 
 			return $r;
-
-		}
-
-		# to request download
-		public function download($ed2klink) {
-
-			$data = $this->curl(array(
-				CURLOPT_URL => $this->getUrl().'submit?'.http_build_query(array('q' => 'dllink '.$ed2klink))
-			));
-			if ($data === false) return false;
-
-			# no suitable response texts?
-			if (strpos($data, 'Added link') === false && strpos($data, 'File is already in download queue') === false) {
-				# then raise error
-				$this->message('Download request failed, invalid response: '.var_export($r, true));
-				return false;
-			}
-
-			# otherwise all ok
-			return true;
 		}
 
 		# to get transfer list
