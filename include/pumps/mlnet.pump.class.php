@@ -246,7 +246,7 @@
 				if (!file_exists($normalthumbpath)) {
 					unset($c, $r);
 					# run video sheet to make it
-					$c = 'php '.DPTOOLS_DIR.'videosheet --filename='.escapeshellarg($origfile).' --format=jpeg --number=4 --column=2 --quality=75 --thumbsize=512,-1 --gridonly --output='.escapeshellarg($normalthumbpath);
+					$c = 'php '.DPTOOLS_DIR.'videosheet --filename='.escapeshellarg($origfile).' --format=jpeg --number=4 --column=2 --quality=75 --thumbsize=512,-1 --gridonly --skipnoduration --output='.escapeshellarg($normalthumbpath);
 					passthru($c, $r);
 
 					if ($r === 0 && file_exists($normalthumbpath)) {
