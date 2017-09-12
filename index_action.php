@@ -16,6 +16,7 @@
 # 2017-07-31 14:22:37 - adding nickname
 # 2017-09-10 23:43:00 - newline removed
 # 2017-09-12 21:52:00 - dropping project name in file
+# 2017-09-13 01:43:00 - adding cancel
 
 if (!isset($action)) exit;
 
@@ -122,6 +123,63 @@ switch ($action) {
 			'status' => 'ok',
 			'data' => array()
 		)));
+
+	case 'cancel':
+		if (!$id) {
+			die(json_encode(array(
+				'status' => 'error',
+				'data' => array(
+					'message' => 'Missing file ID.'
+				)
+			)));
+		}
+
+		if (!$id_clientpumps) {
+			die(json_encode(array(
+				'status' => 'error',
+				'data' => array(
+					'message' => 'Missing pump ID.'
+				)
+			)));
+		}
+
+		$output = array('status' => 'ok', 'data' => array());
+
+		# which client to ask?
+		$tmp = false;
+		foreach ($clientpumps as $pumpname => $pump) {
+			if ((int)$id_clientpumps === (int)$pump['data']['id'] && (int)$pump['data']['status'] === 1) {
+				$tmp = $pumpname;
+				break;
+			}
+		}
+		$pumpname = $tmp;
+
+		# no suitable pump found?
+		if ($pumpname === false) {
+			# then get out
+			die(json_encode(array(
+				'status' => 'error',
+				'data' => array(
+					'message' => 'Pump is not active or found.'
+				)
+			)));
+		}
+
+		# try to run the call
+		$r = $clientpumps[$pumpname]['pump']->cancel($id);
+
+		# did it fail?
+		if ($r === false) {
+			die(json_encode(array(
+				'status' => 'error',
+				'data' => array(
+					'message' => 'Failed cancel download on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true)
+				)
+			)));
+		}
+
+		die(json_encode($output));
 
 	case 'insert_or_update_clientpump': # make a new clientpump or update an existing one
 

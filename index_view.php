@@ -18,6 +18,7 @@
 # 2016-09-22 22:50:35 - base 2 to base 3
 # 2017-09-10 23:45:00 - adding preview
 # 2017-09-12 22:07:00 - dropping project name in file
+# 2017-09-13 01:41:00 - adding cancel
 
 # make sure there is something above this file
 if (!isset($view)) exit;
@@ -497,6 +498,12 @@ if ($format === 'json') {
 					)));
 				}
 
+				$actions = array();
+
+				if (method_exists($pump['pump'], 'cancel')) {
+					$actions[] = 'cancel';
+				}
+
 				# enrichen data
 				foreach ($rtmp as $k => $v) {
 					$rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
@@ -506,6 +513,7 @@ if ($format === 'json') {
 					} else {
 						$rtmp[$k]['preview'] = false;
 					}
+					$rtmp[$k]['actions'] = $actions;
 				}
 
 				# merge together
