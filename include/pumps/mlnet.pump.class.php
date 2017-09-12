@@ -1,11 +1,11 @@
 <?php
-	# MLDonkey-Server Client Pump Class - manages the communication between emulehelper and the client
+	# MLDonkey-Server Client Pump Class - manages the communication between the project and the client
 
 	# changelog
 	# 2013-12-20 00:00:00
 	# 2013-12-21 00:00:00 - improving, connecting to kreosot
 	# 2013-12-22 00:00:00 - improving again
-	# 2014-07-16 15:42:54 - taking emulehelper class
+	# 2014-07-16 15:42:54 - taking emule class
 	# 2014-07-19 20:05:43 - making it a pump
 	# 2014-07-22 00:00:00 - multi-client with clientpumps, search with name+size check
 	# 2014-07-23 18:37:10
@@ -17,6 +17,7 @@
 	# 2017-09-10 17:33:00 - sorting functions
 	# 2017-09-10 17:53:00 - adding generate preview
 	# 2017-09-10 23:46:00 - adding preview to transfers, adding id, putting preview into production
+	# 2017-09-12 22:10:00 - dropping project name in file
 
 	# general notice: data from mlnet already is in UTF-8!
 

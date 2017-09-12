@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
-	worker file for emulehelper - indexes resources - local and samba, searches via emule web interface and requests downloads
+	worker file - indexes resources - local and samba, searches via emule web interface and requests downloads
 
 	# changelog
 	2011-07-04			- eMule Kad reconnector, tries to reconnect Kad on host when needed
@@ -32,6 +32,7 @@
 	2016-09-22 23:04:19 - base 2 to base 3
 	2016-11-09 11:14:27 - bugfix, base 2 to base 3
 	2017-09-10 23:46:00 - preview added
+	2017-09-12 21:53:00 - dropping project name in file
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -370,7 +371,7 @@ foreach ($arguments as $k => $v) {
 					# samba connection
 					case 'smb':
 
-						# job rootpath - eg /mnt/emulehelper/share
+						# job rootpath - eg /mnt/project/share
 						if (!($rootpath = make_dir(MOUNT_ROOTPATH.$collection['name']))) {
 							cl('Path '.MOUNT_ROOTPATH.$collection['name'].' could not be created, or is not a directory'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
 							continue 3;

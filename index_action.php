@@ -1,6 +1,6 @@
 <?php
 
-# actions for emulehelper control panel
+# actions for control panel
 
 # changelog
 # 2013-07-17 22:15:11
@@ -15,6 +15,7 @@
 # 2016-09-22 22:53:42 - base 2 to base 3
 # 2017-07-31 14:22:37 - adding nickname
 # 2017-09-10 23:43:00 - newline removed
+# 2017-09-12 21:52:00 - dropping project name in file
 
 if (!isset($action)) exit;
 

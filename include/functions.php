@@ -1,11 +1,13 @@
 <?php
 /*
-		      dotpointers _      _          _
-	  ___ _ __ ___  _   _| | ___| |__   ___| |_ __   ___ _ __
-	 / _ \ '_ ` _ \| | | | |/ _ \ '_ \ / _ \ | '_ \ / _ \ '__|
-	|  __/ | | | | | |_| | |  __/ | | |  __/ | |_) |  __/ |
-	 \___|_| |_| |_|\__,_|_|\___|_| |_|\___|_| .__/ \___|_|
-		                                     |_|
+	  dotpointers_
+				| |
+	  __ _ _   _| |_ ___   __ _ _   _  ___ _   _  ___ _ __
+	 / _` | | | | __/ _ \ / _` | | | |/ _ \ | | |/ _ \ '__|
+	| (_| | |_| | || (_) | (_| | |_| |  __/ |_| |  __/ |
+	 \__,_|\__,_|\__\___/ \__, |\__,_|\___|\__,_|\___|_|
+							 | |
+							 |_|
 
 	# note: eMule seems to use uppercased ed2k-hashes, so this script uses uppercase.
 
@@ -56,10 +58,11 @@
 	2017-07-31 14:16:46 - new files report with nickname addition
 	2017-08-30 00:47:00 - php7 workarounds
 	2017-09-10 23:45:00 - preview added
+	2017-09-12 22:01:00 - renaming project from emulehelper to autoqueuer
 
 	# SQL setup
-	CREATE DATABASE emulehelper;
-	USE emulehelper;
+	CREATE DATABASE autoqueuer;
+	USE autoqueuer;
 
 	CREATE TABLE clientpumps(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, username TINYTEXT NOT NULL, password TINYTEXT NOT NULL, host TINYTEXT NOT NULL, port INT NOT NULL, `type` TINYTEXT NOT NULL, status int not null default 1, searched datetime not null default '0000-00-00 00:00:00', searches BIGINT NOT NULL DEFAULT 0, queuedfiles BIGINT NOT NULL DEFAULT 0, path_incoming TEXT NOT NULL DEFAULT '', updated DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00', created DATETIME NOT NULL);
 	CREATE TABLE collections(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, host TEXT NOT NULL, hostpath TEXT NOT NULL, username TEXT NOT NULL, password TEXT NOT NULL, rootpath TEXT NOT NULL,  enabled int not null default 1, updated DATETIME NOT NULL, created DATETIME NOT NULL);
@@ -78,13 +81,16 @@
 	# define('DATABASE_HOST', 'localhost');
 	# define('DATABASE_USERNAME', 'root');
 	# define('DATABASE_PASSWORD', '');
-	define('DATABASE_NAME', 'emulehelper');
+	define('PROJECT_FILENAME', 'autoqueuer');
+	define('PROJECT_TITLE', 'Autoqueuer');
+
+	define('DATABASE_NAME', PROJECT_FILENAME);
 
 	# file to store eMule web session id in, must be writable
-	define('FILE_SESSION', '/var/cache/emulehelper.emule.session');
+	define('FILE_SESSION', '/var/cache/'.PROJECT_FILENAME.'.emule.session');
 
 	# tree root where to mount samba shares - ends with a slash
-	define('MOUNT_ROOTPATH', '/mnt/emulehelper/');
+	define('MOUNT_ROOTPATH', '/mnt/'.PROJECT_FILENAME.'/');
 
 	# folder to store preview files, must be read and writeable by www-data user
 	define('PREVIEW_DIR', '/examplehost/download/autoqueue-preview/');
@@ -1961,11 +1967,11 @@
 		# anything in the search result list?
 		if (count($searchresultlist)) {
 
-			# check emulehelper for already downloaded
+			# check for already downloaded
 			$sql = 'SELECT
 						ed2khash
 					FROM
-						emulehelper.files
+						'.DATABASE_NAME.'.files
 					WHERE
 						ed2khash IN ('.implode(',', $ed2khashes).')';
 			cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);

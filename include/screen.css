@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'russo_oneregular';
+    src: url('fonts/russo_one/russo_one-webfont.woff2') format('woff2'),
+         url('fonts/russo_one/russo_one-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 a {
 	color: inherit;
 }
@@ -48,7 +56,12 @@ h2 {
 	margin-top: 0;	
 }
 
-h1, 
+h1 {
+	font-family: 'russo_oneregular', serif;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
 h2, 
 h3 {
 	font-family: Georgia, serif;

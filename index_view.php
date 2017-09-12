@@ -1,6 +1,6 @@
 <?php
 
-# view preparations for emulehelper control panel
+# view preparations for control panel
 
 # changelog
 # 2013-07-17 22:12:05
@@ -17,6 +17,7 @@
 # 2016-03-05 21:50:56 - cleanup
 # 2016-09-22 22:50:35 - base 2 to base 3
 # 2017-09-10 23:45:00 - adding preview
+# 2017-09-12 22:07:00 - dropping project name in file
 
 # make sure there is something above this file
 if (!isset($view)) exit;

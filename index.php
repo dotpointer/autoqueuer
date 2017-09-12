@@ -1,5 +1,5 @@
 <?php
-# control panel for eMulehelper
+# control panel
 
 # tactic for direct communication with eMule is to
 # send as much raw data as possible directly to the client
@@ -16,6 +16,7 @@
 # 2016-03-05 22:16:09 - cleanup
 # 2017-07-31 14:22:52 - adding nickname
 # 2017-09-10 23:45:00 - newline removed
+# 2017-09-12 22:27:00 - dropping project name in file
 
 session_start();
 
@@ -82,7 +83,7 @@ foreach ($clientpumpclasses as $k => $v) {
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-	<title>eMulehelper</title>
+	<title><?php echo PROJECT_TITLE ?></title>
 
 	<link rel="stylesheet" href="include/screen.css" type="text/css" media="screen" />
 
@@ -105,9 +106,9 @@ foreach ($clientpumpclasses as $k => $v) {
 <body>
 	<div id="main">
 		<div id="header">
-			<img src="img/pumpjack.png" id="logo" alt="eMulehelper" />
+			<img src="img/pumpjack.png" id="logo" alt="<?php echo PROJECT_TITLE ?>" />
 			<h1>
-				<a href="?">eMulehelper</a>
+				<a href="?"><?php echo PROJECT_TITLE ?></a>
 			</h1>
 			<div id="subtitle"><?php echo t('Control Panel'); ?></div>
 		</div>

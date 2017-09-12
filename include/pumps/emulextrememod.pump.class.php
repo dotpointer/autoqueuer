@@ -1,17 +1,18 @@
 <?php
-	# eMuleXtremeMod Client Pump Class - manages the communication between emulehelper and the client
+	# eMuleXtremeMod Client Pump Class - manages the communication between the project and the client
 
 	# changelog
-	# 2013-12-20
-	# 2013-12-21 - improving, connecting to kreosot
-	# 2013-12-22 - improving again
+	# 2013-12-20 00:00:00
+	# 2013-12-21 00:00:00 - improving, connecting to kreosot
+	# 2013-12-22 00:00:00 - improving again
 	# 2014-07-19 18:41:34 - converting it to pump class
-	# 2014-07-22 			- multi-client with clientpumps, search with name+size check
+	# 2014-07-22 00:00:00 - multi-client with clientpumps, search with name+size check
 	# 2014-07-24 16:30:41
 	# 2014-09-03 22:44:28 - bugfix kadReconnect missed old connection code
 	# 2015-03-10 22:17:51 - making filesize a float instead of an int
 	# 2015-08-21 11:31:09 - cleanup
 	# 2017-09-10 22:46:00 - adding id
+	# 2017-09-12 22:18:00 - dropping project name in file
 
 	class eMuleXtremeModPump {
 
@@ -23,7 +24,7 @@
 		private $password = '';
 		private $port = 4711;
 		private $ses = false;
-		private $sessionfile = '/tmp/emulehelper.session';
+		private $sessionfile = '/tmp/'.PROJECT_FILENAME.'.session';
 		private $url = '';
 
 		# eMule-defined search types
