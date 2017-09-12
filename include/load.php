@@ -14,6 +14,7 @@
    # 2016-08-26 20:15:19 - bugfix on translation after jslint validation
    # 2017-07-31 14:17:10 - adding nickname
    # 2017-09-10 23:56:00 - preview added, moving up changelog to php
+   # 2017-09-13 00:07:00 - adding chunk weights
 
 	start_translations();
 ?>
@@ -1202,12 +1203,12 @@ var	e = {
 
 					e.make.table("transfers", [
 						e.t("Preview"),
-						{inner_html: '', classes: "unimportant"},
 						e.t("Name"),
 						{inner_html: e.t("Type"), classes: "unimportant"},
 						e.t("Size"),
 						{inner_html: e.t("Completed"), classes: "unimportant"},
-						"%", e.t("Speed"),
+						"%",
+						e.t("Speed"),
 						{inner_html: e.t("State"), classes: "unimportant"}
 					]);
 
@@ -1219,7 +1220,8 @@ var	e = {
 						var percentage;
 						//var size_total,
 						//var size_completed,
-						var progressbar;
+						var chunkbar = null,
+							progressbar;
 
 						// invalid status?
 						if (data.status !== "ok") {
@@ -1233,8 +1235,18 @@ var	e = {
 						// for (i = 0; i < data.data.length; i += 1) {
 						Object.keys(data.data).forEach(function(i) {
 
-							progressbar = $("<div/>").addClass("progressbar");
+							if (data.data[i].chunkweights !== undefined) {
+								chunkbar = $("<div/>").addClass("chunkbar");
+								Object.keys(data.data[i].chunkweights).forEach(function(j) {
+									chunkbar.append(
+										$('<div/>')
+											.addClass('chunkweight' + data.data[i].chunkweights[j].type)
+											.css('width', data.data[i].chunkweights[j].weight + '%')
+									);
+								});
+							}
 
+							progressbar = $("<div/>").addClass("progressbar");
 
 							percentage = data.data[i].completed;
 							// percentage = percentage.substr(percentage.lastIndexOf("(") + 1	, percentage.length);
@@ -1245,6 +1257,9 @@ var	e = {
 							)
 							.append(
 								$("<div/>").addClass("progressbar_bar").css("width", percentage)
+							)
+							.after(
+								chunkbar
 							);
 
 							e.make.table_tr("#transfers tbody", data.data[i], [

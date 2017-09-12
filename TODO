@@ -58,6 +58,14 @@ select * from files where id_collections=-1 and ed2k=hashen, sätt till existing
 		
 --- KLART / DUMPAT --------------------------------------------
 
+emulehelper - exportera ut progressbaren ingen bra idé, ett nytt anrop för varje filrad - men den gör redan det?
+	emulehelper - skulle kunna byta ut ovanstående mot hämtning av tempdir, dock funkar det inte med alla filer då vissa inte är där
+
+emulehelper - ja vad? namnbyte? = autoqueue bra
+
+	autoloader, autodownloader, autoqueue
+	pumpqueue
+
 - __FILE__ och __LINE__ på alla fel.
 
 - flytta filer och skriv in filens position i files-tabellen

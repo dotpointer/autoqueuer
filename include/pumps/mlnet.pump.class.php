@@ -18,6 +18,7 @@
 	# 2017-09-10 17:53:00 - adding generate preview
 	# 2017-09-10 23:46:00 - adding preview to transfers, adding id, putting preview into production
 	# 2017-09-12 22:10:00 - dropping project name in file
+	# 2017-09-13 00:08:00 - adding chunk weights export
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -387,14 +388,14 @@
 			preg_match_all(
 				# example: onMouseOver="mOvr(this);setTimeout(\'popLayer(\\\'Some.File.ext&lt;br&gt;File#: 66&lt;
 				# '/onMouseOver=\"mOvr\(this\)\;setTimeout\(\'popLayer\(\\\\\'(.*?)&lt;br&gt;File\#: (\d+)&lt/',
-				
+
 				# '/onMouseOver=\"mOvr\(this\)\;setTimeout\(\'popLayer\(\\\\\'(.*?)&lt;br&gt;File\#: (\d+)&lt.*?\"loaded\" style\=\"height:2px\" width\=\"(.*?)\"/',
 				'/onMouseOver=\"mOvr\(this\)\;setTimeout\(\'popLayer\(\\\\\'(.*?)&lt;br&gt;File\#: (\d+)&lt.*?\"loaded\" style\=\"height:2px\" width\=\"(\d+)%\"/sim',
 
 				$data,
 				$matches
 			);
-			
+
 			#var_dump($matches);
 			#die();
 
@@ -421,6 +422,37 @@
 				if ($data === false) return false;
 
 
+				# <td class="chunkX" style="width:Xpx">
+
+				# try to get chunks info
+				$start = strpos($data, 'Chunks</td>');
+				$end = strpos($data, '"Chunk size">Chunk size');
+				$chunkweights = array();
+				if ($start !== false && $end !== false) {
+					$cut = substr($data, $start, $end - $start);
+					# echo $cut;
+
+					preg_match_all('/\<td class\=\"chunk(\d+)\"\s*style\=\"width\:(\d+)px\"\>/', $cut, $m);
+					# did it fail?
+					if (!count($m[0])) {
+						# then raise error
+						$this->message('Failed extracting chunks data for row '.$row['id'].', '.$row['name']);
+						return false;
+					}
+
+					$weighttotal = 0;
+					foreach ($m[2] as $key => $weight) {
+						$weighttotal += (int)$weight;
+					}
+
+					foreach ($m[1] as $key => $type) {
+						$chunkweights[] = array(
+							'type' => (int)$type,
+							'weight' => ($m[2][$key] / $weighttotal) * 100
+						);
+					}
+				}
+
 				# any ed2klink?
 				preg_match_all('/\<a href\=\"(ed2k\:\/\/\|file\|(.*?)\|(\d+)\|([a-zA-Z0-9]+)\|\/)\"\>/', $data, $m);
 				# did it fail?
@@ -437,7 +469,7 @@
 				$row['ed2k'] = (rawurldecode($m[4][0]));
 				# $row['completed'] = (rawurldecode($m[5][0]));
 				$row['sizecompleted'] = (float)rawurldecode($m[3][0]) * ((int)$row['completed']/100);
-
+				$row['chunkweights'] = $chunkweights;
 				$tmp[] = $row;
 			}
 
@@ -450,9 +482,9 @@
 			# example: http://host:4080/submit?custom=Complex+Search&keywords=some+keywords&minsize=&minsize_unit=1048576&maxsize=&maxsize_unit=1048576&media=&media_propose=&format=&format_propose=&artist=&album=&title=&bitrate=&network=
 			# fail   : http://host:4080/submit?album=&artist=&bitrate=&custom=Complex+Search&format=&format_propose=&keywords=spankingserver&maxsize=&maxsize_unit=1048576&media=&media_propose=Video&minsize=50&minsize_unit=1048576&network=&title=
 			# default parameters - NOTE the ORDER of the arguments, wrong order results in 404 not found
-			
+
 			# note for mlnet: sending in 0 as min or max results in zero results
-			
+
 			$search = array(
 				'custom'			=> 'Complex Search',
 				'keywords'			=> $search,
@@ -468,7 +500,7 @@
 				'album'				=> '',
 				'title'				=> '',
 				'bitrate'			=> '',
-				'network'			=> ''			
+				'network'			=> ''
 			);
 
 			# is type defined?
