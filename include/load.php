@@ -4,17 +4,18 @@
 	require_once('functions.php');
 
 	# changelog
-   # changelog
-   # 2015-06-05 17:39:01
-   # 2015-07-27 02:27:51 - adding email
-   # 2016-02-23 13:44:56 - replacing email field with email parameters, adding parameters gui
-   # 2016-02-23 15:43:56 - translations
-   # 2016-03-14 23:30:39 - translations
-   # 2016-08-26 19:59:28 - making it validate on jslint again
-   # 2016-08-26 20:15:19 - bugfix on translation after jslint validation
-   # 2017-07-31 14:17:10 - adding nickname
-   # 2017-09-10 23:56:00 - preview added, moving up changelog to php
-   # 2017-09-13 00:07:00 - adding chunk weights
+	# changelog
+	# 2015-06-05 17:39:01
+	# 2015-07-27 02:27:51 - adding email
+	# 2016-02-23 13:44:56 - replacing email field with email parameters, adding parameters gui
+	# 2016-02-23 15:43:56 - translations
+	# 2016-03-14 23:30:39 - translations
+	# 2016-08-26 19:59:28 - making it validate on jslint again
+	# 2016-08-26 20:15:19 - bugfix on translation after jslint validation
+	# 2017-07-31 14:17:10 - adding nickname
+	# 2017-09-10 23:56:00 - preview added, moving up changelog to php
+	# 2017-09-13 00:07:00 - adding chunk weights
+	# 2017-09-13 01:43:00 - adding cancel
 
 	start_translations();
 ?>
@@ -1209,7 +1210,8 @@ var	e = {
 						{inner_html: e.t("Completed"), classes: "unimportant"},
 						"%",
 						e.t("Speed"),
-						{inner_html: e.t("State"), classes: "unimportant"}
+						{inner_html: e.t("State"), classes: "unimportant"},
+						e.t("Actions")
 					]);
 
 					// fetch results
@@ -1295,7 +1297,44 @@ var	e = {
 								{inner_html: data.data[i].sizecompleted, classes: "unimportant"},
 								progressbar,
 								data.data[i].speed,
-								{inner_html: data.data[i].downstate, classes: "unimportant"}
+								{inner_html: data.data[i].downstate, classes: "unimportant"},
+								data.data[i].actions.indexOf('cancel') !== -1
+									?
+									$('<a/>')
+										.attr({
+											href: '#'
+										})
+										.prop('id', data.data[i].id)
+										.prop('id_clientpumps', data.data[i].id_clientpumps)
+										.prop('name', data.data[i].name)
+										.click(function(event) {
+												// var row = $(this).parents('tr:first');
+												event.preventDefault();
+
+												if ($(this).prop('locked')) {
+													return false;
+												}
+
+												if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?')) {
+													return false;
+												}
+
+												$(this).prop('locked', true);
+
+												e.requests.push($.getJSON('?format=json&action=cancel&id_clientpumps=' + $(this).prop('id_clientpumps') + '&id=' + $(this).prop('id') , function(data){
+													if (!e.verify_response(data)) {
+														return false;
+													}
+													// row.remove(); // not sure if it's trustable that
+													// pump does not reuse it's ids when items are removed
+													e.reload_page();
+												}));
+
+												return false;
+											})
+										.text(e.t('Cancel'))
+									:
+									''
 							]);
 						// }
 						});

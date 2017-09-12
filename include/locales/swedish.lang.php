@@ -4,6 +4,7 @@
 # 2015-08-29 22:51:40
 # 2016-03-14 23:30:04
 # 2017-09-10 23:43:00 - preview added
+# 2017-09-13 01:41:00 - cancel added
 
 # store this into translations
 $translations['languages'][] = array(
@@ -23,9 +24,11 @@ $translations['languages'][] = array(
 		array('A path to move the downloaded files to when they complete.', 'En sökväg att flytta de nerladdade filerna till.'),
 		array('Archive','Arkiv'),
 		array('Are you sure that you want to delete', 'Är du säker på att du vill radera'),
+		array('Are you sure that you want to cancel', 'Är du säker på att du vill avbryta'),
 		array('A summary of the latest queued files.', 'En summering av de senast köade filerna.'),
 		array('Audio','Ljud'),
 		array('Bad response from server', 'Felaktigt svar från server'),
+		array('Cancel', 'Avbryt'),
 		array('Check','Kryss'),
 		array('Choose the desired content type.', 'Välj önskad innehållstyp.'),
 		array('Choose the desired method.', 'Välj önskad metod.'),

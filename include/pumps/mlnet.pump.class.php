@@ -19,6 +19,7 @@
 	# 2017-09-10 23:46:00 - adding preview to transfers, adding id, putting preview into production
 	# 2017-09-12 22:10:00 - dropping project name in file
 	# 2017-09-13 00:08:00 - adding chunk weights export
+	# 2017-09-13 01:42:00 - updating cancel, putting it into production
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -57,11 +58,12 @@
 			return $result;
 		}
 
-		# must be tested, id comes from download
+		# to cancel a download, tested
 		public function cancel($id) {
+
 			# example: http://host:4080/files?cancel=9&selectPriority9=%3D0
 			$data = $this->curl(array(
-				CURLOPT_URL => $this->getUrl().'files?'.http_build_query(array('cancel' => $id, 'selectPriority9' => '=0'))
+				CURLOPT_URL => $this->getUrl().'files?'.http_build_query(array('cancel' => $id))
 			));
 			if ($data === false) return false;
 
