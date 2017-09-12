@@ -93,7 +93,7 @@
 	define('MOUNT_ROOTPATH', '/mnt/'.PROJECT_FILENAME.'/');
 
 	# folder to store preview files, must be read and writeable by www-data user
-	define('PREVIEW_DIR', '/examplehost/download/autoqueue-preview/');
+	define('PREVIEW_DIR', '/examplehost/download/'.PROJECT_FILENAME.'-preview/');
 
 	# eMule setup - eMule MUST have special XML-template loaded as web interface
 	# define('EMULEHOST', 'hostname');
