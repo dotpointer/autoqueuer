@@ -59,6 +59,7 @@
 	2017-08-30 00:47:00 - php7 workarounds
 	2017-09-10 23:45:00 - preview added
 	2017-09-12 22:01:00 - renaming project from emulehelper to autoqueuer
+	2017-09-12 22:46:00 - renaming preview path
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
