@@ -16,6 +16,7 @@
 	# 2017-09-10 23:56:00 - preview added, moving up changelog to php
 	# 2017-09-13 00:07:00 - adding chunk weights
 	# 2017-09-13 01:43:00 - adding cancel
+	# 2017-09-13 02:12:00 - adding ed2k to transfer list, moving progress bars
 
 	start_translations();
 ?>
@@ -1204,11 +1205,11 @@ var	e = {
 
 					e.make.table("transfers", [
 						e.t("Preview"),
+						"%",
 						e.t("Name"),
 						{inner_html: e.t("Type"), classes: "unimportant"},
 						e.t("Size"),
 						{inner_html: e.t("Completed"), classes: "unimportant"},
-						"%",
 						e.t("Speed"),
 						{inner_html: e.t("State"), classes: "unimportant"},
 						e.t("Actions")
@@ -1291,11 +1292,16 @@ var	e = {
 												return false;
 											})
 									: '',
-								data.data[i].name,
+								progressbar,
+								$('<span/>')
+									.text(data.data[i].name)
+									.after("<br>")
+									.after(
+										$('<span/>').text(data.data[i].ed2k).addClass('ed2k')
+									),
 								{inner_html: data.data[i].type, classes: "unimportant"},
 								data.data[i].sizetotal,
 								{inner_html: data.data[i].sizecompleted, classes: "unimportant"},
-								progressbar,
 								data.data[i].speed,
 								{inner_html: data.data[i].downstate, classes: "unimportant"},
 								data.data[i].actions.indexOf('cancel') !== -1
