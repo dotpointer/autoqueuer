@@ -17,6 +17,7 @@
 # 2017-09-10 23:43:00 - newline removed
 # 2017-09-12 21:52:00 - dropping project name in file
 # 2017-09-13 01:43:00 - adding cancel
+# 2017-09-19 19:25:00 - editing message handling
 
 if (!isset($action)) exit;
 
@@ -45,10 +46,11 @@ switch ($action) {
 		cl('SQL: '.$sql, VERBOSE_DEBUG);
 		$result = db_query($link, $sql);
 		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => db_error($link)
+					'message' => messages(false)
 				)
 			)));
 		}
@@ -78,10 +80,11 @@ switch ($action) {
 		cl('SQL: '.$sql, VERBOSE_DEBUG);
 		$result = db_query($link, $sql);
 		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => db_error($link)
+					'message' => messages(false)
 				)
 			)));
 		}
@@ -111,10 +114,11 @@ switch ($action) {
 		cl('SQL: '.$sql, VERBOSE_DEBUG);
 		$result = db_query($link, $sql);
 		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => db_error($link)
+					'message' => messages(false)
 				)
 			)));
 		}
@@ -171,10 +175,12 @@ switch ($action) {
 
 		# did it fail?
 		if ($r === false) {
+
+			cl('Failed cancel download on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].').', VERBOSE_ERROR);
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => 'Failed cancel download on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true)
+					'message' => messages(false)
 				)
 			)));
 		}
@@ -222,10 +228,11 @@ switch ($action) {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -246,10 +253,11 @@ switch ($action) {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -297,10 +305,11 @@ switch ($action) {
 				cl('SQL: '.$sql, VERBOSE_DEBUG);
 				$result = db_query($link, $sql);
 				if ($result === false) {
+					cl(db_error($link), VERBOSE_ERROR);
 					die(json_encode(array(
 						'status' => 'error',
 						'data' => array(
-							'message' => db_error($link)
+							'message' => messages(false)
 						)
 					)));
 				}
@@ -323,10 +332,11 @@ switch ($action) {
 				cl('SQL: '.$sql, VERBOSE_DEBUG);
 				$result = db_query($link, $sql);
 				if ($result === false) {
+					cl(db_error($link), VERBOSE_ERROR);
 					die(json_encode(array(
 						'status' => 'error',
 						'data' => array(
-							'message' => db_error($link)
+							'message' => messages(false)
 						)
 					)));
 				}
@@ -380,10 +390,11 @@ switch ($action) {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -404,10 +415,11 @@ switch ($action) {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -452,10 +464,11 @@ switch ($action) {
 
 		# did it fail?
 		if ($r === false) {
+			cl('Failed requesting search on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].').');
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => 'Failed requesting search on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true)
+					'message' => messages(false)
 				)
 			)));
 		}
@@ -491,10 +504,11 @@ switch ($action) {
 
 		if (!$clientpumps[ $pumpname ]['pump'] ->download($id)){
 			# did it fail? why?
+			cl('Failed requesting download from '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].').', VERBOSE_ERROR);
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => 'Failed requesting download from '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true)
+					'message' => messages(false)
 				)
 			)));
 		}

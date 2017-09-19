@@ -33,6 +33,7 @@
 	2016-11-09 11:14:27 - bugfix, base 2 to base 3
 	2017-09-10 23:46:00 - preview added
 	2017-09-12 21:53:00 - dropping project name in file
+	2017-09-19 19:25:00 - editing message handling
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -118,14 +119,16 @@ foreach ($arguments as $k => $v) {
 # check if this is running, if process id
 exec('ps a|grep -v grep|grep "'.basename(__FILE__).'"|grep -v \'^ *'.getmypid().'\'', $output, $retval);
 if (count($output)) {
-	cl('Already running: '.var_export($output, true), VERBOSE_DEBUG);
+	cl('Already running: '.var_export($output, true), VERBOSE_INFO);
+	fwrite(STDOUT, messages(true));
 	die();
 }
 
 # make sure the mounting root path exists - here we mount all samba shares and so on
 if (!file_exists(MOUNT_ROOTPATH) || !is_dir(MOUNT_ROOTPATH)) {
 	cl('Mounting root path ('.MOUNT_ROOTPATH.') does not exist'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-        die();
+	fwrite(STDERR, messages(true));
+	die(1);
 }
 
 # walk arguments again
@@ -133,18 +136,6 @@ foreach ($arguments as $k => $v) {
 
 	# what argument is this?
 	switch ($k) {
-
-		# --- testing
-		/*
-		case 'test':
-			# various testing
-			die();
-
-			var_dump(identify_collection($argv[2]));
-			die();
-
-			break;
-		*/
 
 		# --- download scan, check for files in search results to download ---
 		case 'download':
@@ -209,17 +200,20 @@ foreach ($arguments as $k => $v) {
 			$searches = db_query($link, $sql);
 			if ($searches === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			if (!count($searches)) {
 				cl('No searches found'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			# check that the timeout has passed
 			if (!$force && strtotime($searches[0]['executed']) + (int)$searches[0]['executiontimeout'] > time()) {
 				cl('No suitable searches found', VERBOSE_DEBUG);
+				fwrite(STDERR, messages(true));
 				die();
 			}
 			cl('Found search to run: "'.$searches[0]['search'].'"', VERBOSE_DEBUG);
@@ -234,13 +228,15 @@ foreach ($arguments as $k => $v) {
 			$result = db_query($link, $sql);
 			if ($result === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			};
 
 			# no one found?
 			if(!count($result)) {
 				cl('No suitable active client pumps found.'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			# construct a matching pump name
@@ -249,7 +245,8 @@ foreach ($arguments as $k => $v) {
 			# make sure we have a client pump
 			if (!isset($clientpumps[$pumpname])) {
 				cl('Could not find '.$pumpname.' in list of client pumps.'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			# update the timeout and the time when the search was executed and reset the resultscans counter
@@ -267,7 +264,8 @@ foreach ($arguments as $k => $v) {
 			$result = db_query($link, $sql);
 			if ($result === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			};
 
 			# this is important
@@ -291,8 +289,9 @@ foreach ($arguments as $k => $v) {
 			);
 
 			if ($r === false) {
-				cl('Failed requesting search on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				cl('Failed requesting search on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].', '.__FILE__.':'.__LINE__.').', VERBOSE_ERROR);
+				fwrite(STDERR, messages(true));
+				die(1);
 
 			}
 
@@ -301,7 +300,8 @@ foreach ($arguments as $k => $v) {
 			$result = db_query($link, $sql);
 			if ($result === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			};
 
 			# scan existing response for results
@@ -332,12 +332,14 @@ foreach ($arguments as $k => $v) {
 			$collections = db_query($link, $sql);
 			if ($collections === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			if (count($collections) < 1) {
 				cl('Could not find any collections in database'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			# stop limit
@@ -410,7 +412,8 @@ foreach ($arguments as $k => $v) {
 
 				if (!file_exists($rootpath) || !is_dir($rootpath)) {
 					cl('Bad mount path root dir: '.$rootpath.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 
 				cl('Indexing files in '.$rootpath, VERBOSE_DEBUG);
@@ -443,7 +446,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 				}
 
@@ -460,7 +464,9 @@ foreach ($arguments as $k => $v) {
 				cl('Files found: '.$total, VERBOSE_DEBUG);
 
 				# if ($total < 10) {
-				#	die('Too few files, something is wrong.');
+				#	cl('Too few files, something is wrong.', VERBOSE_ERROR);
+				#	fwrite(STDERR, messages(true));
+				#	die(1);
 				# }
 
 				# walk files found
@@ -508,7 +514,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					# file found
@@ -559,7 +566,8 @@ foreach ($arguments as $k => $v) {
 							$r = db_query($link, $sql);
 							if ($r === false) {
 								cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-								die();
+								fwrite(STDERR, messages(true));
+								die(1);
 							}
 						}
 						$stats['verified']++;
@@ -585,7 +593,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					# file found
@@ -620,7 +629,8 @@ foreach ($arguments as $k => $v) {
 							$r = db_query($link, $sql);
 							if ($r === false) {
 								cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-								die();
+								fwrite(STDERR, messages(true));
+								die(1);
 							}
 						}
 						$stats['verified']++;
@@ -655,7 +665,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					$found = count($r);
@@ -691,7 +702,8 @@ foreach ($arguments as $k => $v) {
 							$rtmp = db_query($link, $sql);
 							if ($rtmp === false) {
 								cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-								die();
+								fwrite(STDERR, messages(true));
+								die(1);
 							}
 
 							# if there is a move then make logmessage about it
@@ -748,7 +760,8 @@ foreach ($arguments as $k => $v) {
 						$r = db_query($link, $sql);
 						if ($r === false) {
 							cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-							die();
+							fwrite(STDERR, messages(true));
+							die(1);
 						}
 
 						# new file found - make a log message about it
@@ -776,7 +789,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 				}
 
@@ -837,7 +851,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					# walk collections and echo them
@@ -855,7 +870,8 @@ foreach ($arguments as $k => $v) {
 					$r = db_query($link, $sql);
 					if ($r === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					foreach ($r as $v) {
@@ -875,7 +891,8 @@ foreach ($arguments as $k => $v) {
 					break;
 				default:
 					cl('Unknown list or nothing specified to list', VERBOSE_DEBUG);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 
 			}
 

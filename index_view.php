@@ -19,6 +19,7 @@
 # 2017-09-10 23:45:00 - adding preview
 # 2017-09-12 22:07:00 - dropping project name in file
 # 2017-09-13 01:41:00 - adding cancel
+# 2017-09-19 19:25:00 - editing message handling
 
 # make sure there is something above this file
 if (!isset($view)) exit;
@@ -26,7 +27,8 @@ if (!isset($view)) exit;
 switch ($view) {
 	case 'preview':
 		if (!is_numeric($id_clientpumps) || !strlen($filehash)) {
-			echo 'Missing parameters id_clientpumps or filehash.';
+			cl('Missing parameters id_clientpumps or filehash.', VERBOSE_ERROR);
+			fwrite(STDERR, messages(true));
 			die(1);
 		}
 
@@ -35,7 +37,8 @@ switch ($view) {
 		$previewfile = PREVIEW_DIR.$id_clientpumps.'/'.$filehash.'.preview.jpg';
 
 		if (!file_exists($previewfile)) {
-			echo 'File does not exist. Make sure subfolder below the pump id folders is readable by web server.';
+			cl('File does not exist. Make sure subfolder below the pump id folders is readable by web server.', VERBOSE_ERROR);
+			fwrite(STDERR, messages(true));
 			die(1);
 		}
 
@@ -69,10 +72,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -117,10 +121,11 @@ if ($format === 'json') {
 
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -158,10 +163,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -191,10 +197,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -219,10 +226,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -253,10 +261,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -307,10 +316,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -362,10 +372,11 @@ if ($format === 'json') {
 
 				# did it fail?
 				if ($rtmp === false) {
+					cl('Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].').', VERBOSE_ERROR);
 					die(json_encode(array(
 						'status' => 'error',
 						'data' => array(
-							'message' => 'Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].'): '.$pump['pump']->messages(false,true)
+							'message' => messages(false)
 						)
 					)));
 				}
@@ -407,10 +418,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -429,10 +441,11 @@ if ($format === 'json') {
 			cl('SQL: '.$sql, VERBOSE_DEBUG);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -490,10 +503,12 @@ if ($format === 'json') {
 
 				# did it fail?
 				if ($rtmp === false) {
+					cl('Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].').', VERBOSE_ERROR);
+					cl(db_error($link), VERBOSE_ERROR);
 					die(json_encode(array(
 						'status' => 'error',
 						'data' => array(
-							'message' => 'Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].'): '.$pump['pump']->messages(false,true)
+							'message' => messages(false)
 						)
 					)));
 				}

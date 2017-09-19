@@ -60,6 +60,7 @@
 	2017-09-10 23:45:00 - preview added
 	2017-09-12 22:01:00 - renaming project from emulehelper to autoqueuer
 	2017-09-12 22:46:00 - renaming preview path
+	2017-09-19 19:25:00 - editing message handling
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -207,7 +208,6 @@
 		LOGMESSAGE_TYPE_TEXT => 'Text'
 	);
 
-
 	# time definitions
 	define('TIME_ONE_SECOND', 1);
 	define('TIME_ONE_MINUTE',		TIME_ONE_SECOND * 60);
@@ -224,6 +224,7 @@
 
 	$conn = false;
 	$loglevel = VERBOSE_INFO;
+	$messages = array();
 	$pingresults = array(); # to store ping results
 	$verbose = VERBOSE_ERROR; # level of verbosity, 0=off, 1=errors, 2=info, 3=debug, 4=debug deep
 
@@ -253,7 +254,8 @@
 	$link = db_connect();
 	if (!$link) {
 		cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-		die();
+		fwrite(STDOUT, messages(true));
+		die(1);
 	}
 
 	# a function to run when the script shutdown
@@ -303,7 +305,9 @@
 	$result = db_query($link, $sql);
 	foreach ($result as $clientpump) {
 		if (!isset($clientpumpclasses[$clientpump['type']])) {
-			die('Missing class for '.$clientpump['type']);
+			cl('Missing class for '.$clientpump['type'], VERBOSE_ERROR);
+			fwrite(STDOUT, messages(true));
+			die(1);
 		}
 
 		# make an object for it
@@ -358,6 +362,7 @@
 		global $verbose;
 		global $loglevel;
 		global $link;
+		global $messages;
 
 		# do not log passwords from mountcifs
 		$s = preg_replace('/password=\".*\" \"\/\//', 'password="*****" "//', $s);
@@ -376,8 +381,12 @@
 			break;
 		}
 
-		# is verbosity on and level is enough?
-		if ($verbose && $verbose >= $level) echo '['.date('Y-m-d H:i:s').' '.$l.'] '.$s."\n";
+		# post to local array
+		$messages[] = array(
+			'date' => date('Y-m-d H:i:s'),
+			'level' => $level,
+			'msg' => $s
+		);
 
 		if ($log_to_db && $loglevel && $loglevel >= $level) {
 			$sql = 'INSERT INTO logmessages (type, data, updated, created) VALUES('.LOGMESSAGE_TYPE_TEXT.', "'.dbres($link, $s).'","'.date('Y-m-d H:i:s').'","'.date('Y-m-d H:i:s').'")';
@@ -423,6 +432,42 @@
 		return db_insert_id($link);
 	}
 
+		# to get messages - empties messages and returns them
+		function messages($mashed=false) {
+
+			global $messages;
+			global $verbose;
+
+			$levels = is_array($levels) ? $levels : array(VERBOSE_ERROR);
+
+			$tmp = $mashed ? '' : array();
+			$first = true;
+			foreach ($messages as $message) {
+
+				# is verbosity on and level is enough?
+				if ($verbose && $verbose >= $message['level']) {
+
+					# should it be mashed?
+					if ($mashed) {
+						# not first?
+						if (!$first) {
+							# add separator
+							$tmp .= "\n";
+						}
+
+						$tmp .= $message['msg'];
+						$first = false;
+					} else {
+						$tmp[] = $message;
+					}
+				}
+			}
+
+			# empty messages
+			$messages = [];
+			# return contents
+			return $tmp;
+		}
 
 	# --- cURL:ing ----------------------------------------------------------------------
 
@@ -434,8 +479,9 @@
 		if (!count($pingresults)) {
 			# die silently
 			if(!pingtest(EMULEHOST)) {
-				cl('eMule host '.EMULEHOST.' is offline'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				cl('eMule host '.EMULEHOST.' is offline'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_INFO);
+				fwrite(STDOUT, messages(true));
+				die(1);
 			}
 		}
 		return curl_get_connection();
@@ -462,7 +508,9 @@
 
 		$f = fopen($file, 'r');
 		if (!$f) {
-			die('Failed opening file: '.$file."\n");
+			cl('Failed opening file: '.$file."\n", VERBOSE_ERROR);
+			fwrite(STDOUT, messages(true));
+			die(1);
 		}
 
 		$ok = false;
@@ -475,7 +523,9 @@
 				# close file
 				fclose($f);
 				# end here
-				die('Failed reading from file: '.$c);
+				cl('Failed reading from file: '.$c, VERBOSE_ERROR);
+				fwrite(STDOUT, messages(true));
+				die(1);
 			}
 
 			# if zero detected - go next
@@ -606,7 +656,7 @@
 		# if it failed, end here
 		if ($r['status'] !== 'ok' || !isset($r['filelist'], $r['filelist']['file'])) {
 			cl('Request failed'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die();
+			die(1);
 		}
 
 		# walk files in the download list and collect the hashes
@@ -630,7 +680,7 @@
 		$r = db_query($link, $sql);
 		if ($r === false) {
 			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die();
+			die(1);
 		}
 
 		return true;
@@ -721,7 +771,8 @@
 		$collections = db_query($link, $sql);
 		if ($collections === false) {
 			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die();
+			fwrite(STDOUT, messages(true));
+			die(1);
 		}
 
 		# walk the collections
@@ -842,7 +893,8 @@
 				#$collections = db_query($link, $sql);
 				#if ($collections === false) {
 				#	cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				#	die();
+				#	fwrite(STDOUT, messages(true));
+				#	die(1);
 				#}
 
 				# by default assume that the file has left the collections
@@ -883,7 +935,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
+					fwrite(STDOUT, messages(true));
+					die(1);
 				}
 
 				# make logmessage about it
@@ -908,7 +961,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
+					fwrite(STDOUT, messages(true));
+					die(1);
 				}
 			}
 			return false;
@@ -958,10 +1012,11 @@
 
 		$result = db_query($link, $sql);
 		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
 			die(json_encode(array(
 				'status' => 'error',
 				'data' => array(
-					'message' => db_error($link)
+					'message' => messages(false)
 				)
 			)));
 		}
@@ -986,7 +1041,8 @@
 		$moverules = db_query($link, $sql);
 		if ($moverules === false) {
 			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die();
+			fwrite(STDERR, messages(true));
+			die(1);
 		}
 
 		# make sure the paths in the rules end with a slash
@@ -1057,7 +1113,8 @@
 			$r = db_query($link, $sql);
 			if ($r === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 			# any matches in db?
@@ -1073,7 +1130,8 @@
 					$result_update_searches = db_query($link, $sql);
 					if ($result_update_searches === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 				}
@@ -1115,7 +1173,8 @@
 			$r = db_query($link, $sql);
 			if ($r === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 
 
@@ -1134,7 +1193,8 @@
 					$result_update_searches = db_query($link, $sql);
 					if ($result_update_searches === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 				}
@@ -1162,7 +1222,8 @@
 					$result = db_query($link, $sql);
 					if ($result === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					# dangerous now - we take next file too to be safe
@@ -1186,7 +1247,8 @@
 					$result = db_query($link, $sql);
 					if ($result === false) {
 						cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-						die();
+						fwrite(STDERR, messages(true));
+						die(1);
 					}
 
 					# set up move
@@ -1227,7 +1289,8 @@
 							$result_update_moverules = db_query($link, $sql);
 							if ($result_update_moverules === false) {
 								cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-								die();
+								fwrite(STDERR, messages(true));
+								die(1);
 							}
 
 							if (strlen($moverule['cmdaftermove'])) {
@@ -1278,7 +1341,8 @@
                 $r = db_query($link, $sql);
                 if ($r === false) {
                     cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                    die();
+                    fwrite(STDERR, messages(true));
+                    die(1);
                 }
                 $totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];*/
 
@@ -1286,7 +1350,8 @@
                 $r = db_query($link, $sql);
                 if ($r === false) {
                     cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                    die();
+                    fwrite(STDERR, messages(true));
+                    die(1);
                 }
 
                 $filessincelastmail = $r;
@@ -1298,7 +1363,8 @@
                 $r = db_query($link, $sql);
                 if ($r === false) {
                     cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                    die();
+                    fwrite(STDERR, messages(true));
+                    die(1);
                 }
                 $totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];
                 */
@@ -1306,7 +1372,8 @@
                 $r = db_query($link, $sql);
                 if ($r === false) {
                     cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                    die();
+                    fwrite(STDERR, messages(true));
+                    die(1);
                 }
 
                 foreach ($r as $row) {
@@ -1323,7 +1390,8 @@
                     cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
                     if ($r === false) {
                         cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                        die();
+                        fwrite(STDERR, messages(true));
+                        die(1);
                     }
 
                     $sql = 'UPDATE moverules SET filessincelastmail = 0';
@@ -1331,7 +1399,8 @@
                     cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
                     if ($r === false) {
                         cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                        die();
+                        fwrite(STDERR, messages(true));
+                        die(1);
                     }
 
                     # replace the template locations in the mailer string with our versions
@@ -1386,7 +1455,8 @@
                     # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
                     if ($r === false) {
                         cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                        die();
+                        fwrite(STDERR, messages(true));
+                        die(1);
                     }
 
                     if (count($r)) {
@@ -1399,7 +1469,8 @@
                     cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
                     if ($r === false) {
                         cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                        die();
+                        fwrite(STDERR, messages(true));
+                        die(1);
                     }
 
                     # make logmessage about it
@@ -1530,7 +1601,8 @@
 		$searches = db_query($link, $sql);
 		if ($searches === false) {
 			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die();
+			fwrite(STDERR, messages(true));
+			die(1);
 		}
 
 		# do not go forward if all searches already have been scanned for downloads
@@ -1557,8 +1629,9 @@
 			$tmp = $pump['pump']->results();
 			# did it fail?
 			if ($tmp === false || !is_array($tmp)) {
-				cl('Failed requesting search results from '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].'): '.$clientpumps[ $pumpname ]['pump']->messages(false, true).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				cl('Failed requesting search results from '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].', '.__FILE__.':'.__LINE__.').', VERBOSE_ERROR);
+				fwrite(STDOUT, messages(true));
+				die(1);
 			}
 
 			# walk and enrichen the result with the name of the pump
@@ -1585,7 +1658,8 @@
 			$result = db_query($link, $sql);
 			if ($result === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 		# or do we have id_searches?
 		} else {
@@ -1595,7 +1669,8 @@
 			$result = db_query($link, $sql);
 			if ($result === false) {
 				cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				die();
+				fwrite(STDERR, messages(true));
+				die(1);
 			}
 		}
 
@@ -1704,7 +1779,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link), VERBOSE_DEBUG);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 				if (count($result) > 0) {
 					cl('Skipping, file downloaded before, detected by name + size', VERBOSE_DEBUG);
@@ -1717,7 +1793,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link), VERBOSE_DEBUG);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 				if (count($result) > 0) {
 					cl('Skipping, file downloaded before, detected by ed2khash', VERBOSE_DEBUG);
@@ -1745,8 +1822,9 @@
 				cl('Requesting download from pump '.$file['pumpname'].' (#'.$clientpumps[ $file['pumpname'] ]['data']['id'].')', VERBOSE_DEBUG);
 				if (!$clientpumps[ $file['pumpname'] ]['pump'] ->download($file['id'])){
 					# did it fail? why?
-					cl('Failed requesting download from '.$file['pumpname'].' (#'.$clientpumps[ $file['pumpname'] ]['data']['id'].'): '.$clientpumps[ $file['pumpname'] ]['pump']->messages(false, true).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					die();
+					cl('Failed requesting download from '.$file['pumpname'].' (#'.$clientpumps[ $file['pumpname'] ]['data']['id'].', ('.__FILE__.':'.__LINE__.').', VERBOSE_ERROR);
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 
 
@@ -1759,7 +1837,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link), VERBOSE_DEBUG);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 
 				# new file found - make a log message about it
@@ -1782,7 +1861,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link), VERBOSE_DEBUG);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 
 				# update this client counter too
@@ -1791,7 +1871,8 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link), VERBOSE_DEBUG);
-					die();
+					fwrite(STDERR, messages(true));
+					die(1);
 				}
 
 			}
@@ -1858,17 +1939,18 @@
 
 			# is this pump not active?
 			if (!(int)$pump['data']['status']) {
-				cl('Pump '.$pumpname.' (#'.$pump['data']['id'].') is inactive, skipping', VERBOSE_DEBUG);
+				cl('Pump '.$pumpname.' (#'.$pump['data']['id'].') is inactive, skipping.', VERBOSE_DEBUG);
 				continue;
 			}
 
 			$rtmp = $pump['pump']->transfers();
 			# did it fail?
 			if ($rtmp === false) {
+				cl('Fetch transfer from '.$pumpname.' ('.$pump['data']['id'].') failed.', VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => 'Fetch transfer from '.$pumpname.' ('.$pump['data']['id'].') failed: '.$pump['pump']->messages(false,true)
+						'message' => messages(false)
 					)
 				)));
 
@@ -1893,10 +1975,11 @@
 
 			# no link data
 			if (!isset($file['link'])) {
+				cl('Invalid filelist response - no ED2k-link or type, file structure was: '.var_export($file,true), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => 'Invalid filelist response - no ED2k-link or type, file structure was: '.var_export($file,true)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -1937,10 +2020,11 @@
 			cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link, VERBOSE_ERROR));
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}
@@ -1978,10 +2062,11 @@
 			cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 			$result = db_query($link, $sql);
 			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
 				die(json_encode(array(
 					'status' => 'error',
 					'data' => array(
-						'message' => db_error($link)
+						'message' => messages(false)
 					)
 				)));
 			}

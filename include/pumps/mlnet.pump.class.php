@@ -28,7 +28,6 @@
 		private $c 			= false;
 		private $host 		= 'localhost';
 		private $id			= 0;
-		private $messages	= array();
 		private $password 	= '';
 		private $port 		= 4080;
 		private $ses 		= false;
@@ -123,7 +122,7 @@
 			curl_setopt_array($this->c, $opt);
 			$r = curl_exec($this->c);
 			if (curl_errno($this->c)) {
-				$this->message('cURL-error: '.curl_error($this->c).' ('.curl_errno($this->c).')');
+				cl('cURL-error: '.curl_error($this->c).' ('.curl_errno($this->c).')', VERBOSE_ERROR);
 				return false;
 			}
 			return $r;
@@ -149,7 +148,7 @@
 			# no suitable response texts?
 			if (strpos($data, 'Added link') === false && strpos($data, 'File is already in download queue') === false) {
 				# then raise error
-				$this->message('Download request failed, invalid response: '.var_export($r, true));
+				cl('Download request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 
@@ -166,7 +165,7 @@
 			));
 			if ($data === false) {
 				# then raise error
-				$this->message('Settings page request failed, invalid response: '.var_export($r, true));
+				cl('Settings page request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 
@@ -176,14 +175,14 @@
 			preg_match_all('/value\=temp_directory\>\<input\s*style\=\"font\-family\:\s*verdana\;\s*font\-size\:\s*10px\;\"\s*type\=text\s*name\=value\s*onchange\=\"track_changed\(this\)\"\s*size\=20\s*value=\"(.*?)\"\>/m', $data, $m);
 			if (!isset($m[1], $m[1][0])) {
 				# then raise error
-				$this->message('Failed extracting temporary directory.');
+				cl('Failed extracting temporary directory.', VERBOSE_ERROR);
 				return false;
 			}
 
 			$originalpath = $m[1][0];
 			if (!is_dir($originalpath)) {
 				# then raise error
-				$this->message('Extracted temporary directory "'.$originalpath.'" is not a directory.');
+				cl('Extracted temporary directory "'.$originalpath.'" is not a directory.', VERBOSE_ERROR);
 				return false;
 			}
 
@@ -191,14 +190,14 @@
 			$originalpath = realpath($m[1][0]);
 			if (!is_dir($originalpath)) {
 				# then raise error
-				$this->message('Extracted temporary directory "'.$originalpath.'" is not a directory.');
+				cl('Extracted temporary directory "'.$originalpath.'" is not a directory.', VERBOSE_ERROR);
 				return false;
 			}
 
 			# make sure it's long enough
 			if (strlen($originalpath) < 2) {
 				# then raise error
-				$this->message('Extracted temporary directory "'.$originalpath.'" is too short.');
+				cl('Extracted temporary directory "'.$originalpath.'" is too short.', VERBOSE_ERROR);
 				return false;
 			}
 
@@ -209,7 +208,7 @@
 			exec('find '.escapeshellarg($originalpath).' -type f', $o, $r);
 			if ($r !== 0) {
 				# then raise error
-				$this->message('Failed searching incoming '.$originalpath.' folder for files: '.var_export($o, true).' ('.$r.')');
+				cl('Failed searching incoming '.$originalpath.' folder for files: '.var_export($o, true).' ('.$r.')', VERBOSE_ERROR);
 				return false;
 			}
 
@@ -219,7 +218,7 @@
 			$previewpath = PREVIEW_DIR.$this->id.'/';
 			if (!is_dir($previewpath)) {
 				if (!mkdir($previewpath, 0777, true)) {
-					$this->message('Failed creating preview directory: '.$previewpath);
+					cl('Failed creating preview directory: '.$previewpath, VERBOSE_ERROR);
 					return false;
 				}
 			}
@@ -264,7 +263,7 @@
 			exec('find '.escapeshellarg($previewpath).' -type f', $o, $r);
 			if ($r !== 0) {
 				# then raise error
-				$this->message('Failed searching preview folder '.$previewpath.' for files: '.var_export($o, true).' ('.$r.')');
+				cl('Failed searching preview folder '.$previewpath.' for files: '.var_export($o, true).' ('.$r.')', VERBOSE_ERROR);
 				return false;
 			}
 
@@ -303,41 +302,6 @@
 		private function getUrl() {
 			return 'http://'.$this->username.':'.$this->password.'@'.$this->host.':'.$this->port.'/';
 		}
-
-		# to make a message
-		private function message($s, $level='error') {
-			$this->messages[] = array('level' => $level, 'msg' => $s);
-			return false;
-		}
-
-		# to get messages - empties messages and returns them
-		public function messages($levels=false, $mashed=false) {
-
-			$levels = is_array($levels) ? $levels : array('error');
-
-			$tmp = $mashed ? '' : array();
-			$first = true;
-			foreach ($this->messages as $message) {
-				if (in_array($message['level'], $levels)) {
-					if ($mashed) {
-						# not first?
-						if (!$first) {
-							# add separator
-							$tmp .= "\n";
-						}
-
-						$tmp .= $message['msg'];
-						$first = false;
-					} else {
-						$tmp[] = $message;
-					}
-				}
-			}
-
-			$this->messages = [];
-			return $tmp;
-		}
-
 
 		# to get search results
 		public function results() {
@@ -405,7 +369,7 @@
 			if (!count($matches[0])) {
 				# all is well, but there are no results
 				# then raise error
-				$this->message('Request failed, invalid response: '.var_export($data, true));
+				cl('Request failed, invalid response: '.var_export($data, true), VERBOSE_ERROR);
 				return false;
 			}
 
@@ -438,7 +402,7 @@
 					# did it fail?
 					if (!count($m[0])) {
 						# then raise error
-						$this->message('Failed extracting chunks data for row '.$row['id'].', '.$row['name']);
+						cl('Failed extracting chunks data for row '.$row['id'].', '.$row['name'], VERBOSE_ERROR);
 						return false;
 					}
 
@@ -460,7 +424,7 @@
 				# did it fail?
 				if (!count($m[0])) {
 					# then raise error
-					$this->message('Failed extracting detailed info about row '.$row['id'].', '.$row['name']);
+					cl('Failed extracting detailed info about row '.$row['id'].', '.$row['name'], VERBOSE_ERROR);
 					return false;
 				}
 
@@ -511,7 +475,7 @@
 				$options['type'] = ucfirst($options['type']);
 				# still not matching?
 			 	if (!array_key_exists($options['type'], $this->types)) {
-					$this->message('Search request failed, unknown type: '.var_export($search['type'], true));
+					cl('Search request failed, unknown type: '.var_export($search['type'], true), VERBOSE_ERROR);
 					return false;
 				}
 
@@ -524,7 +488,7 @@
 
 			# look for something that indicates a working search
 			if (strpos($r, 'Sending query !!!') === false) {
-				$this->message('Search request failed, unknown type: '.var_export($r, true));
+				cl('Search request failed, unknown type: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 

@@ -1,0 +1,67 @@
+README file
+
+Purpose
+-------
+
+The traditional way to find new content usually consists of doing 
+a single regular search, manually traversing the returned search 
+results, finding something you want, queueing it for download, 
+waiting for it to complete and then enjoying the newly fetched content.
+
+This is all fine and dandy for those spontaneous searches.
+
+And every time you want to check for new content you will 
+have to redo your search.
+
+But what if you don't want to spend time redoing your searches?
+What if you could subscribe on searches?
+
+This is where Autoqueue comes in.
+
+What it does
+------------
+
+Autoqueue communicates directly with your download application, 
+like you do, but automatically.
+
+It carries out user defined searches repeatedly on scheduled 
+and randomized basis, analyzes search results, compares with 
+previous downloads and criterias, queues matching content for 
+download, waits for them to complete and then moves them to 
+selected locations. You can even get a mail when new files 
+has arrived.
+
+Benefits
+--------
+
+* Do searches on times while you're away from the host to 
+  reach sources on other time zones that usually are offline
+  when you are online and vice versa
+
+* Subscribe on content by repeating the searches
+
+* Get files sorted after they have completed
+
+* Get mail reports about fetched files
+
+* Get preview images of content being downloaded
+
+* Does not queue already downloaded content
+
+How it works
+------------
+
+The service is executed by a cronjob.
+
+This service (and the GUI to manage it) communicates with your 
+download application through the HTTP interface supplied by 
+your download application.
+
+Requirements / tested on
+------------------------
+
+	MariaDB (or MySQL)
+	PHP 5.6 / 7.0 with cURL, MySQL/MariaDB
+	ffmpeg (to get previews)
+	nginx (or other web server)
+	MLDonkey (or eMuleXtreme, but support is a bit outdated)

@@ -20,7 +20,6 @@
 		private $c = false;
 		private $host = 'localhost';
 		private $id = 0;
-		private $messages;
 		private $password = '';
 		private $port = 4711;
 		private $ses = false;
@@ -117,7 +116,7 @@
 			))));
 			$r = $this->parseResponse($r); # convert to XML
 			if (!isset($r['status']) || $r['status'] != 'ok') {
-				$this->message('Download request failed, invalid response: '.var_export($r, true));
+				cl('Download request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 			return true;
@@ -142,14 +141,14 @@
 			# a previous session was found
 			if ($this->ses !== false) {
 				# try to contact eMule with the session
-				$this->message('Trying previous session id: '.$this->ses, 'info');
+				cl('Trying previous session id: '.$this->ses, VERBOSE_INFO);
 
 				$r = $this->curl($this->c, array(CURLOPT_URL => $this->url.'?'.http_build_query(array('ses' => $this->ses))));
 				$r = $this->parseResponse($r); # convert to XML
 
 				# if it failed, make session invalid
 				if (!isset($r['status']) || $r['status'] != 'ok') {
-					$this->message('Login with previous session id failed','info');
+					cl('Login with previous session id failed', VERBOSE_INFO);
 					$this->ses = false;
 				}
 			}
@@ -157,20 +156,20 @@
 			# no previous session
 			if ($this->ses === false) {
 
-				$this->message('No previous session, trying to login','info');
+				cl('No previous session, trying to login', VERBOSE_INFO);
 
 				# --- try to login
 				$r = $this->curl($this->c, array(CURLOPT_URL => $this->url.'?'.http_build_query(array('p' => $this->password, 'w' => 'password'))));
 				$r = $this->parseResponse($r); # convert to XML
 
 				if (!isset($r['status']) || $r['status'] != 'ok') {
-					$this->message('Login failed, response was: '.var_export($r, true));
+					cl('Login failed, response was: '.var_export($r, true), VERBOSE_ERROR);
 					return false;
 				}
 
 				$this->ses = $r['ses'];
 
-				$this->message('Session code which will be stored: '.$this->ses, 'info');
+				cl('Session code which will be stored: '.$this->ses, VERBOSE_INFO);
 
 				# if (file_existsis_readable($this->sessionfile)) {
 				file_put_contents($this->sessionfile, $this->ses);
@@ -201,7 +200,7 @@
 				CURLOPT_POST            => false,	# i am sending post data
 				CURLOPT_SSL_VERIFYHOST	=> 0,		# don't verify ssl
 				CURLOPT_SSL_VERIFYPEER	=> false,
-				CURLOPT_VERBOSE			=> false,       # set to true to echo headers
+				CURLOPT_VERBOSE			=> false,   # set to true to echo headers
 			);
 
 			# merge defaults and provided parameters to get the best mix
@@ -213,7 +212,7 @@
 				# could not connect to host?  then get out silently
 				# if (curl_errno($this->c) === 7) return false;
 
-				$this->message('cURL-error: '.curl_error($this->c).' ('.curl_errno($this->c).')');
+				cl('cURL-error: '.curl_error($this->c).' ('.curl_errno($this->c).')', VERBOSE_ERROR);
 				return false;
 			}
 			return $r;
@@ -231,17 +230,11 @@
 			$r = $this->curl($this->c, array(CURLOPT_URL => $this->url.'?'.http_build_query(array('ses' => $this->ses, 'w' => 'search', 'downloads' => strtoupper($filehash)))));
 			$r = $this->parseResponse($r); # convert to XML
 			if (!isset($r['status']) || $r['status'] != 'ok') {
-				$this->message('Download request failed, invalid response: '.var_export($r, true));
+				cl('Download request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 
 			return true;
-		}
-
-		# to make a message
-		private function message($s, $level='error') {
-			$this->messages[] = array('level' => $level, 'msg' => $s);
-			return false;
 		}
 
 		# to extract ed2klist link to an array
@@ -260,7 +253,7 @@
 
 			# incomplete response?
 			if (!isset($fileinfo[2], $fileinfo[3], $fileinfo[4])) {
-				$this->message('Invalid response - ED2k-link is invalid, contents of it: '.var_export($file['ed2klink'], true));
+				cl('Invalid response - ED2k-link is invalid, contents of it: '.var_export($file['ed2klink'], true), VERBOSE_ERROR);
 				return array();
 			}
 
@@ -272,34 +265,6 @@
 				'size' => (float)$fileinfo[3],
 				'type' => strtolower($file['type'])
 			);
-		}
-
-		# to get messages - empties messages and returns them
-		public function messages($levels=false, $mashed=false) {
-
-			$levels = is_array($levels) ? $levels : array('error');
-
-			$tmp = $mashed ? '' : array();
-			$first = true;
-			foreach ($this->messages as $message) {
-				if (in_array($message['level'], $levels)) {
-					if ($mashed) {
-						# not first?
-						if (!$first) {
-							# add separator
-							$tmp .= "\n";
-						}
-
-						$tmp .= $message['msg'];
-						$first = false;
-					} else {
-						$tmp[] = $message;
-					}
-				}
-			}
-
-			$this->messages = [];
-			return $tmp;
 		}
 
 		# to get search results - filter may be min, max, type
@@ -314,7 +279,7 @@
 			$r = $this->curl($this->c, array(CURLOPT_URL => $this->url.'?'.http_build_query(array('ses' => $this->ses, 'w' => 'search', 'sort' => 1, 'sortAsc' => 0))));
 			$r = $this->parseResponse($r); # convert to XML
 			if (!isset($r['status']) || $r['status'] != 'ok') {
-				$this->message('Search results request failed, invalid response: '.var_export($r, true));
+				cl('Search results request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 
@@ -335,7 +300,7 @@
 
 			# if it failed, end here
 			if ($r['status'] != 'ok' || !isset($r['filelist'], $r['filelist']['file'])) {
-				$this->message('Transfers request failed, invalid response: '.var_export($r, true));
+				cl('Transfers request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 
@@ -354,10 +319,10 @@
 			$r = $this->parseResponse($r); # convert to XML
 
 			if (!in_array(strtolower($r['kadstatus']), array('ansluten', 'connected'))) {
-				$this->message('Kad disconnected, trying to connect', 'info');
+				cl('Kad disconnected, trying to connect', VERBOSE_INFO);
 				$r = $this->curl($this->c, array(CURLOPT_URL => $this->url.'?'.http_build_query(array('ses' => $this->ses, 'w' => 'kad', 'c' => 'connect'))));
 			} else {
-				$this->message('Kad connected, nothing needed todo', 'info');
+				cl('Kad connected, nothing needed todo', VERBOSE_INFO);
 			}
 
 			return true;
@@ -395,7 +360,7 @@
 		public function responseToFilelist($r, $listtype='searchresultlist', $filter=false) {
 
 			if (!isset($r['status']) || $r['status'] != 'ok') {
-				$this->message('Response is invalid, cannot convert to file list: '.var_export($r, true));
+				cl('Response is invalid, cannot convert to file list: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 
@@ -412,7 +377,7 @@
 
 						# invalid response?
 						if (!isset($file['ed2klink'])||!isset($file['type'])) {
-							$this->message('Invalid filelist response - no ED2k-link or type, file structure was: '.var_export($file, true));
+							cl('Invalid filelist response - no ED2k-link or type, file structure was: '.var_export($file, true), VERBOSE_ERROR);
 							continue;
 						}
 
@@ -422,11 +387,11 @@
 						# no file info found?
 						if (!count($fileinfo)) {
 							# logmessage('Invalid response - ED2k-link is invalid, contents of it: '.$file['ed2klink'], $link);
-							$this->message('Invalid response - ED2k-link is invalid, contents of it: '.var_export($file['ed2klink'], true));
+							cl('Invalid response - ED2k-link is invalid, contents of it: '.var_export($file['ed2klink'], true), VERBOSE_ERROR);
 							continue;
 						}
 
-						$this->message('Checking "'.$fileinfo['name'].'" ('.$fileinfo['size'].' b, '.$fileinfo['ed2k'].')', 'debug');
+						cl('Checking "'.$fileinfo['name'].'" ('.$fileinfo['size'].' b, '.$fileinfo['ed2k'].')', VERBOSE_DEBUG);
 
 						# is filter enabled?
 						if (is_array($filter)) {
@@ -500,7 +465,7 @@
 				$search['type'] = ucfirst($search['type']);
 				# still not matching?
 			 	if (!array_key_exists($search['type'], $this->types)) {
-					$this->message('Search request failed, unknown type: '.var_export($search['type'], true));
+					cl('Search request failed, unknown type: '.var_export($search['type'], true), VERBOSE_ERROR);
 					return false;
 				}
 			}
@@ -509,7 +474,7 @@
 			$r = $this->parseResponse($r); # convert to XML
 
 			if (!isset($r['status']) || $r['status'] != 'ok') {
-				$this->message('Search request failed, invalid response: '.var_export($r, true));
+				cl('Search request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
 				return false;
 			}
 			return $this->responseToFilelist($r, 'searchresultlist', $filter);
