@@ -13,6 +13,7 @@
 	# 2015-08-21 11:31:09 - cleanup
 	# 2017-09-10 22:46:00 - adding id
 	# 2017-09-12 22:18:00 - dropping project name in file
+	# 2017-09-19 19:25:00 - editing message handling
 
 	class eMuleXtremeModPump {
 

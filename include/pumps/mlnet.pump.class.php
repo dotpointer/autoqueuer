@@ -20,6 +20,8 @@
 	# 2017-09-12 22:10:00 - dropping project name in file
 	# 2017-09-13 00:08:00 - adding chunk weights export
 	# 2017-09-13 01:42:00 - updating cancel, putting it into production
+	# 2017-09-19 19:25:00 - editing message handling
+	# 2017-09-19 22:31:00 - using stderr for diagnostic output
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -239,7 +241,7 @@
 					$previewtime = filemtime($normalthumbpath);
 					# is the thumb time before the file time
 					if ($previewtime < $modifytime) {
-						//fwrite(STDOUT, 'Thumbnail outdated [T: '.date('Y-m-d H:i:s', $previewtime).' / F: '.date('Y-m-d H:i:s', $modifytime).'] on '.$normalthumbpath."\n");
+						//fwrite(STDERR, 'Thumbnail outdated [T: '.date('Y-m-d H:i:s', $previewtime).' / F: '.date('Y-m-d H:i:s', $modifytime).'] on '.$normalthumbpath."\n");
 						# then remove the thumbnail
 						unlink($normalthumbpath);
 					}
@@ -290,7 +292,7 @@
 
 				# was not found, wants to delete it then
 				if (!$found) {
-					# fwrite(STDOUT, 'Removing leftover thumbnail: '.$previewfile."\n");
+					# fwrite(STDERR, 'Removing leftover thumbnail: '.$previewfile."\n");
 					unlink($previewfile);
 				}
 			}

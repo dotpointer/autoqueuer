@@ -34,6 +34,7 @@
 	2017-09-10 23:46:00 - preview added
 	2017-09-12 21:53:00 - dropping project name in file
 	2017-09-19 19:25:00 - editing message handling
+	2017-09-19 22:31:00 - using stderr for diagnostic output
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -119,9 +120,9 @@ foreach ($arguments as $k => $v) {
 # check if this is running, if process id
 exec('ps a|grep -v grep|grep "'.basename(__FILE__).'"|grep -v \'^ *'.getmypid().'\'', $output, $retval);
 if (count($output)) {
-	cl('Already running: '.var_export($output, true), VERBOSE_INFO);
-	fwrite(STDOUT, messages(true));
-	die();
+	cl('Already running: '.var_export($output, true), VERBOSE_ERROR);
+	fwrite(STDERR, messages(true));
+	die(1);
 }
 
 # make sure the mounting root path exists - here we mount all samba shares and so on

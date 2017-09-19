@@ -203,7 +203,7 @@
 	$link = db_connect();
 	if (!$link) {
 		cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-		fwrite(STDOUT, messages(true));
+		fwrite(STDERR, messages(true));
 		die(1);
 	}
 
@@ -255,7 +255,7 @@
 	foreach ($result as $clientpump) {
 		if (!isset($clientpumpclasses[$clientpump['type']])) {
 			cl('Missing class for '.$clientpump['type'], VERBOSE_ERROR);
-			fwrite(STDOUT, messages(true));
+			fwrite(STDERR, messages(true));
 			die(1);
 		}
 
@@ -427,7 +427,7 @@
 			# die silently
 			if(!pingtest(EMULEHOST)) {
 				cl('eMule host '.EMULEHOST.' is offline'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_INFO);
-				fwrite(STDOUT, messages(true));
+				fwrite(STDERR, messages(true));
 				die(1);
 			}
 		}
@@ -456,7 +456,7 @@
 		$f = fopen($file, 'r');
 		if (!$f) {
 			cl('Failed opening file: '.$file."\n", VERBOSE_ERROR);
-			fwrite(STDOUT, messages(true));
+			fwrite(STDERR, messages(true));
 			die(1);
 		}
 
@@ -471,7 +471,7 @@
 				fclose($f);
 				# end here
 				cl('Failed reading from file: '.$c, VERBOSE_ERROR);
-				fwrite(STDOUT, messages(true));
+				fwrite(STDERR, messages(true));
 				die(1);
 			}
 
@@ -718,7 +718,7 @@
 		$collections = db_query($link, $sql);
 		if ($collections === false) {
 			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			fwrite(STDOUT, messages(true));
+			fwrite(STDERR, messages(true));
 			die(1);
 		}
 
@@ -840,7 +840,7 @@
 				#$collections = db_query($link, $sql);
 				#if ($collections === false) {
 				#	cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-				#	fwrite(STDOUT, messages(true));
+				#	fwrite(STDERR, messages(true));
 				#	die(1);
 				#}
 
@@ -882,7 +882,7 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					fwrite(STDOUT, messages(true));
+					fwrite(STDERR, messages(true));
 					die(1);
 				}
 
@@ -908,7 +908,7 @@
 				$result = db_query($link, $sql);
 				if ($result === false) {
 					cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-					fwrite(STDOUT, messages(true));
+					fwrite(STDERR, messages(true));
 					die(1);
 				}
 			}
@@ -1577,7 +1577,7 @@
 			# did it fail?
 			if ($tmp === false || !is_array($tmp)) {
 				cl('Failed requesting search results from '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].', '.__FILE__.':'.__LINE__.').', VERBOSE_ERROR);
-				fwrite(STDOUT, messages(true));
+				fwrite(STDERR, messages(true));
 				die(1);
 			}
 
