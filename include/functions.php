@@ -61,6 +61,7 @@
 	2017-09-12 22:01:00 - renaming project from emulehelper to autoqueuer
 	2017-09-12 22:46:00 - renaming preview path
 	2017-09-19 19:25:00 - editing message handling
+	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -2277,5 +2278,131 @@
 		$_SESSION['translation_index'] = $translations['current']['index'];
 	}
 
+	# --- pump class helpers
 
+	# to get unfinished files from db based on pump id
+	function pump_get_unfinished($id_clientpumps, $renewableonly=false) {
+		global $link;
+
+		$sql = '
+				SELECT
+					*
+				FROM
+					files_unfinished
+				WHERE
+					id_clientpumps="'.dbres($link, $id_clientpumps).'"
+					'.($renewableonly ? ' AND renewable="1" ' : '').'
+				';
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
+		$result = db_query($link, $sql);
+		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
+			fwrite(STDERR, messages(true));
+			die(1);
+		}
+		return $result;
+	}
+
+	# to delete unfinished files from db based on pump id and file ids
+	function pump_delete_unfinished($id_clientpumps, $id_files) {
+		global $link;
+
+		foreach ($id_files as $k => $v) {
+			$id_files[$k] = '"'.dbres($link, $v).'"';
+		}
+
+		if (!count($id_files)) {
+			return;
+		}
+
+		$sql = '
+				DELETE FROM
+					files_unfinished
+				WHERE
+					id IN ('.implode($id_files, ',').') AND
+					id_clientpumps="'.dbres($link, $id_clientpumps).'"
+				';
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
+		$result = db_query($link, $sql);
+		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
+			fwrite(STDERR, messages(true));
+			die(1);
+		}
+	}
+
+	# to tell that a file is not renewable
+	function pump_update_renewed_file($id_clientpumps, $id_files, $filesize, $filemodified) {
+		global $link;
+
+		$sql = '
+				UPDATE
+					files_unfinished
+				SET
+					renewable=0,
+					size="'.dbres($link, $filesize).'",
+					modified="'.dbres($link, $filemodified).'"
+				WHERE
+					id="'.dbres($link, $id_files).'" AND
+					id_clientpumps="'.dbres($link, $id_clientpumps).'"
+				';
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
+		$result = db_query($link, $sql);
+		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
+			fwrite(STDERR, messages(true));
+			die(1);
+		}
+	}
+
+	# to update db for a pump, takes pump id and a file array with id, name, size and modified date
+	function pump_update_unfinished($id_clientpumps, $files) {
+		global $link;
+		foreach ($files as $file) {
+			# existing file
+			if (isset($file['id'])) {
+				# update it
+				$sql = '
+					UPDATE
+						files_unfinished
+					SET
+						name="'.dbres($link, $file['name']).'",
+						size="'.dbres($link, $file['size']).'",
+						modified="'.dbres($link, $file['modified']).'",
+						renewable=1
+					WHERE
+						id="'.dbres($link, $file['id']).'" AND
+						id_clientpumps="'.dbres($link, $id_clientpumps).'"
+					';
+			# or new file
+			} else {
+				# insert it
+				$sql = '
+					INSERT INTO
+						files_unfinished
+					(
+						id_clientpumps,
+						name,
+						size,
+						modified,
+						renewable
+						)
+					VALUES(
+						"'.dbres($link, $id_clientpumps).'",
+						"'.dbres($link, $file['name']).'",
+						"'.dbres($link, $file['size']).'",
+						"'.dbres($link, $file['modified']).'",
+						1
+					)
+					';
+			}
+			cl('SQL: '.$sql, VERBOSE_DEBUG);
+			$result = db_query($link, $sql);
+			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
+				fwrite(STDERR, messages(true));
+				die(1);
+			}
+		}
+	}
 ?>

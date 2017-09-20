@@ -35,6 +35,7 @@
 	2017-09-12 21:53:00 - dropping project name in file
 	2017-09-19 19:25:00 - editing message handling
 	2017-09-19 22:31:00 - using stderr for diagnostic output
+	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -51,7 +52,7 @@ $force = false;
 $unmount = true;
 
 # get arguments
-$arguments = getopt("c:dfhj:puv::", array(
+$arguments = getopt("c:dfhj:pPuv::", array(
 	'download::',
 	'dryrun',
 	'dry-run',
@@ -64,6 +65,7 @@ $arguments = getopt("c:dfhj:puv::", array(
 	'list::',
 	'move',
 	'preview',
+	'previewscan',
 	'results',
 	'scan::',
 	'search::',
@@ -913,6 +915,16 @@ foreach ($arguments as $k => $v) {
 			foreach ($clientpumps as $pumpname => $pump) {
 				if (method_exists($pump['pump'], 'generatePreviews')) {
 					$pump['pump']->generatePreviews();
+				}
+			}
+			break;
+
+		case 'P':
+		case 'previewscan':
+			cl('Action: scan for previewable files', VERBOSE_DEBUG);
+			foreach ($clientpumps as $pumpname => $pump) {
+				if (method_exists($pump['pump'], 'previewScanUnfinished')) {
+					$pump['pump']->previewScanUnfinished();
 				}
 			}
 			break;

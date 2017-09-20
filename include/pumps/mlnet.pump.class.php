@@ -22,6 +22,7 @@
 	# 2017-09-13 01:42:00 - updating cancel, putting it into production
 	# 2017-09-19 19:25:00 - editing message handling
 	# 2017-09-19 22:31:00 - using stderr for diagnostic output
+	# 2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -158,8 +159,7 @@
 			return true;
 		}
 
-		# to generate preview files
-		public function generatePreviews() {
+		private function getUnfinishedFiles() {
 
 			# get settings page with file paths
 			$data = $this->curl(array(
@@ -173,7 +173,7 @@
 
 			# extract temporary directory path
 			# value=temp_directory><input style="font-family: verdana; font-size: 10px;"
-            # type=text name=value onchange="track_changed(this)" size=20 value="/examplehost/download/unfinished"></td></form>
+            # type=text name=value onchange="track_changed(this)" size=20 value="/temporary/folder/path"></td></form>
 			preg_match_all('/value\=temp_directory\>\<input\s*style\=\"font\-family\:\s*verdana\;\s*font\-size\:\s*10px\;\"\s*type\=text\s*name\=value\s*onchange\=\"track_changed\(this\)\"\s*size\=20\s*value=\"(.*?)\"\>/m', $data, $m);
 			if (!isset($m[1], $m[1][0])) {
 				# then raise error
@@ -214,7 +214,108 @@
 				return false;
 			}
 
-			$originalfiles = $o;
+			$files = array();
+
+			# filter unwanted files
+			foreach ($o as $file) {
+				if (strpos(basename($file), 'urn_ed2k') !== 0) {
+					continue;
+				}
+
+				$files[] = $file;
+			}
+
+			return $files;
+		}
+
+		public function previewScanUnfinished() {
+			# get file list
+			$originalfiles = $this->getUnfinishedFiles();
+			if ($originalfiles === false) {
+				return false;
+			}
+
+			# get db files
+			$db_files =  pump_get_unfinished($this->id);
+
+			# delete files only in db
+			$db_files_kept = array();
+			$db_id_files_remove = array();
+			foreach ($db_files as $db_file) {
+				$found = false;
+				foreach ($originalfiles as $file) {
+					if (basename($file) === $db_file['name']) {
+						$found = true;
+						break;
+					}
+				}
+				if (!$found) {
+					$db_id_files_remove[] = $db_file['id'];
+				} else {
+					$db_files_kept[] = $db_file;
+				}
+			}
+
+			if (count($db_id_files_remove)) {
+				pump_delete_unfinished($this->id, $db_id_files_remove);
+			}
+
+			$db_files = $db_files_kept;
+
+			$db_files_update = array();
+
+			# walk files from dir
+			foreach ($originalfiles as $file) {
+
+				# walk db files
+				$found = false;
+				$filename = basename($file);
+				$filesize = filesize($file);
+				$filemodified = date('Y-m-d H:i:s', filemtime($file));
+
+				foreach ($db_files as $db_file) {
+
+					# existing file
+					if ($db_file['name'] === $filename) {
+						$found = true;
+						# existing file size or modification date differ
+						if ((int)$filesize !== (int)$db_file['size'] || $filemodified !== $db_file['modified']) {
+							# prepare for update
+							$db_files_update[] = array(
+								'id' => $db_file['id'],
+								'name' => $filename,
+								'size' => $filesize,
+								'modified' => $filemodified
+							);
+
+						}
+					}
+				}
+
+				if (!$found) {
+					# new file, prepare for insert
+					$db_files_update[] = array(
+						'name' => $filename,
+						'size' => $filesize,
+						'modified' => $filemodified
+					);
+				}
+			}
+
+			# was there files to update
+			if (count($db_files_update)) {
+				# then call for update in db
+				pump_update_unfinished($this->id, $db_files_update);
+			}
+		}
+
+		# to generate preview files
+		public function generatePreviews() {
+
+			$originalfiles = $this->getUnfinishedFiles();
+			if ($originalfiles === false) {
+				return false;
+			}
 
 			# ends with slash
 			$previewpath = PREVIEW_DIR.$this->id.'/';
@@ -225,10 +326,21 @@
 				}
 			}
 
+			$db_files =  pump_get_unfinished($this->id, true);
+
 			# walk files
 			foreach ($originalfiles as $origfile) {
 
-				if (strpos(basename($origfile), 'urn_ed2k') !== 0) {
+				# must be a renewable file, otherwise skip it
+				$renewable = false;
+				foreach ($db_files as $db_file) {
+					if ($db_file['name'] === basename($origfile)) {
+						$renewable = true;
+						break;
+					}
+				}
+
+				if (!$renewable) {
 					continue;
 				}
 
@@ -237,18 +349,18 @@
 				$normalthumbpath = $previewpath.$ed2k.'.preview.jpg';
 
 				# thumb exists and we got modify time for it
-				if (file_exists($normalthumbpath) && $modifytime !== false) {
-					$previewtime = filemtime($normalthumbpath);
+				#if (file_exists($normalthumbpath) && $modifytime !== false) {
+				#	$previewtime = filemtime($normalthumbpath);
 					# is the thumb time before the file time
-					if ($previewtime < $modifytime) {
+				#	if ($previewtime < $modifytime) {
 						//fwrite(STDERR, 'Thumbnail outdated [T: '.date('Y-m-d H:i:s', $previewtime).' / F: '.date('Y-m-d H:i:s', $modifytime).'] on '.$normalthumbpath."\n");
 						# then remove the thumbnail
 						unlink($normalthumbpath);
-					}
-				}
+				#	}
+				#}
 
 				# no main thumb?
-				if (!file_exists($normalthumbpath)) {
+				#if (!file_exists($normalthumbpath)) {
 					unset($c, $r);
 					# run video sheet to make it
 					$c = 'php '.DPTOOLS_DIR.'videosheet --filename='.escapeshellarg($origfile).' --format=jpeg --number=4 --column=2 --quality=75 --thumbsize=512,-1 --gridonly --skipnoduration --output='.escapeshellarg($normalthumbpath);
@@ -258,7 +370,10 @@
 						# if it succeeded, set the date of the file to the same as the file
 						touch($normalthumbpath, $modifytime);
 					}
-				}
+				#}
+
+				# tell that this file has been renewed now
+				pump_update_renewed_file($this->id, $db_file['id'], filesize($origfile), date('Y-m-d H:i:s', $modifytime));
 			}
 
 			# remove thumbnails without parent
