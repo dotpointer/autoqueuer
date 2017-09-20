@@ -62,6 +62,7 @@
 	2017-09-12 22:46:00 - renaming preview path
 	2017-09-19 19:25:00 - editing message handling
 	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
+	2017-09-21 00:44:00 - adding sql for unfinished files
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -70,6 +71,7 @@
 	CREATE TABLE clientpumps(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, username TINYTEXT NOT NULL, password TINYTEXT NOT NULL, host TINYTEXT NOT NULL, port INT NOT NULL, `type` TINYTEXT NOT NULL, status int not null default 1, searched datetime not null default '0000-00-00 00:00:00', searches BIGINT NOT NULL DEFAULT 0, queuedfiles BIGINT NOT NULL DEFAULT 0, path_incoming TEXT NOT NULL DEFAULT '', updated DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00', created DATETIME NOT NULL);
 	CREATE TABLE collections(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, host TEXT NOT NULL, hostpath TEXT NOT NULL, username TEXT NOT NULL, password TEXT NOT NULL, rootpath TEXT NOT NULL,  enabled int not null default 1, updated DATETIME NOT NULL, created DATETIME NOT NULL);
 	CREATE TABLE files (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_collections bigint not null default 0, id_searches INT NOT NULL DEFAULT 0, name TINYTEXT NOT NULL, path TINYTEXT NOT NULL, ed2khash VARCHAR(32) NOT NULL, size BIGINT NOT NULL DEFAULT 0, verified INT NOT NULL DEFAULT 1, existing INT NOT NULL DEFAULT 0, fakecheck INT NOT NULL, moved INT NOT NULL DEFAULT 0, modified DATETIME NOT NULL, created DATETIME NOT NULL, updated DATETIME NOT NULL DEFAULT 0);
+	CREATE TABLE files_unfinished (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_clientpumps BIGINT NOT NULL, name TINYTEXT NOT NULL, size BIGINT NOT NULL, renewable INT NOT NULL DEFAULT 0, modified DATETIME NOT NULL, created DATETIME NOT NULL);
 	CREATE TABLE logmessages (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_logmessages_parent BIGINT NOT NULL DEFAULT  0, id_files INT NOT NULL DEFAULT 0, type INT NOT NULL DEFAULT 0, message TEXT NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
 	CREATE TABLE moverules(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, regex TEXT NOT NULL, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, matches INT NOT NULL DEFAULT 0,  cmdaftermove TINYTEXT NOT NULL, filessincelastmail INT NOT NULL DEFAULT 0, status INT NOT NULL DEFAULT 1);
 	CREATE TABLE parameters(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, parameter TINYTEXT NOT NULL, value TEXT NOT NULL);
