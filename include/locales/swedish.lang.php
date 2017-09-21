@@ -5,6 +5,7 @@
 # 2016-03-14 23:30:04
 # 2017-09-10 23:43:00 - preview added
 # 2017-09-13 01:41:00 - cancel added
+# 2017-09-22 00:32:00 - dialog texts
 
 # store this into translations
 $translations['languages'][] = array(
@@ -14,6 +15,8 @@ $translations['languages'][] = array(
 	'content' => array(
 	),
 	'content_logged_in' => array(
+		array('The file will be allowed to redownload if it re-appears.', 'Filen kommer tillåtas för omnerladdning om den dyker upp igen.'),
+		array('Cancel/Redownload', 'Avbryt/Omladda'),
 		array('approximately', 'cirka'),
 		array('ago', 'sedan'),
 		array('years','år'),

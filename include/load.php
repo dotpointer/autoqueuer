@@ -19,6 +19,7 @@
 	# 2017-09-13 02:12:00 - adding ed2k to transfer list, moving progress bars
 	# 2017-09-21 23:12:00 - adding last modified to transfers
 	# 2017-09-22 00:08:00 - adding redownload
+	# 2017-09-22 00:32:00 - clarifying cancel dialogs
 
 	start_translations();
 ?>
@@ -1401,14 +1402,14 @@ var	e = {
 												.prop('id_clientpumps', data.data[i].id_clientpumps)
 												.prop('name', data.data[i].name)
 												.click(function(event) {
-														// var row = $(this).parents('tr:first');
+														var row = $(this).parents('tr:first');
 														event.preventDefault();
 
 														if ($(this).prop('locked')) {
 															return false;
 														}
 
-														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?')) {
+														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?' + '\n\n' + e.t('The file will be allowed to redownload if it re-appears.'))) {
 															return false;
 														}
 
@@ -1418,9 +1419,9 @@ var	e = {
 															if (!e.verify_response(data)) {
 																return false;
 															}
-															// row.remove(); // not sure if it's trustable that
+															row.remove(); // not sure if it's trustable that
 															// pump does not reuse it's ids when items are removed
-															e.reload_page();
+															// e.reload_page();
 														}));
 
 														return false;
