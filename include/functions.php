@@ -63,6 +63,7 @@
 	2017-09-19 19:25:00 - editing message handling
 	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 	2017-09-21 00:44:00 - adding sql for unfinished files
+	2017-09-22 00:08:00 - adding redownload
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -70,7 +71,7 @@
 
 	CREATE TABLE clientpumps(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, username TINYTEXT NOT NULL, password TINYTEXT NOT NULL, host TINYTEXT NOT NULL, port INT NOT NULL, `type` TINYTEXT NOT NULL, status int not null default 1, searched datetime not null default '0000-00-00 00:00:00', searches BIGINT NOT NULL DEFAULT 0, queuedfiles BIGINT NOT NULL DEFAULT 0, path_incoming TEXT NOT NULL DEFAULT '', updated DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00', created DATETIME NOT NULL);
 	CREATE TABLE collections(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, host TEXT NOT NULL, hostpath TEXT NOT NULL, username TEXT NOT NULL, password TEXT NOT NULL, rootpath TEXT NOT NULL,  enabled int not null default 1, updated DATETIME NOT NULL, created DATETIME NOT NULL);
-	CREATE TABLE files (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_collections bigint not null default 0, id_searches INT NOT NULL DEFAULT 0, name TINYTEXT NOT NULL, path TINYTEXT NOT NULL, ed2khash VARCHAR(32) NOT NULL, size BIGINT NOT NULL DEFAULT 0, verified INT NOT NULL DEFAULT 1, existing INT NOT NULL DEFAULT 0, fakecheck INT NOT NULL, moved INT NOT NULL DEFAULT 0, modified DATETIME NOT NULL, created DATETIME NOT NULL, updated DATETIME NOT NULL DEFAULT 0);
+	CREATE TABLE files (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_collections bigint not null default 0, id_searches INT NOT NULL DEFAULT 0, name TINYTEXT NOT NULL, path TINYTEXT NOT NULL, ed2khash VARCHAR(32) NOT NULL, size BIGINT NOT NULL DEFAULT 0, verified INT NOT NULL DEFAULT 1, existing INT NOT NULL DEFAULT 0, fakecheck INT NOT NULL, moved INT NOT NULL DEFAULT 0, fakecheck int not null default 0, redownload int not null default 0, modified DATETIME NOT NULL, created DATETIME NOT NULL, updated DATETIME NOT NULL DEFAULT 0);
 	CREATE TABLE files_unfinished (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_clientpumps BIGINT NOT NULL, name TINYTEXT NOT NULL, size BIGINT NOT NULL, renewable INT NOT NULL DEFAULT 0, modified DATETIME NOT NULL, created DATETIME NOT NULL);
 	CREATE TABLE logmessages (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_logmessages_parent BIGINT NOT NULL DEFAULT  0, id_files INT NOT NULL DEFAULT 0, type INT NOT NULL DEFAULT 0, message TEXT NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
 	CREATE TABLE moverules(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, regex TEXT NOT NULL, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, matches INT NOT NULL DEFAULT 0,  cmdaftermove TINYTEXT NOT NULL, filessincelastmail INT NOT NULL DEFAULT 0, status INT NOT NULL DEFAULT 1);
@@ -125,11 +126,13 @@
 	define('LOGMESSAGE_TYPE_DOWNLOAD_REQUESTED', 11);
 	define('LOGMESSAGE_TYPE_INDEXED_COLLECTION', 12);
 	define('LOGMESSAGE_TYPE_EMAIL_SENT',13); # when an email is dispatched
+	define('LOGMESSAGE_TYPE_REDOWNLOAD_REQUESTED', 14); # download again, if nonexisting
 	define('LOGMESSAGE_TYPE_ERROR_MYSQL', -1);
 
 	$logmessage_type_descriptions = array(
 		LOGMESSAGE_TYPE_BITRATE_SAMPLERATE_CHANGE => 'Bitrate- eller samplerate-förändring',
 		LOGMESSAGE_TYPE_DOWNLOAD_REQUESTED => 'Download is requested.',
+		LOGMESSAGE_TYPE_REDOWNLOAD_REQUESTED => 'Redownload is requested.',
 		LOGMESSAGE_TYPE_ED2K_REHASH => 'ED2K hash change',
 		LOGMESSAGE_TYPE_EMAIL_SENT => 'Email sent.',
 		LOGMESSAGE_TYPE_ERROR_MYSQL => 'MySQL database error',
@@ -145,6 +148,7 @@
 	$logmessage_type_descriptions_short = array(
 		LOGMESSAGE_TYPE_BITRATE_SAMPLERATE_CHANGE => 'Bitrate change',
 		LOGMESSAGE_TYPE_DOWNLOAD_REQUESTED => 'Downloading.',
+		LOGMESSAGE_TYPE_REDOWNLOAD_REQUESTED => 'Redownloading.',
 		LOGMESSAGE_TYPE_ED2K_REHASH => 'ED2K',
 		LOGMESSAGE_TYPE_EMAIL_SENT => 'E-mail sent',
 		LOGMESSAGE_TYPE_ERROR_MYSQL => 'MySQL-error',
@@ -1724,7 +1728,16 @@
 				cl('Search words match', VERBOSE_DEBUG);
 
 				# check for previous downloads and existence using name and filesize
-				$sql = 'SELECT * FROM files WHERE name="'.dbres($link, $filename).'" AND size="'.dbres($link, $filesize).'"';
+				$sql = '
+					SELECT
+						*
+					FROM
+						files
+					WHERE
+						name="'.dbres($link, $filename).'" AND
+						size="'.dbres($link, $filesize).'" AND
+						redownload=0
+					';
 				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 				$result = db_query($link, $sql);
 				if ($result === false) {
@@ -1738,7 +1751,14 @@
 				}
 
 				# check for previous downloads and existence using ed2k-hash
-				$sql = 'SELECT * FROM files WHERE UPPER(ed2khash)="'.dbres($link, $filehash).'"';
+				$sql = '
+					SELECT
+						*
+					FROM
+						files
+					WHERE
+						UPPER(ed2khash)="'.dbres($link, $filehash).'"
+					';
 				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 				$result = db_query($link, $sql);
 				if ($result === false) {
@@ -1746,26 +1766,67 @@
 					fwrite(STDERR, messages(true));
 					die(1);
 				}
+
+;;;;				$redownload_id=false;
 				if (count($result) > 0) {
-					cl('Skipping, file downloaded before, detected by ed2khash', VERBOSE_DEBUG);
-					continue 2;
+
+;;;;					# walk the results
+					foreach ($result as $foundfile) {
+						# is redownload enabled here and file does not exist?
+						if (
+							(int)$foundfile['redownload'] === 1
+							&&
+							(int)$foundfile['existing'] === 0
+						) {
+							# then take this id
+							$redownload_id = $foundfile['id'];
+							break;
+						}
+
+;;;;;;;					}
+
+;;;;;					if ($redownload_id === false) {
+						cl('Skipping, file downloaded before, detected by ed2khash', VERBOSE_DEBUG);
+						continue 2;
+					}
 				}
 
-				cl('File has not been downloaded before', VERBOSE_DEBUG);
+				# file has been downloaded before
+				if ($redownload_id === false) {
+					cl('File has not been downloaded before', VERBOSE_DEBUG);
 
-				# store file as downloaded (or at least tried to...)
-				$insert_update = array(
-					'created'			=> date('Y-m-d H:i:s'),
-					'ed2khash'			=> $filehash,
-					'existing'			=> 0, # not yet
-					'id_clientpumps'	=> $clientpumps[ $file['pumpname'] ]['data']['id'],
-					'id_collections'	=> FILES_ID_COLLECTIONS_DOWNLOAD, # downloads,
-					'id_searches'		=> $search['id'],
-					'name'				=> $filename,
-					'size'				=> $filesize,
-					# path?
-					'verified'			=> 0
-				);
+					# store file as downloaded (or at least tried to...)
+					$insert_update = array(
+						'created'			=> date('Y-m-d H:i:s'),
+						'ed2khash'			=> $filehash,
+						'existing'			=> 0, # not yet
+						'id_clientpumps'	=> $clientpumps[ $file['pumpname'] ]['data']['id'],
+						'id_collections'	=> FILES_ID_COLLECTIONS_DOWNLOAD, # downloads,
+						'id_searches'		=> $search['id'],
+						'name'				=> $filename,
+						'redownload'		=> 0,
+						'size'				=> $filesize,
+						# path?
+						'verified'			=> 0
+					);
+				# file has been downloaded before
+				} else {
+					cl('File has been downloaded before, but redownloading allowed', VERBOSE_DEBUG);
+					# store file as downloaded (or at least tried to...)
+					$insert_update = array(
+						'updated'			=> date('Y-m-d H:i:s'),
+						# 'ed2khash'			=> $filehash,
+						'existing'			=> 0, # not yet
+						'id_clientpumps'	=> $clientpumps[ $file['pumpname'] ]['data']['id'],
+						'id_collections'	=> FILES_ID_COLLECTIONS_DOWNLOAD, # downloads,
+						'id_searches'		=> $search['id'],
+						'name'				=> $filename,
+						'size'				=> $filesize,
+						# path?
+						'verified'			=> 0,
+						'redownload'		=> 0
+					);
+				}
 
 
 				# request download
@@ -1781,8 +1842,16 @@
 				$queued_for_download++;
 
 				cl('Storing file in database', VERBOSE_DEBUG);
-				$insert_update = dbpia($link, $insert_update);
-				$sql = 'INSERT INTO files ('.implode(',', array_keys($insert_update)).') VALUES('.implode(',', $insert_update).')';
+
+;;;;				# file has not been downloaded before
+				if ($redownload_id === false) {
+					$insert_update = dbpia($link, $insert_update);
+					$sql = 'INSERT INTO files ('.implode(',', array_keys($insert_update)).') VALUES('.implode(',', $insert_update).')';
+				# file has been downloaded before
+				} else {
+					$insert_update = dbpua($link, $insert_update);
+					$sql = 'UPDATE files SET '.implode(',', $insert_update).' WHERE id="'.$redownload_id.'"';
+				}
 				cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
 				$result = db_query($link, $sql);
 				if ($result === false) {
@@ -1791,19 +1860,37 @@
 					die(1);
 				}
 
-				# new file found - make a log message about it
-				logmessage(
-					$link,
-					LOGMESSAGE_TYPE_DOWNLOAD_REQUESTED,
-					array(
-						'ed2khash' => $filehash,
-						'id_searches' => $search['id'],
-						'name' => $filename,
-						'size' => $filesize
-					),
-					false,
-					db_insert_id($link)
-				);
+				if ($redownload_id === false) {
+					# new file found - make a log message about it
+					logmessage(
+						$link,
+						LOGMESSAGE_TYPE_DOWNLOAD_REQUESTED,
+						array(
+							'ed2khash' => $filehash,
+							'id_searches' => $search['id'],
+							'name' => $filename,
+							'size' => $filesize
+						),
+						false,
+						db_insert_id($link)
+					);
+				} else {
+					# existing file found with redownload enabled - make a log message about it
+					logmessage(
+						$link,
+						LOGMESSAGE_TYPE_REDOWNLOAD_REQUESTED,
+						array(
+							'id_files' => $redownload_id,
+							'ed2khash' => $filehash,
+							'id_searches' => $search['id'],
+							'name' => $filename,
+							'size' => $filesize
+						),
+						false,
+						db_insert_id($link)
+					);
+
+;;;;				}
 
 				# update the search counters
 				$sql = 'UPDATE searches SET queuedfiles=queuedfiles+1 WHERE id="'.$search['id'].'"';

@@ -18,6 +18,7 @@
 	# 2017-09-13 01:43:00 - adding cancel
 	# 2017-09-13 02:12:00 - adding ed2k to transfer list, moving progress bars
 	# 2017-09-21 23:12:00 - adding last modified to transfers
+	# 2017-09-22 00:08:00 - adding redownload
 
 	start_translations();
 ?>
@@ -1347,43 +1348,87 @@ var	e = {
 								{inner_html: data.data[i].sizecompleted, classes: "unimportant"},
 								data.data[i].speed,
 								{inner_html: data.data[i].downstate, classes: "unimportant"},
-								data.data[i].actions.indexOf('cancel') !== -1
-									?
-									$('<a/>')
-										.attr({
-											href: '#'
-										})
-										.prop('id', data.data[i].id)
-										.prop('id_clientpumps', data.data[i].id_clientpumps)
-										.prop('name', data.data[i].name)
-										.click(function(event) {
-												// var row = $(this).parents('tr:first');
-												event.preventDefault();
+								$('<div/>')
+									.append(
+										data.data[i].actions.indexOf('cancel') !== -1
+											?
+											$('<a/>')
+												.attr({
+													href: '#'
+												})
+												.prop('id', data.data[i].id)
+												.prop('id_clientpumps', data.data[i].id_clientpumps)
+												.prop('name', data.data[i].name)
+												.click(function(event) {
+														// var row = $(this).parents('tr:first');
+														event.preventDefault();
 
-												if ($(this).prop('locked')) {
-													return false;
-												}
+														if ($(this).prop('locked')) {
+															return false;
+														}
 
-												if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?')) {
-													return false;
-												}
+														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?')) {
+															return false;
+														}
 
-												$(this).prop('locked', true);
+														$(this).prop('locked', true);
 
-												e.requests.push($.getJSON('?format=json&action=cancel&id_clientpumps=' + $(this).prop('id_clientpumps') + '&id=' + $(this).prop('id') , function(data){
-													if (!e.verify_response(data)) {
+														e.requests.push($.getJSON('?format=json&action=cancel&id_clientpumps=' + $(this).prop('id_clientpumps') + '&id=' + $(this).prop('id') , function(data){
+															if (!e.verify_response(data)) {
+																return false;
+															}
+															// row.remove(); // not sure if it's trustable that
+															// pump does not reuse it's ids when items are removed
+															e.reload_page();
+														}));
+
 														return false;
-													}
-													// row.remove(); // not sure if it's trustable that
-													// pump does not reuse it's ids when items are removed
-													e.reload_page();
-												}));
+													})
+												.text(e.t('Cancel'))
+											:
+											''
+									)
+									.append(data.data[i].actions.indexOf('cancel') !== -1 ? '<br/>' : '')
+									.append(
+										data.data[i].actions.indexOf('cancel') !== -1
+											?
+											$('<a/>')
+												.attr({
+													href: '#'
+												})
+												.prop('id', data.data[i].id)
+												.prop('ed2k', data.data[i].ed2k)
+												.prop('id_clientpumps', data.data[i].id_clientpumps)
+												.prop('name', data.data[i].name)
+												.click(function(event) {
+														// var row = $(this).parents('tr:first');
+														event.preventDefault();
 
-												return false;
-											})
-										.text(e.t('Cancel'))
-									:
-									''
+														if ($(this).prop('locked')) {
+															return false;
+														}
+
+														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?')) {
+															return false;
+														}
+
+														$(this).prop('locked', true);
+
+														e.requests.push($.getJSON('?format=json&action=cancel&id_clientpumps=' + $(this).prop('id_clientpumps') + '&id=' + $(this).prop('id') + '&redownload=1&filehash=' + $(this).prop('ed2k'), function(data){
+															if (!e.verify_response(data)) {
+																return false;
+															}
+															// row.remove(); // not sure if it's trustable that
+															// pump does not reuse it's ids when items are removed
+															e.reload_page();
+														}));
+
+														return false;
+													})
+												.text(e.t('Cancel/Redownload'))
+											:
+											''
+									)
 							]);
 						// }
 						});

@@ -17,6 +17,7 @@
 # 2017-07-31 14:22:52 - adding nickname
 # 2017-09-10 23:45:00 - newline removed
 # 2017-09-12 22:27:00 - dropping project name in file
+# 2017-09-22 00:08:00 - adding redownload
 
 session_start();
 
@@ -56,6 +57,7 @@ $nickname 					= isset($_REQUEST['nickname']) ? $_REQUEST['nickname'] : '';
 $password 					= isset($_REQUEST['password']) ? $_REQUEST['password'] : '';
 $path_incoming 				= isset($_REQUEST['path_incoming']) ? $_REQUEST['path_incoming'] : '';
 $port 						= isset($_REQUEST['port']) ? $_REQUEST['port'] : 0;
+$redownload					= isset($_REQUEST['redownload']) ? $_REQUEST['redownload'] : false;
 $search 					= isset($_REQUEST['search']) ? $_REQUEST['search'] : false;
 $show_download 				= isset($_REQUEST['show_download']) ? (int)$_REQUEST['show_download'] : 0;
 $sizemax 					= isset($_REQUEST['sizemax']) ? $_REQUEST['sizemax'] : 0;

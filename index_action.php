@@ -18,6 +18,7 @@
 # 2017-09-12 21:52:00 - dropping project name in file
 # 2017-09-13 01:43:00 - adding cancel
 # 2017-09-19 19:25:00 - editing message handling
+# 2017-09-22 00:08:00 - adding redownload
 
 if (!isset($action)) exit;
 
@@ -183,6 +184,32 @@ switch ($action) {
 					'message' => messages(false)
 				)
 			)));
+		}
+
+		# is redownload with file hash specified?
+		if ($redownload && $filehash) {
+			$sql = '
+				UPDATE
+					files
+				SET
+					redownload=1
+				WHERE
+					ed2khash="'.dbres($link, $filehash).'" AND
+					existing=0 AND
+					id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'" AND
+					redownload=0
+				LIMIT 1';
+			cl('SQL: '.$sql, VERBOSE_DEBUG);
+			$result = db_query($link, $sql);
+			if ($result === false) {
+				cl(db_error($link), VERBOSE_ERROR);
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => messages(false)
+					)
+				)));
+			}
 		}
 
 		die(json_encode($output));
