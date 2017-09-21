@@ -17,6 +17,7 @@
 	# 2017-09-13 00:07:00 - adding chunk weights
 	# 2017-09-13 01:43:00 - adding cancel
 	# 2017-09-13 02:12:00 - adding ed2k to transfer list, moving progress bars
+	# 2017-09-21 23:12:00 - adding last modified to transfers
 
 	start_translations();
 ?>
@@ -388,6 +389,33 @@ var	e = {
 
 			return tmp.children();
 		};
+
+
+		e.timediff = function timeDifference(current, previous) {
+
+			var msPerMinute = 60 * 1000,
+				msPerHour = msPerMinute * 60,
+				msPerDay = msPerHour * 24,
+				msPerMonth = msPerDay * 30,
+				msPerYear = msPerDay * 365;
+
+			var elapsed = current - previous;
+
+			if (elapsed < msPerMinute) {
+				return Math.round(elapsed/1000) + ' ' + e.t('seconds') + ' ' + e.t('ago');
+			} else if (elapsed < msPerHour) {
+				return Math.round(elapsed/msPerMinute) + ' ' + e.t('minutes') + ' ' + e.t('ago');
+			} else if (elapsed < msPerDay ) {
+				return Math.round(elapsed/msPerHour ) + ' ' + e.t('hours') + ' ' + e.t('ago');
+			} else if (elapsed < msPerMonth) {
+				return e.t('approximately') + ' ' + Math.round(elapsed/msPerDay) + ' ' + e.t('days') + ' ' + e.t('ago');
+			} else if (elapsed < msPerYear) {
+				return e.t('approximately') + ' ' + Math.round(elapsed/msPerMonth) + ' ' + e.t('months') + ' ' + e.t('ago');
+			} else {
+				return e.t('approximately') + ' ' + Math.round(elapsed/msPerYear ) + ' ' + e.t('years') + ' ' + e.t('ago');
+			}
+		}
+
 
 		// to make a loading row
 		e.make.table_tr_loading = function(tbody) {
@@ -1266,32 +1294,47 @@ var	e = {
 							);
 
 							e.make.table_tr("#transfers tbody", data.data[i], [
-								data.data[i].preview
-									?
-										$('<a/>')
-											.attr({
-												alt: e.t("Preview of") + ' ' + data.data[i].name,
-												href: '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k,
-												title: e.t("Preview of") + ' ' + data.data[i].name
-											})
+								$('<div/>')
+									.addClass('previewcontainer')
+									.append(
+										data.data[i].preview
+										?
+											$('<a/>')
+												.attr({
+													alt: e.t("Preview of") + ' ' + data.data[i].name,
+													href: '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k,
+													title: e.t("Preview of") + ' ' + data.data[i].name
+												})
+												.append(
+													$('<img/>')
+														.attr('src', '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k)
+														.addClass('preview')
+												)
+												.click(function(event) {
+
+												var opened = window.open($(this).attr('href'), '_blank');
+
+													if (opened) {
+														opened.focus();
+													} else {
+														window.alert(e.t('Failed opening new window, popups may be blocked.'));
+													}
+													event.preventDefault();
+													return false;
+												})
+										: ''
+									)
+									.append(data.data[i].modified ? '<br>' : '')
+									.append(
+										data.data[i].modified ?
+										$('<span>/')
+											.addClass(Date.now() - Date.parse(data.data[i].modified) < 86400 * 1000 ? 'hot' : '')
+											.attr('title', e.t('Was updated') + ' ' + data.data[i].modified)
 											.append(
-												$('<img/>')
-													.attr('src', '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k)
-													.addClass('preview')
+												e.timediff(Date.now(), Date.parse(data.data[i].modified))
 											)
-											.click(function(event) {
-
-											var opened = window.open($(this).attr('href'), '_blank');
-
-												if (opened) {
-													opened.focus();
-												} else {
-													window.alert(e.t('Failed opening new window, popups may be blocked.'));
-												}
-												event.preventDefault();
-												return false;
-											})
-									: '',
+										: ''
+									),
 								progressbar,
 								$('<span/>')
 									.text(data.data[i].name)

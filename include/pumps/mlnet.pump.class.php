@@ -23,6 +23,7 @@
 	# 2017-09-19 19:25:00 - editing message handling
 	# 2017-09-19 22:31:00 - using stderr for diagnostic output
 	# 2017-09-21 00:21:00 - separating unfinished files listing and preview generation
+	# 2017-09-21 23:12:00 - adding last modified to transfers
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -482,6 +483,8 @@
 			#var_dump($matches);
 			#die();
 
+			$unfinished_files = $this->getUnfinishedFiles();
+
 			# no matches?
 			if (!count($matches[0])) {
 				# all is well, but there are no results
@@ -553,6 +556,15 @@
 				# $row['completed'] = (rawurldecode($m[5][0]));
 				$row['sizecompleted'] = (float)rawurldecode($m[3][0]) * ((int)$row['completed']/100);
 				$row['chunkweights'] = $chunkweights;
+
+				if ($unfinished_files) {
+					foreach ($unfinished_files as $file) {
+						if (basename($file) === 'urn_ed2k_'.$row['ed2k']) {
+							$row['modified'] = date('Y-m-d H:i:s', filemtime($file));
+						}
+					}
+				}
+
 				$tmp[] = $row;
 			}
 

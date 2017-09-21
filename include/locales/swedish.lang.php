@@ -14,6 +14,14 @@ $translations['languages'][] = array(
 	'content' => array(
 	),
 	'content_logged_in' => array(
+		array('approximately', 'cirka'),
+		array('ago', 'sedan'),
+		array('years','år'),
+		array('days', 'dagar'),
+		array('months', 'månader'),
+		array('minutes', 'minuter'),
+		array('seconds', 'sekunder'),
+		array('hours', 'timmar'),
 		array('Indexed', 'Indexerat'),
 		array('E-mail sent', 'E-post skickad'),
 		array('Active','Aktiv'),
@@ -133,6 +141,7 @@ $translations['languages'][] = array(
 		array('Used to activate the e-mail function.', 'Används för att aktivera e-postfunktionen.'),
 		array('Username','Användarnamn'),
 		array('Verified', 'Verifierade'),
+		array('Was updated', 'Uppdaterades'),
 		array('Whether the search is active or not.', 'Huruvida sökningen är aktiverad eller ej.'),
 		array('Video','Video'),
 		array('Yes', 'Ja')

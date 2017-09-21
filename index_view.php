@@ -519,7 +519,7 @@ if ($format === 'json') {
 					$actions[] = 'cancel';
 				}
 
-				# enrichen data
+				# enrichen data with preview information
 				foreach ($rtmp as $k => $v) {
 					$rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
 					$rtmp[$k]['pumpname'] = $pumpname;

@@ -255,6 +255,16 @@ table tbody tr.logcategory_queued {
 table tbody tr td {
 	padding: 4px;
 }
+
+
+table tbody tr td div.previewcontainer {
+		text-align: center;
+}
+
+table tbody tr td .hot {
+		color: red;
+}
+
 table tbody tr.clickable {
 	cursor: pointer;
 }

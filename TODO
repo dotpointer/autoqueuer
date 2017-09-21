@@ -50,6 +50,46 @@ select * from files where id_collections=-1 and ed2k=hashen, sätt till existing
 
 --- KLART / DUMPAT --------------------------------------------
 
+emulehelper - visa när filen uppdaterades senast?
+	hur då, fronten har inte nödvändigtvis tillgång till filerna i tempkatalogen, och fronten har bara tillgång till webbgränssnittet
+	- fråga annan process med rättigheter
+		- kreosot?
+		- process med semafor-messagequeue?
+			-- men detta gör att processen krävs, gör systemet ännu mer komplext
+			-- ipcs -q
+	- öppna rättigheter till tempkatalogen
+	- låta annan process periodvis spara uppdateringsdata
+	= indexera filerna i unfinished-katalogen
+
+	en action scan_unfinished
+
+
+
+	pump->previewScanUnfinished() <-- körs när mlnet:s unfinished-katalog förändrats
+
+		hämta fillista på nuvarande filer i katalogen
+
+		ta bort de i databasen som inte matchar på ed2k-namnet
+			ska pump-klassen göra delete:n själv, eller ska en funktion göra det?
+
+			function pump_delete_unfinished($id_pump, $array_ids)
+				global $link
+				DELETE FROm files_unfinished WHERE id_pumps=X AND id IN (...)
+
+		uppdatera de i databasen där datum eller storlek förändrats - sätt renewable = 1
+			ska pump-klassen göra det?
+
+			function pump_update_unfinished($id_pump, $array_files
+				global $link
+				$array_files innehåller:
+					name
+					size
+					modified
+
+	previewGenerate()
+
+		walka files_unfinished renewable = 1, kolla att filerna i fråga finns i katalogen, om inte, radera dem från tabellen och ta nästa
+
 emulehelper - pumparna borde köra cl eller på nåt sätt kunna skriva ut meddelanden direkt
 
 
