@@ -36,6 +36,7 @@
 	2017-09-19 19:25:00 - editing message handling
 	2017-09-19 22:31:00 - using stderr for diagnostic output
 	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
+	2017-09-22 23:49:00 - cleanup
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -56,12 +57,10 @@ $arguments = getopt("c:dfhj:pPuv::", array(
 	'download::',
 	'dryrun',
 	'dry-run',
-	'dumpcheck',
 	'find',
 	'force',
 	'help',
 	'index::',
-	'kadcheck',
 	'list::',
 	'move',
 	'preview',
@@ -150,25 +149,7 @@ foreach ($arguments as $k => $v) {
 			$id_searches = $v;
 
 			scan_results_for_downloads($conn['c'], $link, $conn['ses'], $blacklist, $id_searches, $force);
-
-			# mark files that are dumped from download as dumped
-			# mark_dumped_files($conn['c'], $link, $conn['ses']);
 			break;
-
-		# --- dumped files check, does only work with emule ---
-
-		case 'dumpcheck': # check what files that has been downloaded but seems to be dumped
-			cl($k.': Deprecated action', VERBOSE_DEBUG);
-			break;
-			/*
-			cl('Action: dump check files', VERBOSE_DEBUG);
-			if (!$conn) {
-				$conn = curl_try_get_connection();
-			}
-			# usage: command dumpcheck
-			mark_dumped_files($conn['c'], $link, $conn['ses']);
-			break;
-			*/
 
 		# --- find, to run scheduled searches ---
 		case 'find':
@@ -295,7 +276,6 @@ foreach ($arguments as $k => $v) {
 				cl('Failed requesting search on '.$pumpname.' (#'.$clientpumps[ $pumpname ]['data']['id'].', '.__FILE__.':'.__LINE__.').', VERBOSE_ERROR);
 				fwrite(STDERR, messages(true));
 				die(1);
-
 			}
 
 			# update client pump stats
@@ -320,10 +300,6 @@ foreach ($arguments as $k => $v) {
 			logmessage($link, LOGMESSAGE_TYPE_INDEXING_BEGIN);
 
 			$id_collections = $v;
-
-			# new fields:
-			# ALTER TABLE collections ADD url TINYTEXT NOT NULL AFTER rootpath;
-			# ALTER TABLE collections ADD name TINYTEXT NOT NULL AFTER id;
 
 			# get all enabled collections
 			if ($id_collections !== false) {
@@ -466,17 +442,8 @@ foreach ($arguments as $k => $v) {
 				$total = count($files);
 				cl('Files found: '.$total, VERBOSE_DEBUG);
 
-				# if ($total < 10) {
-				#	cl('Too few files, something is wrong.', VERBOSE_ERROR);
-				#	fwrite(STDERR, messages(true));
-				#	die(1);
-				# }
-
 				# walk files found
 				foreach ($files as $k => $file) {
-
-					# the current readable fullpath to file
-					# $fullpath = $file;
 
 					# cut out mount path
 					$file = substr($file, strlen($rootpath), strlen($file));
@@ -717,7 +684,6 @@ foreach ($arguments as $k => $v) {
 									array(
 										'from' => $r[0]['path'].$r[0]['name'],
 										'to' => $path.$basename
-
 									),
 									false,
 									(int)$r[0]['id']
@@ -800,7 +766,7 @@ foreach ($arguments as $k => $v) {
 				$stats['duration'] = time() - $stats['started'];
 				$stats['collection'] = $collection['name'];
 
-				// cl('Indexed collection "'.$collection['name'].'": '.var_export($stats, true), VERBOSE_INFO);
+				# cl('Indexed collection "'.$collection['name'].'": '.var_export($stats, true), VERBOSE_INFO);
 
 				logmessage($link, LOGMESSAGE_TYPE_INDEXED_COLLECTION, $stats);
 
@@ -831,12 +797,6 @@ foreach ($arguments as $k => $v) {
 
 			logmessage($link, LOGMESSAGE_TYPE_INDEXING_END);
 
-			break;
-
-		# --- kadcheck emule, to check emule so it is connected to kad ---
-		case 'kadcheck': # check that KAD network is connected in eMule
-			# this is now done automatically each time we connect to to emule
-			cl($k.': Deprecated action', VERBOSE_DEBUG);
 			break;
 
 		# --- list collections printout ---
@@ -896,7 +856,6 @@ foreach ($arguments as $k => $v) {
 					cl('Unknown list or nothing specified to list', VERBOSE_DEBUG);
 					fwrite(STDERR, messages(true));
 					die(1);
-
 			}
 
 			break;

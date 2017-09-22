@@ -64,6 +64,7 @@
 	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 	2017-09-21 00:44:00 - adding sql for unfinished files
 	2017-09-22 00:08:00 - adding redownload
+	2017-09-22 23:49:00 - cleanup
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -81,6 +82,9 @@
 	CREATE INDEX ed2khash ON files(ed2khash(32));
 
 	
+
+	# ALTER TABLE collections ADD url TINYTEXT NOT NULL AFTER rootpath;
+	# ALTER TABLE collections ADD name TINYTEXT NOT NULL AFTER id;
 */
 
 	# open this file and edit to setup
@@ -282,18 +286,6 @@
 
 	# --- functions ------------------------------------------------------------------
 
-	# as PHP:s built-in array_merge does not do a real merge with overwriting of int-keys, we do it ourself
-	function array_merge_keep_keys(/* dynamic */) {
-		$result = array();
-		foreach (func_get_args() as $arg) {
-			if (!is_array($arg)) continue;
-			foreach ($arg as $k => $v) {
-				$result[$k] = $v;
-			}
-		}
-		return $result;
-	}
-
 	# to quickly cast data
 	function caster($data, $ints=array(), $floats=array()) {
 
@@ -388,74 +380,42 @@
 		return db_insert_id($link);
 	}
 
-		# to get messages - empties messages and returns them
-		function messages($mashed=false) {
+	# to get messages - empties messages and returns them
+	function messages($mashed=false) {
 
-			global $messages;
-			global $verbose;
+		global $messages;
+		global $verbose;
 
-			$tmp = $mashed ? '' : array();
-			$first = true;
-			foreach ($messages as $message) {
+		$tmp = $mashed ? '' : array();
+		$first = true;
+		foreach ($messages as $message) {
 
-				# is verbosity on and level is enough?
-				if ($verbose && $verbose >= $message['level']) {
+			# is verbosity on and level is enough?
+			if ($verbose && $verbose >= $message['level']) {
 
-					# should it be mashed?
-					if ($mashed) {
-						# not first?
-						if (!$first) {
-							# add separator
-							$tmp .= "\n";
-						}
-
-						$tmp .= $message['msg'];
-						$first = false;
-					} else {
-						$tmp[] = $message;
+				# should it be mashed?
+				if ($mashed) {
+					# not first?
+					if (!$first) {
+						# add separator
+						$tmp .= "\n";
 					}
+
+					$tmp .= $message['msg'];
+					$first = false;
+				} else {
+					$tmp[] = $message;
 				}
 			}
-
-			# empty messages
-			$messages = [];
-			# return contents
-			return $tmp;
 		}
 
-	# --- cURL:ing ----------------------------------------------------------------------
-
-	function curl_try_get_connection() {
-
-		global $pingresults;
-
-		# try to do a pingtest
-		if (!count($pingresults)) {
-			# die silently
-			if(!pingtest(EMULEHOST)) {
-				cl('eMule host '.EMULEHOST.' is offline'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_INFO);
-				fwrite(STDERR, messages(true));
-				die(1);
-			}
-		}
-		return curl_get_connection();
-	}
-
-	# list dir without . and ..
-	function dirlist($dir) {
-
-		$dirlist = scandir($dir);
-		if (!$dirlist) return false;
-
-		$tmp = array();
-		# remove . and ..
-		foreach ($dirlist as $k => $v) {
-			if ($v === '.' || $v === '..') continue;
-			$tmp[] = $v;
-		}
-
+		# empty messages
+		$messages = [];
+		# return contents
 		return $tmp;
 	}
+
+	# --- cURL:ing ----------------------------------------------------------------------
 
 	# to check a file for fakes, returns true if ok, scan the first x bytes for nulls
 	function fakecheck_file($file) {
@@ -589,58 +549,6 @@
 		}
 	}
 
-	# to change collection of files that has been downloaded, but skipped and does not exist
-	function mark_dumped_files($c, $link_unused, $ses) {
-
-		# this only works with eMule which can provide a list of downloads with:
-		# - files completed
-		# - ed2k-hashes in transfer list
-		return true;
-	/*
-		global $link;
-
-		# request transfer list from eMule
-		cl('Requesting transfer list', VERBOSE_DEBUG);
-		$r = curl_do($c, array(CURLOPT_URL => EMULEWEBURL.'?'.http_build_query(array(
-			'ses' => $ses,
-			'w' => 'transfer'
-		))));
-		$r = parse_response($r); # convert to XML
-
-		# if it failed, end here
-		if ($r['status'] !== 'ok' || !isset($r['filelist'], $r['filelist']['file'])) {
-			cl('Request failed'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die(1);
-		}
-
-		# walk files in the download list and collect the hashes
-		$hashes = array();
-		cl('Walking files to collect hashes', VERBOSE_DEBUG);
-		foreach ($r['filelist']['file'] as $k => $v) {
-			$hashes[] = '"'.dbres($link, $v['ed2khash']).'"';
-		}
-
-		# get files that has not been moved, belongs to the download collection, does not exist and is not in download directory
-		$sql = 'UPDATE files
-				SET id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DUMPED).'"
-			WHERE
-				moved=0 AND
-				id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'" AND
-				existing=0 AND
-				ed2khash NOT IN ('.implode($hashes, ",").')
-
-			';
-		cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
-		$r = db_query($link, $sql);
-		if ($r === false) {
-			cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-			die(1);
-		}
-
-		return true;
-		*/
-	}
-
 	# samba-mount something
 	function mountcifs($parsed_url, $mountpath, $options=array()) {
 
@@ -731,7 +639,6 @@
 
 		# walk the collections
 		foreach ($collections as $collection) {
-
 
 			# parse the URL from where to get the files
 			if (!($collection['url'] = parse_url($collection['url']))) {
@@ -1041,7 +948,6 @@
 
 			cl('Checking database for unmoved files using filename', VERBOSE_DEBUG);
 			# step A - try to match file in previous search-and-download-requests
-			# removed AND files.id_clientpumps="'.dbres($link, $file['id_clientpumps']).'"
 
 			$sql = '
 				SELECT
@@ -1131,8 +1037,6 @@
 				die(1);
 			}
 
-
-
 			# any matches in db?
 			if (count($r)) {
 				cl('Matched '.count($r).' entries in DB by ed2khash', VERBOSE_DEBUG);
@@ -1150,7 +1054,6 @@
 						fwrite(STDERR, messages(true));
 						die(1);
 					}
-
 				}
 
 				continue;
@@ -1280,7 +1183,6 @@
 
 		# is there a mailer defined and any addresses to mail to and the last time a mail was sent has passed?
 		if (
-			# MAILER &&
 			(int)$parameters['email_enabled'] === 1 &&
 			((int)strtotime($parameters['email_last_sent']) + (int)$parameters['email_timeout']) < time()
 		) {
@@ -1289,16 +1191,6 @@
 			if (!filter_var($parameters['email_address'], FILTER_VALIDATE_EMAIL)) {
 				cl('Skipping invalid mail address: '.$parameters['email_address'], VERBOSE_DEBUG);
 			} else {
-
-                # sum the searches
-                /*$sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM searches WHERE filessincelastmail>0';
-                $r = db_query($link, $sql);
-                if ($r === false) {
-                    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                    fwrite(STDERR, messages(true));
-                    die(1);
-                }
-                $totalfilessincelastmail = (int)$r[0]['totalfilessincelastmail'];*/
 
                 $sql = 'SELECT nickname, filessincelastmail FROM searches WHERE filessincelastmail>0';
                 $r = db_query($link, $sql);
@@ -1310,18 +1202,7 @@
 
                 $filessincelastmail = $r;
 
-
                 # sum the move rules
-                /*
-                $sql = 'SELECT IFNULL(SUM(filessincelastmail), 0) AS totalfilessincelastmail FROM moverules WHERE filessincelastmail>0';
-                $r = db_query($link, $sql);
-                if ($r === false) {
-                    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                    fwrite(STDERR, messages(true));
-                    die(1);
-                }
-                $totalfilessincelastmail += (int)$r[0]['totalfilessincelastmail'];
-                */
                 $sql = 'SELECT nickname, filessincelastmail FROM moverules WHERE filessincelastmail>0';
                 $r = db_query($link, $sql);
                 if ($r === false) {
@@ -1335,7 +1216,6 @@
                 }
 
                 # any news?
-                # if ($totalfilessincelastmail > 0) {
                 if (count($filessincelastmail) > 0) {
 
                     # clear the counters
@@ -1357,28 +1237,7 @@
                         die(1);
                     }
 
-                    # replace the template locations in the mailer string with our versions
-                    /*
-                    $cmd = str_replace(
-                        array(
-                            '###EMAIL###',
-                            '###SUBJECT###',
-                            '###BODY###'
-                        ),
-                        array(
-                            escapeshellarg($parameters['email_address']),
-                            '\''.$totalfilessincelastmail.' new files\'',
-                            '\''.$totalfilessincelastmail.' new files has arrived.\''
-                        ),
-                        MAILER
-                    );
-                    */
-
-
-                    # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
                     cl('Sending mail to: '.$parameters['email_address'], VERBOSE_DEBUG_DEEP);
-                    # try to send the mail
-                    # exec($cmd, $output, $retval);
 
                     # summarize
                     $totalfilessincelastmail = 0;
@@ -1395,7 +1254,6 @@
                         # subject
                         $totalfilessincelastmail.' new files',
                         # body
-                        #$totalfilessincelastmail.' new files has arrived',
                         implode("\r\n", $body),
                         # headers
                         implode("\r\n", array(
@@ -1403,10 +1261,8 @@
                         ))
                     );
 
-
                     # check and update the last email sent-parameter
                     $r = db_query($link, 'SELECT * FROM parameters WHERE parameter="email_last_sent"');
-                    # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
                     if ($r === false) {
                         cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
                         fwrite(STDERR, messages(true));
@@ -1419,7 +1275,6 @@
                         $sql = 'INSERT INTO parameters (parameter, value) VALUES("email_last_sent", "'.dbres($link, date('Y-m-d H:i:s')).'")';
                     }
                     $r = db_query($link, $sql);
-                    # cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
                     cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
                     if ($r === false) {
                         cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
@@ -1440,19 +1295,10 @@
                     );
                 }
             }
-
 		}
 
 		return true;
 	}
-
-	# for some reason we need to twin-quote on filenames with ' in as there is a slash in db for this
-	#function m-ysql_real_escape_array2($arr) {
-	#	foreach ($arr as $key => $value) {
-	#		$arr[$key] = '"'.m-ysql_real_escape_string(mysql_real_escape_string($value)).'"';
-	#	}
-	#	return $arr;
-	#}
 
 	# convert object to array - aaron at tekserve dot com 25-Oct-2009 01:16
 	function object_to_array($mixed) {
@@ -1470,7 +1316,7 @@
 
 	# parse an xml response and return a plain array
 	function parse_response($xmlstr) {
-		# TODO: better way to secure the filenames, possible search for <ed2klink>*</ed2klink> and fix between
+		# maybe there's a better way to secure the filenames, possible search for <ed2klink>*</ed2klink> and fix between
 		$xmlstr = str_replace('&', '&amp;', $xmlstr);
 
 		# make sure we remove unneccessary tags
@@ -1482,45 +1328,6 @@
 		# convert the object to an array if possible
 		$xml = is_object($xml) ? object_to_array($xml) : $xml;
 		return $xml;
-	}
-
-	# check if host responds to ping
-	function pingtest($host) {
-		    global $pingresults;
-
-		    if (isset($pingresults[$host])) {
-		            cl('Pinged '.$host.' before, reusing that', VERBOSE_DEBUG);
-		            return $pingresults[$host];
-		    }
-
-		    cl('Pinging '.$host, VERBOSE_DEBUG);
-		    # do it quiet, send only 1 packet, wait 3 sec for it to return
-		    $cmd = 'ping -w3 -qc1 '.$host.' 2>&- 1>&-';
-		    cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
-		    $t = microtime();
-		    exec($cmd, $output, $retval);
-		    $t = microtime() - $t;
-
-		    # remember the response to next time this is run
-		    $pingresults[$host] = ($retval === 0);
-
-			if ($retval === 0) {
-				cl('Ping response from '.$host.' in '.$t.' seconds', VERBOSE_DEBUG);
-			} else {
-				cl('No response from '.$host, VERBOSE_DEBUG);
-			}
-
-		    return  ($retval === 0);
-	}
-
-	function remove_comments($s) {
-		$s = explode("\n", $s);
-
-		foreach ($s as $k => $v) {
-			$s[$k] = preg_replace('/^\s*\#+.*$/', '',$v);
-		}
-
-		return implode("\n", $s);
 	}
 
 	# to scan search results for possible downloads
@@ -1653,14 +1460,12 @@
 
 			$fileinfo = explode('|', $file['link']);
 
-			/*
-			 0: protocol (crap)
-			 1: type
-			 2: filename
-			 3: size?
-			 4: ed2khash
-			 5: endslash (crap)
-			*/
+			# 0: protocol (crap)
+			# 1: type
+			# 2: filename
+			# 3: size?
+			# 4: ed2khash
+			# 5: endslash (crap)
 
 			# incomplete response?
 			if (!isset($fileinfo[2])||!isset($fileinfo[3])||!isset($fileinfo[4])) {
@@ -1767,10 +1572,10 @@
 					die(1);
 				}
 
-;;;;				$redownload_id=false;
+				$redownload_id=false;
 				if (count($result) > 0) {
 
-;;;;					# walk the results
+					# walk the results
 					foreach ($result as $foundfile) {
 						# is redownload enabled here and file does not exist?
 						if (
@@ -1783,9 +1588,9 @@
 							break;
 						}
 
-;;;;;;;					}
+				}
 
-;;;;;					if ($redownload_id === false) {
+				if ($redownload_id === false) {
 						cl('Skipping, file downloaded before, detected by ed2khash', VERBOSE_DEBUG);
 						continue 2;
 					}
@@ -1828,7 +1633,6 @@
 					);
 				}
 
-
 				# request download
 				cl('Requesting download from pump '.$file['pumpname'].' (#'.$clientpumps[ $file['pumpname'] ]['data']['id'].')', VERBOSE_DEBUG);
 				if (!$clientpumps[ $file['pumpname'] ]['pump'] ->download($file['id'])){
@@ -1838,12 +1642,11 @@
 					die(1);
 				}
 
-
 				$queued_for_download++;
 
 				cl('Storing file in database', VERBOSE_DEBUG);
 
-;;;;				# file has not been downloaded before
+				# file has not been downloaded before
 				if ($redownload_id === false) {
 					$insert_update = dbpia($link, $insert_update);
 					$sql = 'INSERT INTO files ('.implode(',', array_keys($insert_update)).') VALUES('.implode(',', $insert_update).')';
@@ -1890,7 +1693,7 @@
 						db_insert_id($link)
 					);
 
-;;;;				}
+				}
 
 				# update the search counters
 				$sql = 'UPDATE searches SET queuedfiles=queuedfiles+1 WHERE id="'.$search['id'].'"';
@@ -2021,7 +1824,6 @@
 				)));
 			}
 
-
 			# split the link into useable parts
 			$tmp = split_ed2klink($file['link']);
 			if ($tmp === false) continue;
@@ -2108,7 +1910,6 @@
 				)));
 			}
 
-
 			if (count($result) > 0) {
 				foreach ($result as $row) {
 					# walk the search result list
@@ -2165,12 +1966,6 @@
 
 	function is_logged_in() {
 		return true;
-	}
-
-	# to get the current locale
-	function get_current_locale(){
-		global $translations;
-		return reset($translations['languages'][ $translations['current']['index'] ]['locales']);
 	}
 
 	# to get a matching locale translation index, send in locale and get a working translation index in return
@@ -2243,18 +2038,6 @@
 		}
 
 		return 0;
-	}
-
-	# to switch locale if possible
-	function switch_locale($locale) {
-		global $translations;
-		# get a working locale index
-		$translations['current']['index'] = get_working_locale($translations['languages'], $locale);
-
-		# set this locale
-	    $translations['current']['locale'] = reset($translations['languages'][$translations['current']['index']]['locales']);
-
-		return true;
 	}
 
 	# to translate string
@@ -2360,37 +2143,12 @@
 		# get the parameters
 		$translations['current']['index'] = isset($_REQUEST['translationindex']) ? $_REQUEST['translationindex'] : false;
 
-		# session_start();
-
 		$translations['current']['index'] = !isset($_SESSION['translation_index']) ? get_working_locale($translations['languages']) : $_SESSION['translation_index'];
 		$translations['current']['locale'] = reset($translations['languages'][$translations['current']['index']]['locales']);
 		$_SESSION['translation_index'] = $translations['current']['index'];
 	}
 
 	# --- pump class helpers
-
-	# to get unfinished files from db based on pump id
-	function pump_get_unfinished($id_clientpumps, $renewableonly=false) {
-		global $link;
-
-		$sql = '
-				SELECT
-					*
-				FROM
-					files_unfinished
-				WHERE
-					id_clientpumps="'.dbres($link, $id_clientpumps).'"
-					'.($renewableonly ? ' AND renewable="1" ' : '').'
-				';
-		cl('SQL: '.$sql, VERBOSE_DEBUG);
-		$result = db_query($link, $sql);
-		if ($result === false) {
-			cl(db_error($link), VERBOSE_ERROR);
-			fwrite(STDERR, messages(true));
-			die(1);
-		}
-		return $result;
-	}
 
 	# to delete unfinished files from db based on pump id and file ids
 	function pump_delete_unfinished($id_clientpumps, $id_files) {
@@ -2418,6 +2176,29 @@
 			fwrite(STDERR, messages(true));
 			die(1);
 		}
+	}
+
+	# to get unfinished files from db based on pump id
+	function pump_get_unfinished($id_clientpumps, $renewableonly=false) {
+		global $link;
+
+		$sql = '
+				SELECT
+					*
+				FROM
+					files_unfinished
+				WHERE
+					id_clientpumps="'.dbres($link, $id_clientpumps).'"
+					'.($renewableonly ? ' AND renewable="1" ' : '').'
+				';
+		cl('SQL: '.$sql, VERBOSE_DEBUG);
+		$result = db_query($link, $sql);
+		if ($result === false) {
+			cl(db_error($link), VERBOSE_ERROR);
+			fwrite(STDERR, messages(true));
+			die(1);
+		}
+		return $result;
 	}
 
 	# to tell that a file is not renewable

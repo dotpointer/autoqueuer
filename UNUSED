@@ -1,0 +1,122 @@
+# nice code, but unused
+
+# as PHP:s built-in array_merge does not do a real merge with overwriting of int-keys, we do it ourself
+# function array_merge_keep_keys(/* dynamic */) {
+#	$result = array();
+#	foreach (func_get_args() as $arg) {
+#		if (!is_array($arg)) continue;
+#		foreach ($arg as $k => $v) {
+#			$result[$k] = $v;
+#		}
+#	}
+#	return $result;
+# }
+
+# to change collection of files that has been downloaded, but skipped and does not exist
+# function mark_dumped_files($c, $link_unused, $ses) {
+
+	# this only works with eMule which can provide a list of downloads with:
+	# - files completed
+	# - ed2k-hashes in transfer list
+#	return true;
+/*
+	global $link;
+
+	# request transfer list from eMule
+	cl('Requesting transfer list', VERBOSE_DEBUG);
+	$r = curl_do($c, array(CURLOPT_URL => EMULEWEBURL.'?'.http_build_query(array(
+		'ses' => $ses,
+		'w' => 'transfer'
+	))));
+	$r = parse_response($r); # convert to XML
+
+	# if it failed, end here
+	if ($r['status'] !== 'ok' || !isset($r['filelist'], $r['filelist']['file'])) {
+		cl('Request failed'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+		die(1);
+	}
+
+	# walk files in the download list and collect the hashes
+	$hashes = array();
+	cl('Walking files to collect hashes', VERBOSE_DEBUG);
+	foreach ($r['filelist']['file'] as $k => $v) {
+		$hashes[] = '"'.dbres($link, $v['ed2khash']).'"';
+	}
+
+	# get files that has not been moved, belongs to the download collection, does not exist and is not in download directory
+	$sql = 'UPDATE files
+			SET id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DUMPED).'"
+		WHERE
+			moved=0 AND
+			id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'" AND
+			existing=0 AND
+			ed2khash NOT IN ('.implode($hashes, ",").')
+
+		';
+	cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
+	$r = db_query($link, $sql);
+	if ($r === false) {
+		cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+		die(1);
+	}
+
+	return true;
+	*/
+#}
+
+# check if host responds to ping
+#function pingtest($host) {
+#	    global $pingresults;
+
+#	    if (isset($pingresults[$host])) {
+#	            cl('Pinged '.$host.' before, reusing that', VERBOSE_DEBUG);
+#	            return $pingresults[$host];
+#	    }
+
+#	    cl('Pinging '.$host, VERBOSE_DEBUG);
+		# do it quiet, send only 1 packet, wait 3 sec for it to return
+#	    $cmd = 'ping -w3 -qc1 '.$host.' 2>&- 1>&-';
+#	    cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
+#	    $t = microtime();
+#	    exec($cmd, $output, $retval);
+#	    $t = microtime() - $t;
+
+#	    # remember the response to next time this is run
+#	    $pingresults[$host] = ($retval === 0);
+
+#		if ($retval === 0) {
+#			cl('Ping response from '.$host.' in '.$t.' seconds', VERBOSE_DEBUG);
+#		} else {
+#			cl('No response from '.$host, VERBOSE_DEBUG);
+#		}
+
+#	    return  ($retval === 0);
+#}
+
+#function remove_comments($s) {
+#	$s = explode("\n", $s);
+
+#	foreach ($s as $k => $v) {
+#		$s[$k] = preg_replace('/^\s*\#+.*$/', '',$v);
+#	}
+
+#	return implode("\n", $s);
+#}
+
+# to get the current locale
+# function get_current_locale(){
+#	global $translations;
+#	return reset($translations['languages'][ $translations['current']['index'] ]['locales']);
+# }
+
+# to switch locale if possible
+#function switch_locale($locale) {
+#	global $translations;
+#	# get a working locale index
+#	$translations['current']['index'] = get_working_locale($translations['languages'], $locale);
+
+#	# set this locale
+#	$translations['current']['locale'] = reset($translations['languages'][$translations['current']['index']]['locales']);
+
+#	return true;
+#}
