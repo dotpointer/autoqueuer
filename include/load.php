@@ -20,6 +20,7 @@
 	# 2017-09-21 23:12:00 - adding last modified to transfers
 	# 2017-09-22 00:08:00 - adding redownload
 	# 2017-09-22 00:32:00 - clarifying cancel dialogs
+	# 2017-09-23 00:13:00 - removing commented out code and extra newlines
 
 	start_translations();
 ?>
@@ -56,7 +57,6 @@ var	e = {
 		// to translate texts
 		e.t = function(s) {
 			var found = false;
-			//var i;
 			// are the translation texts available?
 			if (typeof e.msg !== "object") {
 				return s;
@@ -69,13 +69,11 @@ var	e = {
 					// return e.msg[i][1];
 					found = e.msg[i][1];
 				}
-			//}
 			});
 
 			if (found !== false) {
 				return found;
 			}
-
 
 			return s;
 		};
@@ -125,7 +123,6 @@ var	e = {
 				var h;
 				var m;
 
-				// s = s; //Math.floor(ms / 1000);
 				m = Math.floor(s / 60);
 				s = s % 60;
 				h = Math.floor(m / 60);
@@ -191,16 +188,13 @@ var	e = {
 			// to get something
 			get: function(what, params, callback_when_done) {
 
-				// var ix;
 				var params_str = "";
 
 				if (typeof params === "object") {
-					// for (ix in params) {
 					Object.keys(params).forEach(function(ix) {
 						if (params.hasOwnProperty(ix)) {
 							params_str += "&" + ix + "=" + params[ix];
 						}
-					//}
 					});
 				}
 
@@ -219,7 +213,6 @@ var	e = {
 		e.lock_form = function(form, lock) {
 
 			$(form).find("input,select,button,textarea").each(function() {
-
 				if (lock) {
 					if (!$(this).attr("disabled")) {
 						$(this)
@@ -266,7 +259,6 @@ var	e = {
 										.append(
 											$("<button/>")
 												.click(function() {
-													// var fileinfo = e.tools.split_ed2klink($(this).parents("tr:first").prev().prop("data").link);
 													e.emule.request_download(
 														$(this).parents("tr:first").prev().prop("data").id_clientpumps,
 														$(this).parents("tr:first").prev().prop("data").id
@@ -291,23 +283,16 @@ var	e = {
 				return false;
 			};
 
-			//for (i in searchresultlist) {
 			Object.keys(searchresultlist).forEach(function(i) {
 
 				if (searchresultlist.hasOwnProperty(i)) {
 
-					// split ed2klink here
-
-
 					if (searchresultlist[i].rowtype === undefined) {
-
 
 						fileinfo = e.tools.split_ed2klink(searchresultlist[i].link);
 
 						// did the split succeed?
 						if (typeof fileinfo === "object") {
-
-							// searchresultlist[i].fileinfo = fileinfo.filehash;
 
 							// append a result row
 							$("#quickfind_results tbody")
@@ -323,15 +308,9 @@ var	e = {
 														type: "checkbox",
 														name: "checked_ed2klinks[]"
 													})
-													/*
-													.click(function(evt) {
-														evt.preventDefaults();
-													})
-													*/
 													.val(searchresultlist[i].filehash)
 											)
 										)
-
 										.append(
 											$("<td/>").text(fileinfo.name)
 										)
@@ -361,11 +340,8 @@ var	e = {
 											)
 									)
 							);
-
-
 					}
 				}
-			// } // foreach
 			});
 
 			$("#quickfind_results tbody tr.loading").remove();
@@ -373,10 +349,9 @@ var	e = {
 
 		// take an object or an array, iterate through it and return option elements
 		e.obj_to_options = function(obj) {
-			//var i;
+
 			var tmp = $("<select/>");
 
-			//for (i in obj) {
 			Object.keys(obj).forEach(function(i) {
 				if (obj.hasOwnProperty(i)) {
 					tmp
@@ -386,12 +361,10 @@ var	e = {
 								.text(e.t(obj[i]))
 						);
 				}
-			//}
 			});
 
 			return tmp.children();
 		};
-
 
 		e.timediff = function timeDifference(current, previous) {
 
@@ -418,7 +391,6 @@ var	e = {
 			}
 		}
 
-
 		// to make a loading row
 		e.make.table_tr_loading = function(tbody) {
 			$(tbody).append(
@@ -437,13 +409,11 @@ var	e = {
 
 		// to make a table in the contents
 		e.make.table = function(id, columns, loading) {
-			// var i;
 			var thead_tr = $("<tr/>");
 
 			loading = (loading === undefined) ? true : loading;
 
 			// walk columns and construct a header row
-			// for (i in columns) {
 			Object.keys(columns).forEach(function(i) {
 				if (columns.hasOwnProperty(i)) {
 
@@ -461,7 +431,6 @@ var	e = {
 						);
 					}
 				}
-			// }
 			});
 
 			// append table
@@ -490,14 +459,11 @@ var	e = {
 
 		// to make a table tr
 		e.make.table_tr = function(tbody, data, columns, callback_maker) {
-			// var	i = 0;
 			var tr = $("<tr/>").prop("data", data);
 
 			// walk columns
-			// for (i in columns) {
 			Object.keys(columns).forEach(function(i) {
 				if (columns.hasOwnProperty(i)) {
-
 
 					// what type of data is this column?
 					switch (typeof columns[i]) {
@@ -524,11 +490,8 @@ var	e = {
 								.append(
 									$("<td/>").append(columns[i])
 								);
-
-
 					}
 				}
-			// }
 			});
 
 			if (typeof callback_maker === "function") {
@@ -541,13 +504,8 @@ var	e = {
 			return tr;
 		};
 
-
-
 		// to make a table in the contents
 		e.make.textbox = function(id, text) {
-			// var i;
-			// var thead_tr = $("<tr/>");
-
 			// append table
 			$("#content")
 				.append(
@@ -560,9 +518,6 @@ var	e = {
 
 			return true;
 		};
-
-
-
 
 		// to verify response from server
 		e.verify_response = function(data) {
@@ -603,15 +558,11 @@ var	e = {
 		// to switch page
 		e.switch_page = function(view) {
 
-			// var l = 0;
-			// var j = 0;
 			var tmp = "";
 
 			// walk previous requests and abort them all
-			// for (l = 0; l < e.requests.length; l += 1) {
 			Object.keys(e.requests).forEach(function(l) {
 				e.requests[l].abort();
-			// }
 			});
 			e.requests = [];
 
@@ -667,7 +618,6 @@ var	e = {
 												.text(e.t("New client pump"))
 												.click(function(evt) {
 													$(this).parents("form:first")[0].reset();
-													// $("input[name=\"executiontimeoutbase\"],input[name=\"executiontimeoutrandbase\"]").val(259200);
 													evt.preventDefault();
 													return false;
 												})
@@ -724,8 +674,6 @@ var	e = {
 										.append(
 											$("<br/>")
 										)
-
-
 										.append(
 											$("<label/>").text(e.t("Password") + ":")
 										)
@@ -781,7 +729,6 @@ var	e = {
 					e.lock_form("#insert_or_update_clientpump_form", true);
 
 					$("#insert_or_update_clientpump_form").submit(function(evt) {
-						// var i;
 						var data = $(this).serializeArray();
 						var post = {};
 
@@ -789,10 +736,8 @@ var	e = {
 						e.lock_form(this, true);
 
 						// flatten serialized array
-						// for (i = 0; i < data.length; i += 1) {
 						Object.keys(data).forEach(function(i) {
 							post[data[i].name] = data[i].value;
-						//}
 						});
 
 						post.action = "insert_or_update_clientpump";
@@ -806,8 +751,6 @@ var	e = {
 							e.reload_page();
 						}));
 
-
-						//e.reload_page();
 						evt.preventDefault();
 						return false;
 					});
@@ -818,11 +761,6 @@ var	e = {
 						var event_a_delete = null;
 						var event_a_edit = null;
 						var div_manage = null;
-						// var i;
-						// var j;
-
-						// var password_container;
-						// var password_text = "";
 
 						// when clicking on delete links
 						event_a_delete = function(evt) {
@@ -863,7 +801,6 @@ var	e = {
 						};
 
 						// walk clientpumps
-						// for (i = 0; i < data.data.clientpumps.length; i += 1) {
 						Object.keys(data.data.clientpumps).forEach(function(i) {
 
 							div_manage = $("<div/>")
@@ -881,18 +818,6 @@ var	e = {
 										.click(event_a_delete)
 								);
 
-							/*password_text = "";
-							// for (j=0; j < data.data.clientpumps[i].password.length; j += 1) {
-							Object.keys(data.data.clientpumps[i].password).forEach(function(j) {
-								password_text += '*';
-							// }
-							});
-
-							password_container = $("<span/>")
-								.attr("title", data.data.clientpumps[i].password)
-								.text(password_text);
-								*/
-
 							// make TR
 							e.make.table_tr("#clientpumps tbody", data.data.clientpumps[i],
 							[
@@ -909,7 +834,6 @@ var	e = {
 								{inner_html: div_manage.children(), classes: "manage"}
 							], function(data, tr) {
 
-
 								if (data.status === 1) {
 									tr.addClass("active");
 								} else {
@@ -919,10 +843,7 @@ var	e = {
 								return tr;
 
 							});
-						// } for-clientpumps
 						});
-
-
 
 						// remove loading
 						$("#clientpumps tbody tr.loading").remove();
@@ -1099,7 +1020,6 @@ var	e = {
 													})
 												)
 										)
-
 										.append(
 											$("<span/>")
 												.addClass("description")
@@ -1108,7 +1028,6 @@ var	e = {
 										.append(
 											$("<br/>")
 										)
-
 										.append(
 											$("<button/>")
 												.addClass("marginated")
@@ -1120,7 +1039,6 @@ var	e = {
 											$("<button/>")
 												.text(e.t("Update"))
 												.attr("id", "button_update_quickfind")
-
 										)
 								)
 						);
@@ -1131,10 +1049,6 @@ var	e = {
 					// get current client pumps
 					e.emule.get("clientpumps", {}, function(data) {
 
-
-						// var event_tr_dblclick = null,
-						// var i;
-
 						// invalid status?
 						if (data.status !== "ok") {
 							if (data.status === "error") {
@@ -1144,9 +1058,7 @@ var	e = {
 							}
 						}
 
-
 						// walk client pumps
-						//for (i = 0; i < data.data.clientpumps.length; i += 1) {
 						Object.keys(data.data.clientpumps).forEach(function(i) {
 							// is this one available?
 							if (data.data.clientpumps[i].status === 1) {
@@ -1154,12 +1066,9 @@ var	e = {
 								$("#quickfind_find_form select[name=\"id_clientpumps\"]").append(
 									$("<option/>")
 										.text(data.data.clientpumps[i].type + "@" + data.data.clientpumps[i].host)
-
-
 										.val(data.data.clientpumps[i].id)
 								);
 							}
-						//}
 						});
 
 						// remove loader option
@@ -1188,7 +1097,6 @@ var	e = {
 							type: 			$("select[name='type']").val()
 						}, function(data) {
 
-
 							if (!e.verify_response(data)) {
 								e.lock_form("#quickfind_find_form", false);
 								return false;
@@ -1212,8 +1120,6 @@ var	e = {
 
 						e.make.table_tr_loading("#quickfind_results tbody");
 
-
-
 						// fetch results
 						e.emule.get("quickfind_results", {
 								id_clientpumps: $("select[name='id_clientpumps']").val(),
@@ -1232,7 +1138,6 @@ var	e = {
 					e.make.textbox("", e.t("Here is an overview of the files that are currently downloading."));
 
 					// make a table
-
 					e.make.table("transfers", [
 						e.t("Preview"),
 						"%",
@@ -1248,11 +1153,7 @@ var	e = {
 					// fetch results
 					e.emule.get("transfers", "", function(data) {
 
-						//var event_tr_dblclick = null;
-						// var i = 0;
 						var percentage;
-						//var size_total,
-						//var size_completed,
 						var chunkbar = null,
 							progressbar;
 
@@ -1265,7 +1166,6 @@ var	e = {
 							}
 						}
 
-						// for (i = 0; i < data.data.length; i += 1) {
 						Object.keys(data.data).forEach(function(i) {
 
 							if (data.data[i].chunkweights !== undefined) {
@@ -1280,9 +1180,7 @@ var	e = {
 							}
 
 							progressbar = $("<div/>").addClass("progressbar");
-
 							percentage = data.data[i].completed;
-							// percentage = percentage.substr(percentage.lastIndexOf("(") + 1	, percentage.length);
 
 							progressbar
 							.append(
@@ -1361,7 +1259,7 @@ var	e = {
 												.prop('id_clientpumps', data.data[i].id_clientpumps)
 												.prop('name', data.data[i].name)
 												.click(function(event) {
-														// var row = $(this).parents('tr:first');
+
 														event.preventDefault();
 
 														if ($(this).prop('locked')) {
@@ -1437,7 +1335,6 @@ var	e = {
 						// remove loading
 						$("#transfers tbody tr.loading").remove();
 					});
-
 
 					return true;
 
@@ -1723,29 +1620,24 @@ var	e = {
 
 					e.lock_form("#insert_or_update_search_form", true);
 
-
-
 					$("#content")
 						.append(
 							$("<ul/>")
 								.attr("id", "stats")
 						);
 
-
 					$("#insert_or_update_search_form").submit(function(evt) {
 						var data = $(this).serializeArray();
-						// var i;
 						var post = {};
 
 						// lock down the form
 						e.lock_form(this, true);
 
 						// flatten serialized array
-						// for (i = 0; i < data.length; i += 1) {
 						Object.keys(data).forEach(function(i) {
 							post[data[i].name] = data[i].value;
-						//}
 						});
+
 						post.action = "insert_or_update_search";
 
 						e.requests.push($.postJSON(".", post, function(data) {
@@ -1767,7 +1659,6 @@ var	e = {
 						var div_manage = null;
 						var event_a_delete = null;
 						var event_a_edit = null;
-						// var i;
 
 						// when clicking on delete links
 						event_a_delete = function(evt) {
@@ -1812,7 +1703,6 @@ var	e = {
 						};
 
 						// walk searches
-						// for (i = 0; i < data.data.searches.length; i += 1) {
 						Object.keys(data.data.searches).forEach(function(i) {
 
 							div_manage = $("<div/>")
@@ -1861,7 +1751,6 @@ var	e = {
 						});
 
 						// walk stats and make li:s
-						// for (i = 0; i < data.data.stats.length; i += 1) {
 						Object.keys(data.data.stats).forEach(function(i) {
 							$("#stats")
 								.append(
@@ -1874,7 +1763,6 @@ var	e = {
 											e.t("files")
 										)
 								);
-						// }
 						});
 
 						// remove loading
@@ -1903,15 +1791,11 @@ var	e = {
 					// request data
 					e.emule.get("latest_queued", "", function(data) {
 
-						// var i;
-						// var j;
-
 						$("#chart").highcharts({
 							chart: {
-
-							plotBackgroundColor: null,
-							plotBorderWidth: null,
-							plotShadow: false
+								plotBackgroundColor: null,
+								plotBorderWidth: null,
+								plotShadow: false
 							},
 							credits: {
 								enabled : false
@@ -1947,25 +1831,20 @@ var	e = {
 						});
 
 						// walk the result
-						//for (i = 0; i < data.data.files_queued.length; i += 1) {
 						Object.keys(data.data.files_queued).forEach(function(i) {
 							tmp = "";
 
 							// walk the searches
-							// for (j = 0; j < data.data.searches.length; j += 1) {
 							Object.keys(data.data.searches).forEach(function(j) {
 								// does this search match this file?
 								if (data.data.files_queued[i].id_searches === data.data.searches[j].id && tmp === "") {
 									// then take the search text for this
 									tmp = data.data.searches[j].search;
-									// break; // cannot break a forEach
 								}
-							//}
 							});
 
 							// make a new row in the table
 							e.make.table_tr("#latest_queued tbody", data.data.files_queued[i], [data.data.files_queued[i].name, {inner_html: tmp, classes: "unimportant"}, data.data.files_queued[i].created]);
-						// }
 						});
 
 						// remove loading
@@ -1973,7 +1852,6 @@ var	e = {
 					});
 
 					return true;
-
 
 				case "log":
 
@@ -1985,7 +1863,6 @@ var	e = {
 					// fetch results
 					e.emule.get("log", "", function(data) {
 
-						// var i = 0;
 						var trmaker;
 
 						// invalid status?
@@ -2019,7 +1896,6 @@ var	e = {
 								if (typeof parsed_json === "object") {
 
 									// walk data
-									//for (i in parsed_json) {
 									Object.keys(parsed_json).forEach(function(i) {
 										if (parsed_json.hasOwnProperty(i)) {
 											// append the data
@@ -2033,7 +1909,6 @@ var	e = {
 													)
 											);
 										}
-									//}
 									});
 
 									tr
@@ -2047,7 +1922,6 @@ var	e = {
 						};
 
 						// walk logmessages
-						// for (i = 0; i < data.data.logmessages.length; i += 1) {
 						Object.keys(data.data.logmessages).forEach(function(i) {
 							e.make.table_tr(
 								$("#log>tbody"),
@@ -2055,7 +1929,6 @@ var	e = {
 								[e.t(e.logmessage_type_descriptions_short[data.data.logmessages[i].type]), data.data.logmessages[i].data, data.data.logmessages[i].created],
 								trmaker
 							);
-						//}
 						});
 
 						// remove loading
@@ -2074,8 +1947,6 @@ var	e = {
 					// fetch results
 					e.emule.get("dumped", "", function(data) {
 
-						// var i = 0;
-
 						// invalid status?
 						if (data.status !== "ok") {
 							if (data.status === "error") {
@@ -2085,7 +1956,6 @@ var	e = {
 							}
 						}
 
-						// for (i = 0; i < data.data.files_dumped.length; i += 1) {
 						Object.keys(data.data.files_dumped).forEach(function(i) {
 							$("#dumped tbody")
 								.append(
@@ -2108,13 +1978,11 @@ var	e = {
 											$("<td/>").text(data.data.files_dumped[i].created)
 										)
 								);
-						//}
 						});
 
 						// remove loading
 						$("#dumped tbody tr.loading").remove();
 					});
-
 
 					return true;
 				case "parameters":
@@ -2220,7 +2088,6 @@ var	e = {
 					e.lock_form("#insert_or_update_parameters_form", true);
 
 					$("#insert_or_update_parameters_form").submit(function(evt) {
-						// var i;
 						var data = $(this).serializeArray();
 						var post = {};
 
@@ -2228,10 +2095,8 @@ var	e = {
 						e.lock_form(this, true);
 
 						// flatten serialized array
-						// for (i = 0; i < data.length; i += 1) {
 						Object.keys(data).forEach(function(i) {
 							post[data[i].name] = data[i].value;
-						//}
 						});
 
 						post.action = "insert_or_update_parameters";
@@ -2245,18 +2110,12 @@ var	e = {
 							e.reload_page();
 						}));
 
-
-						//e.reload_page();
 						evt.preventDefault();
 						return false;
 					});
 
-
 					// get current client pumps
 					e.emule.get("parameters", {}, function(data) {
-
-
-						// var i;
 
 						// invalid status?
 						if (data.status !== "ok") {
@@ -2268,7 +2127,6 @@ var	e = {
 						}
 
 						// walk parameters
-						// for (i in data.data.parameters) {
 						Object.keys(data.data.parameters).forEach(function(i) {
 							if (data.data.parameters.hasOwnProperty(i)) {
 								if (i === "email_last_sent") {
@@ -2277,16 +2135,12 @@ var	e = {
 									$("#insert_or_update_parameters_form [name=\"" + i + "\"]").val(data.data.parameters[i]);
 								}
 							}
-						// }
 						});
 
 						e.lock_form("#insert_or_update_parameters_form", false);
 					});
 
-
 					return true;
-
-
 			}
 
 			return false;
@@ -2303,7 +2157,6 @@ var	e = {
 			evt.preventDefault();
 			return false;
 		});
-
 
 		// the find box
 		$("#findbox #find").keyup(function() {
@@ -2325,7 +2178,6 @@ var	e = {
 				}
 
 				e.requests.push($.getJSON("?format=json&view=find&find=" + $("#findbox #find").val(), function(data){
-					// var i;
 					var tbody = $("<tbody/>");
 
 					if (!e.verify_response(data)) {
@@ -2369,7 +2221,6 @@ var	e = {
 					}
 
 					// walk results
-					// for (i in data.data.findresult) {
 					Object.keys(data.data.findresult).forEach(function(i) {
 						if (data.data.findresult.hasOwnProperty(i)) {
 
@@ -2398,19 +2249,13 @@ var	e = {
 
 								);
 						}
-					// }
 					});
-
 
 					$("#content table#findresult").append(tbody);
 
 				}));
 				return true;
-
-
 			}, 250);
-
-
 		});
 
 		// switch page to something
