@@ -24,6 +24,7 @@
 	# 2017-09-19 22:31:00 - using stderr for diagnostic output
 	# 2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 	# 2017-09-21 23:12:00 - adding last modified to transfers
+	# 2017-09-22 12:15:00 - bugfix, remove thumbnail only if it exists
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -356,9 +357,13 @@
 				#	if ($previewtime < $modifytime) {
 						//fwrite(STDERR, 'Thumbnail outdated [T: '.date('Y-m-d H:i:s', $previewtime).' / F: '.date('Y-m-d H:i:s', $modifytime).'] on '.$normalthumbpath."\n");
 						# then remove the thumbnail
-						unlink($normalthumbpath);
+						# unlink($normalthumbpath);
 				#	}
 				#}
+
+				if (file_exists($normalthumbpath)) {
+					unlink($normalthumbpath);
+				}
 
 				# no main thumb?
 				#if (!file_exists($normalthumbpath)) {
