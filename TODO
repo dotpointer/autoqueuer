@@ -46,9 +46,13 @@ select * from files where id_collections=-1 and ed2k=hashen, sätt till existing
 	- ta transfer-listan och kör den mot databasen - på filnamn utan ändelsen och i annan id_collection än download, ev. även trim + lowercase
 	- lista potentiella fall
 
-- transfer-listan är trasig i mlnet
+
 
 --- KLART / DUMPAT --------------------------------------------
+
+- transfer-listan är trasig i mlnet
+
+autoqueue - sortera transferlistan efter senaste uppdateringsdatum
 
 emulehelper - visa när filen uppdaterades senast?
 	hur då, fronten har inte nödvändigtvis tillgång till filerna i tempkatalogen, och fronten har bara tillgång till webbgränssnittet
