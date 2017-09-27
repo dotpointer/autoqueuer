@@ -25,6 +25,7 @@
 	# 2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 	# 2017-09-21 23:12:00 - adding last modified to transfers
 	# 2017-09-22 12:15:00 - bugfix, remove thumbnail only if it exists
+	# 2017-09-28 00:07:00 - sorting transfer list descending on modify date
 
 	# general notice: data from mlnet already is in UTF-8!
 
@@ -573,7 +574,25 @@
 				$tmp[] = $row;
 			}
 
+			# sort data descending by modified date
+			usort($tmp, array($this, "sort_descending_by_modified"));
+
 			return $tmp;
+		}
+
+		# to sort using usort by modified date
+		private function sort_descending_by_modified($a, $b)
+		{
+			if (!isset($a['modified'], $b['modified'])) return 0;
+
+			if (!isset($a['modified']) && isset($b['modified'])) return 1;
+
+			if (!isset($b['modified']) && isset($a['modified'])) return -1;
+
+			if ($a['modified'] == $b['modified']) {
+				return 0;
+			}
+			return ($a['modified'] < $b['modified']) ? 1 : -1;
 		}
 
 		# to perform a search - searchtext, options can be supplied
