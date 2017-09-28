@@ -21,6 +21,7 @@
 	# 2017-09-22 00:08:00 - adding redownload
 	# 2017-09-22 00:32:00 - clarifying cancel dialogs
 	# 2017-09-23 00:13:00 - removing commented out code and extra newlines
+	# 2017-09-29 00:33:00 - removing row instead of reloading whole transfer list when cancelling a transfer
 
 	start_translations();
 ?>
@@ -1259,7 +1260,7 @@ var	e = {
 												.prop('id_clientpumps', data.data[i].id_clientpumps)
 												.prop('name', data.data[i].name)
 												.click(function(event) {
-
+														var row = $(this).parents('tr:first');
 														event.preventDefault();
 
 														if ($(this).prop('locked')) {
@@ -1276,9 +1277,9 @@ var	e = {
 															if (!e.verify_response(data)) {
 																return false;
 															}
-															// row.remove(); // not sure if it's trustable that
+															row.remove(); // not sure if it's trustable that
 															// pump does not reuse it's ids when items are removed
-															e.reload_page();
+															// e.reload_page();
 														}));
 
 														return false;
