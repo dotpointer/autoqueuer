@@ -65,6 +65,7 @@
 	2017-09-21 00:44:00 - adding sql for unfinished files
 	2017-09-22 00:08:00 - adding redownload
 	2017-09-22 23:49:00 - cleanup
+	2017-09-28 23:15:00 - adjusting mashed message output to add newline at the end of each line
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -387,7 +388,6 @@
 		global $verbose;
 
 		$tmp = $mashed ? '' : array();
-		$first = true;
 		foreach ($messages as $message) {
 
 			# is verbosity on and level is enough?
@@ -396,13 +396,7 @@
 				# should it be mashed?
 				if ($mashed) {
 					# not first?
-					if (!$first) {
-						# add separator
-						$tmp .= "\n";
-					}
-
-					$tmp .= $message['msg'];
-					$first = false;
+					$tmp .= $message['msg']."\n";
 				} else {
 					$tmp[] = $message;
 				}

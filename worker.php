@@ -37,6 +37,7 @@
 	2017-09-19 22:31:00 - using stderr for diagnostic output
 	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 	2017-09-22 23:49:00 - cleanup
+	2017-09-28 23:14:00 - adding fake check command
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -57,6 +58,7 @@ $arguments = getopt("c:dfhj:pPuv::", array(
 	'download::',
 	'dryrun',
 	'dry-run',
+	'fakecheck:',
 	'find',
 	'force',
 	'help',
@@ -150,7 +152,11 @@ foreach ($arguments as $k => $v) {
 
 			scan_results_for_downloads($conn['c'], $link, $conn['ses'], $blacklist, $id_searches, $force);
 			break;
-
+		case 'fakecheck':
+			$result = fakecheck_file($v);
+			cl('Fake checked "'.$v.'", result: '.($result ? 'ok' : 'fake or incomplete'), VERBOSE_INFO);
+			fwrite(STDERR, messages(true));
+			break;
 		# --- find, to run scheduled searches ---
 		case 'find':
 		case 'search':
