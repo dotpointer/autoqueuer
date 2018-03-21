@@ -87,9 +87,18 @@ select {
 }
 button {
 	float: left;
+	margin-left: 5px;
+	background-color: #f0f0f0;
+	border: 1px solid #c0c0c0;
+	color: #000;
+	display: inline-block;
 	font-family: Tahoma, sans-serif;
 	font-size: 11px;
-	margin-left: 5px;
+	padding: 2px 7px;
+	cursor: pointer;
+}
+button:hover {
+		background-color: #fff;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
 	button {
@@ -176,7 +185,7 @@ table tbody td img.preview {
 	border: 1px solid #000;
 }
 table tbody td span.ed2k {
-		color: #c0c0c0;
+		color: #b0b0b0;
 }
 table tbody td.counter {
 	font-family: monospace;
@@ -215,6 +224,15 @@ table tbody tr.slave td button {
 }
 table tbody tr:nth-child(odd) {
 	background-color: #eee;
+}
+table tbody tr:nth-child(odd):hover {
+	background-color: #ddd;
+}
+table tbody tr {
+	background-color: #fff;
+}
+table tbody tr:hover {
+	background-color: #ddd;
 }
 table tbody tr.active {
 	background-color: #E7FFD7;
@@ -276,6 +294,21 @@ table tbody tr td.first {
 }
 table tbody tr.loading td {
 	text-align: center;
+}
+
+table tbody tr td a.button {
+		background-color: #f0f0f0;
+		border: 1px solid #c0c0c0;
+		color: #000;
+		display: inline-block;
+		font-family: Tahoma, sans-serif;
+		font-size: 11px;
+		margin: 1px;
+		padding: 2px 7px;
+		text-decoration: none;
+}
+table tbody tr td a.button:hover {
+	background-color: #fff;
 }
 .chunkbar {
 	background-color: #000;

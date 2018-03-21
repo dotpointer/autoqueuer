@@ -6,6 +6,7 @@
 # 2017-09-10 23:43:00 - preview added
 # 2017-09-13 01:41:00 - cancel added
 # 2017-09-22 00:32:00 - dialog texts
+# 2018-03-22 00:18:00 - button texts
 
 # store this into translations
 $translations['languages'][] = array(
@@ -113,6 +114,7 @@ $translations['languages'][] = array(
 		array('Queued files', 'Köade filer'),
 		array('Queued','Köade'),
 		array('random', 'slump'),
+		array('Remove', 'Radera'),
 		array('Researchable', 'Återsökbar'),
 		array('Save', 'Spara'),
 		array('Schedule', 'Schema'),

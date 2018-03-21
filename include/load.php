@@ -22,6 +22,7 @@
 	# 2017-09-22 00:32:00 - clarifying cancel dialogs
 	# 2017-09-23 00:13:00 - removing commented out code and extra newlines
 	# 2017-09-29 00:33:00 - removing row instead of reloading whole transfer list when cancelling a transfer
+	# 2018-03-22 00:17:00 - css adjustments
 
 	start_translations();
 ?>
@@ -808,14 +809,16 @@ var	e = {
 								.append(
 									$("<a/>")
 										.attr("href", "#")
-										.text("[" + e.t("Edit") + "]")
+										.addClass("button")
+										.text(e.t("Edit"))
 										.click(event_a_edit)
 								)
 								.append(" ")
 								.append(
 									$("<a/>")
 										.attr("href", "#")
-										.text("[X]")
+										.addClass("button")
+										.text(e.t("Remove"))
 										.click(event_a_delete)
 								);
 
@@ -1256,6 +1259,7 @@ var	e = {
 												.attr({
 													href: '#'
 												})
+												.addClass("button")
 												.prop('id', data.data[i].id)
 												.prop('id_clientpumps', data.data[i].id_clientpumps)
 												.prop('name', data.data[i].name)
@@ -1296,6 +1300,7 @@ var	e = {
 												.attr({
 													href: '#'
 												})
+												.addClass("button")
 												.prop('id', data.data[i].id)
 												.prop('ed2k', data.data[i].ed2k)
 												.prop('id_clientpumps', data.data[i].id_clientpumps)
@@ -1710,14 +1715,16 @@ var	e = {
 								.append(
 									$("<a/>")
 										.attr("href", "#")
-										.text("[" + e.t("Edit") + "]")
+										.addClass("button")
+										.text(e.t("Edit"))
 										.click(event_a_edit)
 								)
 								.append(" ")
 								.append(
 									$("<a/>")
 										.attr("href", "#")
-										.text("[X]")
+										.addClass("button")
+										.text(e.t("Remove"))
 										.click(event_a_delete)
 								);
 
