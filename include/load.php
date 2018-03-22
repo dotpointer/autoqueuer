@@ -24,6 +24,7 @@
 	# 2017-09-29 00:33:00 - removing row instead of reloading whole transfer list when cancelling a transfer
 	# 2018-03-22 00:17:00 - css adjustments
 	# 2018-03-22 01:52:00 - adding search links to transfers
+	# 2018-03-22 02:20:00 - replacing dots with spaces in search links
 
 	start_translations();
 ?>
@@ -1222,14 +1223,13 @@ var	e = {
 											.click(function(event) {
 												let data = $(this).prop('name'),
 													url;
-
+												data = data.indexOf('.') !== -1 ? data.substring(0, data.lastIndexOf('.')) : data;
 												data = e.tools.replace_all('\_', ' ', data);
 												data = e.tools.replace_all('\-', ' ', data);
 												data = e.tools.replace_all('\(', ' ', data);
 												data = e.tools.replace_all('\)', ' ', data);
 												data = e.tools.replace_all('\#', ' ', data);
-
-												data = data.indexOf('.') !== -1 ? data.substring(0, data.lastIndexOf('.')) : data;
+												data = e.tools.replace_all('.', ' ', data);
 
 												url = $(this).prop('url').replace('###NAME###', encodeURIComponent($.trim(data)));
 
