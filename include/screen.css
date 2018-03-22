@@ -307,6 +307,10 @@ table tbody tr td a.button {
 		padding: 2px 7px;
 		text-decoration: none;
 }
+table tbody tr td a.unimportant {
+		color: #c0c0c0;
+}
+
 table tbody tr td a.button:hover {
 	background-color: #fff;
 }

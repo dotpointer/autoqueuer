@@ -20,6 +20,7 @@
 # 2017-09-12 22:07:00 - dropping project name in file
 # 2017-09-13 01:41:00 - adding cancel
 # 2017-09-19 19:25:00 - editing message handling
+# 2018-03-22 01:52:00 - adding search links to transfers
 
 # make sure there is something above this file
 if (!isset($view)) exit;
@@ -535,9 +536,38 @@ if ($format === 'json') {
 				$r = array_merge($r, $rtmp);
 			}
 
-			$output['data'] = $r;
+			# version 1
+			if ($version === 1) {
+				$output['data'] = $r;
+			# version 2
+			} else if ($version === 2) {
+						$output['data']['transfers'] = $r;
 
-			die(json_encode($output));
+				# get parameters
+				$sql = 'SELECT
+							*
+						FROM
+							parameters
+						WHERE
+							parameter="search_links"
+						'
+						;
+				cl('SQL: '.$sql, VERBOSE_DEBUG);
+				$result = db_query($link, $sql);
+				if ($result === false) {
+					cl(db_error($link), VERBOSE_ERROR);
+					die(json_encode(array(
+						'status' => 'error',
+						'data' => array(
+							'message' => messages(false)
+						)
+					)));
+				}
+							if (count($result) && isset($result[0])) {
+					$output['data']['search_links'] = $result[0]['value'];
+				}
+			}
+					die(json_encode($output));
 	/*
 		case 'transfer_compare': # to get transfer list
 		case 'transfers_compare':

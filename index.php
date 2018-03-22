@@ -18,6 +18,7 @@
 # 2017-09-10 23:45:00 - newline removed
 # 2017-09-12 22:27:00 - dropping project name in file
 # 2017-09-22 00:08:00 - adding redownload
+# 2018-03-22 01:53:00 - adding version parameter and no-referrer meta tag
 
 session_start();
 
@@ -65,6 +66,7 @@ $sizemin 					= isset($_REQUEST['sizemin']) ? $_REQUEST['sizemin'] : 0;
 $status 					= isset($_REQUEST['status']) ? $_REQUEST['status'] : '';
 $type 						= isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
 $username 					= isset($_REQUEST['username']) ? $_REQUEST['username'] : '';
+$version					= isset($_REQUEST['version']) ? (int)$_REQUEST['version'] : 1;
 $view 						= isset($_REQUEST['view']) ? $_REQUEST['view'] : '';
 
 # get actions
@@ -84,6 +86,7 @@ foreach ($clientpumpclasses as $k => $v) {
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta name="referrer" content="no-referrer" />
 
 	<title><?php echo PROJECT_TITLE ?></title>
 

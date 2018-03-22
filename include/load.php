@@ -23,6 +23,7 @@
 	# 2017-09-23 00:13:00 - removing commented out code and extra newlines
 	# 2017-09-29 00:33:00 - removing row instead of reloading whole transfer list when cancelling a transfer
 	# 2018-03-22 00:17:00 - css adjustments
+	# 2018-03-22 01:52:00 - adding search links to transfers
 
 	start_translations();
 ?>
@@ -92,6 +93,9 @@ var	e = {
 			// parse int, radix 10 (decimal)
 			pi10: function(x) {
 				return parseInt(x, 10);
+			},
+			replace_all(search, replacement, subject) {
+				return subject.replace(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), 'g'), replacement);
 			},
 			// to split an ed2k link into parts
 			split_ed2klink: function (ed2klink) {
@@ -1155,36 +1159,46 @@ var	e = {
 					]);
 
 					// fetch results
-					e.emule.get("transfers", "", function(data) {
+					e.emule.get("transfers", {version: 2}, function(data) {
 
 						var percentage;
 						var chunkbar = null,
 							progressbar;
+						var search_links = [];
 
 						// invalid status?
 						if (data.status !== "ok") {
 							if (data.status === "error") {
-								window.alert(data.data.message);
+								window.alert(data.data.transfers.message);
 							} else {
 								window.alert(e.t("Bad response from server"));
 							}
 						}
 
-						Object.keys(data.data).forEach(function(i) {
+						if (data.data.search_links) {
+							try {
+								search_links = JSON.parse(data.data.search_links);
+							} catch (e) {
+								search_links = [];
+							}
+						}
 
-							if (data.data[i].chunkweights !== undefined) {
+						Object.keys(data.data.transfers).forEach(function(i) {
+							let search_links_container = $('<div/>');
+
+							if (data.data.transfers[i].chunkweights !== undefined) {
 								chunkbar = $("<div/>").addClass("chunkbar");
-								Object.keys(data.data[i].chunkweights).forEach(function(j) {
+								Object.keys(data.data.transfers[i].chunkweights).forEach(function(j) {
 									chunkbar.append(
 										$('<div/>')
-											.addClass('chunkweight' + data.data[i].chunkweights[j].type)
-											.css('width', data.data[i].chunkweights[j].weight + '%')
+											.addClass('chunkweight' + data.data.transfers[i].chunkweights[j].type)
+											.css('width', data.data.transfers[i].chunkweights[j].weight + '%')
 									);
 								});
 							}
 
 							progressbar = $("<div/>").addClass("progressbar");
-							percentage = data.data[i].completed;
+							percentage = data.data.transfers[i].completed;
 
 							progressbar
 							.append(
@@ -1197,21 +1211,55 @@ var	e = {
 								chunkbar
 							);
 
-							e.make.table_tr("#transfers tbody", data.data[i], [
+							if (search_links.length) {
+								search_links.forEach(item => {
+									search_links_container.append(
+										$('<a/>')
+											.addClass("unimportant")
+											.attr('href', '#')
+											.prop('name', data.data.transfers[i].name)
+											.prop('url', item.url)
+											.click(function(event) {
+												let data = $(this).prop('name'),
+													url;
+
+												data = e.tools.replace_all('\_', ' ', data);
+												data = e.tools.replace_all('\-', ' ', data);
+												data = e.tools.replace_all('\(', ' ', data);
+												data = e.tools.replace_all('\)', ' ', data);
+												data = e.tools.replace_all('\#', ' ', data);
+
+												data = data.indexOf('.') !== -1 ? data.substring(0, data.lastIndexOf('.')) : data;
+
+												url = $(this).prop('url').replace('###NAME###', encodeURIComponent($.trim(data)));
+
+												window.open(url);
+
+												event.preventDefault();
+												return false;
+											})
+											.text(item.title)
+									);
+
+
+								});
+							}
+
+							e.make.table_tr("#transfers tbody", data.data.transfers[i], [
 								$('<div/>')
 									.addClass('previewcontainer')
 									.append(
-										data.data[i].preview
+										data.data.transfers[i].preview
 										?
 											$('<a/>')
 												.attr({
-													alt: e.t("Preview of") + ' ' + data.data[i].name,
-													href: '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k,
-													title: e.t("Preview of") + ' ' + data.data[i].name
+													alt: e.t("Preview of") + ' ' + data.data.transfers[i].name,
+													href: '?view=preview&id_clientpumps=' + data.data.transfers[i].id_clientpumps + '&filehash=' + data.data.transfers[i].ed2k,
+													title: e.t("Preview of") + ' ' + data.data.transfers[i].name
 												})
 												.append(
 													$('<img/>')
-														.attr('src', '?view=preview&id_clientpumps=' + data.data[i].id_clientpumps + '&filehash=' + data.data[i].ed2k)
+														.attr('src', '?view=preview&id_clientpumps=' + data.data.transfers[i].id_clientpumps + '&filehash=' + data.data.transfers[i].ed2k)
 														.addClass('preview')
 												)
 												.click(function(event) {
@@ -1228,41 +1276,45 @@ var	e = {
 												})
 										: ''
 									)
-									.append(data.data[i].modified ? '<br>' : '')
+									.append(data.data.transfers[i].modified ? '<br>' : '')
 									.append(
-										data.data[i].modified ?
+										data.data.transfers[i].modified ?
 										$('<span>/')
-											.addClass(Date.now() - Date.parse(data.data[i].modified) < 86400 * 1000 ? 'hot' : '')
-											.attr('title', e.t('Was updated') + ' ' + data.data[i].modified)
+											.addClass(Date.now() - Date.parse(data.data.transfers[i].modified) < 86400 * 1000 ? 'hot' : '')
+											.attr('title', e.t('Was updated') + ' ' + data.data.transfers[i].modified)
 											.append(
-												e.timediff(Date.now(), Date.parse(data.data[i].modified))
+												e.timediff(Date.now(), Date.parse(data.data.transfers[i].modified))
 											)
 										: ''
 									),
 								progressbar,
 								$('<span/>')
-									.text(data.data[i].name)
+									.text(data.data.transfers[i].name)
 									.after("<br>")
 									.after(
-										$('<span/>').text(data.data[i].ed2k).addClass('ed2k')
+										$('<span/>').text(data.data.transfers[i].ed2k).addClass('ed2k')
+									)
+									.after(' ')
+									.after(
+										search_links_container.children()
 									),
-								{inner_html: data.data[i].type, classes: "unimportant"},
-								data.data[i].sizetotal,
-								{inner_html: data.data[i].sizecompleted, classes: "unimportant"},
-								data.data[i].speed,
-								{inner_html: data.data[i].downstate, classes: "unimportant"},
+								{inner_html: data.data.transfers[i].type, classes: "unimportant"},
+								data.data.transfers[i].sizetotal,
+								{inner_html: data.data.transfers[i].sizecompleted, classes: "unimportant"},
+								data.data.transfers[i].speed,
+								{inner_html: data.data.transfers[i].downstate, classes: "unimportant"},
 								$('<div/>')
 									.append(
-										data.data[i].actions.indexOf('cancel') !== -1
+										data.data.transfers[i].actions.indexOf('cancel') !== -1
 											?
 											$('<a/>')
 												.attr({
 													href: '#'
 												})
 												.addClass("button")
-												.prop('id', data.data[i].id)
-												.prop('id_clientpumps', data.data[i].id_clientpumps)
-												.prop('name', data.data[i].name)
+												.prop('id', data.data.transfers[i].id)
+												.prop('id_clientpumps', data.data.transfers[i].id_clientpumps)
+												.prop('name', data.data.transfers[i].name)
 												.click(function(event) {
 														var row = $(this).parents('tr:first');
 														event.preventDefault();
@@ -1292,19 +1344,19 @@ var	e = {
 											:
 											''
 									)
-									.append(data.data[i].actions.indexOf('cancel') !== -1 ? '<br/>' : '')
+									.append(data.data.transfers[i].actions.indexOf('cancel') !== -1 ? '<br/>' : '')
 									.append(
-										data.data[i].actions.indexOf('cancel') !== -1
+										data.data.transfers[i].actions.indexOf('cancel') !== -1
 											?
 											$('<a/>')
 												.attr({
 													href: '#'
 												})
 												.addClass("button")
-												.prop('id', data.data[i].id)
-												.prop('ed2k', data.data[i].ed2k)
-												.prop('id_clientpumps', data.data[i].id_clientpumps)
-												.prop('name', data.data[i].name)
+												.prop('id', data.data.transfers[i].id)
+												.prop('ed2k', data.data.transfers[i].ed2k)
+												.prop('id_clientpumps', data.data.transfers[i].id_clientpumps)
+												.prop('name', data.data.transfers[i].name)
 												.click(function(event) {
 														var row = $(this).parents('tr:first');
 														event.preventDefault();
