@@ -7,6 +7,7 @@
 # 2017-09-13 01:41:00 - cancel added
 # 2017-09-22 00:32:00 - dialog texts
 # 2018-03-22 00:18:00 - button texts
+# 2018-03-24 01:03:00 - adding incognito mode warning
 
 # store this into translations
 $translations['languages'][] = array(
@@ -149,7 +150,8 @@ $translations['languages'][] = array(
 		array('Was updated', 'Uppdaterades'),
 		array('Whether the search is active or not.', 'Huruvida sökningen är aktiverad eller ej.'),
 		array('Video','Video'),
-		array('Yes', 'Ja')
+		array('Yes', 'Ja'),
+		array('You are not in incognito mode. This link will register in the browser history. Do you want to continue anyway? (This will disable the warning for this session.)', 'Du är inte i inkognitoläge. Denna länk kommer att registreras i webbläsarhistoriken. Vill du fortsätta ändå? (Detta stänger av varningen för denna session.)')
 	)
 );
 ?>

@@ -4,7 +4,6 @@
 	require_once('functions.php');
 
 	# changelog
-	# changelog
 	# 2015-06-05 17:39:01
 	# 2015-07-27 02:27:51 - adding email
 	# 2016-02-23 13:44:56 - replacing email field with email parameters, adding parameters gui
@@ -24,7 +23,8 @@
 	# 2017-09-29 00:33:00 - removing row instead of reloading whole transfer list when cancelling a transfer
 	# 2018-03-22 00:17:00 - css adjustments
 	# 2018-03-22 01:52:00 - adding search links to transfers
-	# 2018-03-22 02:20:00 - replacing dots with spaces in search links
+	# 2018-03-22 02:20:00 - replacing dots with spaces in search
+	# 2018-03-24 01:03:00 - adding incognito mode warning
 
 	start_translations();
 ?>
@@ -34,6 +34,7 @@
 var	e = {
 	timeouts: {},
 	emule: {},
+	incognito_mode: undefined,
 	make: {},
 	msg: <?php echo json_encode(get_translation_texts()); ?>,
 	pages: {
@@ -157,6 +158,22 @@ var	e = {
 					s = pad + s;
 				}
 				return s;
+			},
+			determine_incognito_mode() {
+				let fs = window.RequestFileSystem || window.webkitRequestFileSystem;
+				if (!fs) {
+					return false;
+				}
+				fs(
+					window.TEMPORARY,
+					100,
+					function () {
+						e.incognito_mode = false;
+					},
+					function() {
+						e.incognito_mode = true;
+					}
+				);
 			},
 			// to convert a timestamp to a date
 			timestamp_to_date: function(timestamp) {
@@ -1221,19 +1238,25 @@ var	e = {
 											.prop('name', data.data.transfers[i].name)
 											.prop('url', item.url)
 											.click(function(event) {
-												let data = $(this).prop('name'),
-													url;
-												data = data.indexOf('.') !== -1 ? data.substring(0, data.lastIndexOf('.')) : data;
-												data = e.tools.replace_all('\_', ' ', data);
-												data = e.tools.replace_all('\-', ' ', data);
-												data = e.tools.replace_all('\(', ' ', data);
-												data = e.tools.replace_all('\)', ' ', data);
-												data = e.tools.replace_all('\#', ' ', data);
-												data = e.tools.replace_all('.', ' ', data);
+												if (!e.incognito_mode) {
+													e.incognito_mode = window.confirm(e.t('You are not in incognito mode. This link will register in the browser history. Do you want to continue anyway? (This will disable the warning for this session.)'));
+												}
 
-												url = $(this).prop('url').replace('###NAME###', encodeURIComponent($.trim(data)));
+												if (e.incognito_mode) {
+													let data = $(this).prop('name'),
+														url;
+													data = data.indexOf('.') !== -1 ? data.substring(0, data.lastIndexOf('.')) : data;
+													data = e.tools.replace_all('\_', ' ', data);
+													data = e.tools.replace_all('\-', ' ', data);
+													data = e.tools.replace_all('\(', ' ', data);
+													data = e.tools.replace_all('\)', ' ', data);
+													data = e.tools.replace_all('\#', ' ', data);
+													data = e.tools.replace_all('.', ' ', data);
 
-												window.open(url);
+													url = $(this).prop('url').replace('###NAME###', encodeURIComponent($.trim(data)));
+
+													window.open(url);
+												}
 
 												event.preventDefault();
 												return false;
@@ -2320,5 +2343,7 @@ var	e = {
 
 		// switch page to something
 		e.switch_page(view);
+
+		e.tools.determine_incognito_mode();
 	});
 }());
