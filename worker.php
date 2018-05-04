@@ -38,6 +38,7 @@
 	2017-09-21 00:21:00 - separating unfinished files listing and preview generation
 	2017-09-22 23:49:00 - cleanup
 	2017-09-28 23:14:00 - adding fake check command
+	2018-05-05 01:39:00 - bugfix, removing error when no searches are available
 
 	command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
 	command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -195,16 +196,16 @@ foreach ($arguments as $k => $v) {
 			}
 
 			if (!count($searches)) {
-				cl('No searches found'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+				cl('No searches found', VERBOSE_DEBUG);
 				fwrite(STDERR, messages(true));
-				die(1);
+				break;
 			}
 
 			# check that the timeout has passed
 			if (!$force && strtotime($searches[0]['executed']) + (int)$searches[0]['executiontimeout'] > time()) {
 				cl('No suitable searches found', VERBOSE_DEBUG);
 				fwrite(STDERR, messages(true));
-				die();
+				break;
 			}
 			cl('Found search to run: "'.$searches[0]['search'].'"', VERBOSE_DEBUG);
 
