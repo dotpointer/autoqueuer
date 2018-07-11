@@ -21,12 +21,19 @@
 # 2017-09-13 01:41:00 - adding cancel
 # 2017-09-19 19:25:00 - editing message handling
 # 2018-03-22 01:52:00 - adding search links to transfers
+# 2018-07-11 18:38:00 - adding login
 
 # make sure there is something above this file
 if (!isset($view)) exit;
 
 switch ($view) {
 	case 'preview':
+
+		# make sure user is logged in
+		if (!is_logged_in()) {
+			die('Login required.');
+		}
+
 		if (!is_numeric($id_clientpumps) || !strlen($filehash)) {
 			cl('Missing parameters id_clientpumps or filehash.', VERBOSE_ERROR);
 			fwrite(STDERR, messages(true));
@@ -60,6 +67,17 @@ if ($format === 'json') {
 	switch ($view) {
 
 		case 'clientpumps': # list of client pumps
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
 			$output = array(
 				'status' => 'ok',
 				'data' => array()
@@ -104,6 +122,18 @@ if ($format === 'json') {
 			die(json_encode($output));
 
 		case 'dumped': # list of dumped files
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
+
 			$output = array(
 						'status' => 'ok',
 						'data' => array()
@@ -143,6 +173,16 @@ if ($format === 'json') {
 
 		case 'find': # to get results from db-findbox
 
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
 			$output = array(
 				'status' => 'ok',
 				'data' => array(
@@ -178,6 +218,17 @@ if ($format === 'json') {
 			die(json_encode($output));
 
 		case 'latest_queued': # to get latest queued files
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
 			$output = array(
 				'status' => 'ok',
 				'data' => array()
@@ -299,6 +350,17 @@ if ($format === 'json') {
 			die(json_encode($output));
 
 		case 'log': # to get logmessages
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
 			$output = array(
 				'status' => 'ok',
 				'data' => array()
@@ -338,6 +400,17 @@ if ($format === 'json') {
 			die(json_encode($output));
 
 		case 'parameters': # list of parameters
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
 			$output = array(
 				'status' => 'ok',
 				'data' => array(
@@ -348,6 +421,16 @@ if ($format === 'json') {
 			die(json_encode($output));
 
 		case 'quickfind_results': # to get results from quick find
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
 
 			$output = array(
 				'status' => 'ok',
@@ -397,6 +480,16 @@ if ($format === 'json') {
 			die(json_encode($output));
 
 		case 'searches': # to get list of searches
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
 
 			$output = array(
 				'status' => 'ok',
@@ -487,6 +580,16 @@ if ($format === 'json') {
 
 		case 'transfers': # to get transfer list
 
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
+
 			$output = array(
 				'status' => 'ok',
 				'data' => array()
@@ -571,6 +674,16 @@ if ($format === 'json') {
 	/*
 		case 'transfer_compare': # to get transfer list
 		case 'transfers_compare':
+
+			# make sure user is logged in
+			if (!is_logged_in()) {
+				die(json_encode(array(
+					'status' => 'error',
+					'data' => array(
+						'message' => 'Login required.'
+					)
+				)));
+			}
 
 			$output = array('status' => 'ok', 'data' => array());
 

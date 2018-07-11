@@ -66,6 +66,7 @@
 	2017-09-22 00:08:00 - adding redownload
 	2017-09-22 23:49:00 - cleanup
 	2017-09-28 23:15:00 - adjusting mashed message output to add newline at the end of each line
+	2018-07-11 18:35:00 - adding login
 
 	# SQL setup
 	CREATE DATABASE autoqueuer;
@@ -182,6 +183,8 @@
 	define('VERBOSE_INFO', 2);
 	define('VERBOSE_DEBUG', 3);
 	define('VERBOSE_DEBUG_DEEP', 4);
+
+	define('SITE_SHORTNAME', 'autoqueuer');
 
 	$conn = false;
 	$loglevel = VERBOSE_INFO;
@@ -531,6 +534,17 @@
 		cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
 		exec($cmd, $output, $retval);
 		return  ($retval == 0);
+	}
+
+	function is_logged_in() {
+		if (!isset($_SESSION[SITE_SHORTNAME])) {
+			return false;
+		}
+
+		if (!isset($_SESSION[SITE_SHORTNAME]['user'])) {
+			return false;
+		}
+		return true;
 	}
 
 	function make_dir($path) {
@@ -1753,6 +1767,24 @@
 		exec($cmd, $output, $retval);
 		return  ($retval == 0);
 	}
+	# --- end of translations
+
+	function validate_user($s) {
+		if (preg_match('/[^A-Za-z0-9]/', $s)) return false;
+		if (strlen($s) < 3) return false;
+		if (strlen($s) > 16) return false;
+		return true;
+	}
+
+	function validate_pass($s) {
+		# at least 6 chars
+		if (strlen($s) < 6) return false;
+
+		# must contain a-z
+		if (!preg_match('/^.*([a-z]).*$/', $s, $m)) return false;
+		if (!preg_match('/^.*([0-9]).*$/', $s, $m)) return false;
+		return true;
+	}
 
 	# quickly mashed together as we need this code both in the action and the view part
 	function web_check_results($conn, $r, $link, $show_download) {
@@ -1958,8 +1990,17 @@
 
 	# --- translation ----
 
-	function is_logged_in() {
-		return true;
+	function get_logged_in_user($field=false) {
+		if (!is_logged_in()) {
+			return false;
+		}
+		if (!$field) {
+			return $_SESSION[SITE_SHORTNAME]['user'];
+		}
+		if (!isset($_SESSION[SITE_SHORTNAME]['user'][$field])) {
+			return false;
+		}
+		return $_SESSION[SITE_SHORTNAME]['user'][$field];
 	}
 
 	# to get a matching locale translation index, send in locale and get a working translation index in return

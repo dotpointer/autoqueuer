@@ -25,6 +25,7 @@
 	# 2018-03-22 01:52:00 - adding search links to transfers
 	# 2018-03-22 02:20:00 - replacing dots with spaces in search
 	# 2018-03-24 01:03:00 - adding incognito mode warning
+	# 2018-07-11 18:36:00 - adding login
 
 	start_translations();
 ?>
@@ -32,18 +33,15 @@
 /*global clientpumptypes,window,$,jQuery,toggler,Highcharts,files_queued_stats,view,types,methods*/
 
 var	e = {
-	timeouts: {},
 	emule: {},
 	incognito_mode: undefined,
 	make: {},
 	msg: <?php echo json_encode(get_translation_texts()); ?>,
-	pages: {
-		quickfind: {
-		}
-	},
+	pages: { quickfind: {}	},
+	requests: [],
 	switch_page: null,
-	view: "",
-	requests: []
+	timeouts: {},
+	view: ""
 };
 
 (function() {
@@ -83,8 +81,10 @@ var	e = {
 			return s;
 		};
 
+<?php if (is_logged_in()) { ?>
 		// collection of useful tools
 		e.tools = {
+
 			// expected: yyyy-mm-dd hh:ii:ss
 			format_date: function(s) {
 				s = $.trim(s);
@@ -183,7 +183,6 @@ var	e = {
 			upperCaseFirstLetter: function(s) {
     			return s.charAt(0).toUpperCase() + s.slice(1);
 			}
-
 		};
 
 		// functions for emule direct communication
@@ -232,7 +231,7 @@ var	e = {
 			}
 
 		};
-
+<?php } ?>
 		// to lock a form
 		e.lock_form = function(form, lock) {
 
@@ -250,6 +249,8 @@ var	e = {
 				}
 			});
 		};
+
+<?php if (is_logged_in()) { ?>
 
 		// to render search result list
 		e.pages.quickfind.render_results = function(searchresultlist) {
@@ -279,7 +280,7 @@ var	e = {
 								.addClass("slave")
 								.append(
 									$("<td/>")
-										.attr("colspan", $(this).parents("table:first").find("thead th").size())
+										.attr("colspan", $(this).parents("table:first").find("thead th").length)
 										.append(
 											$("<button/>")
 												.click(function() {
@@ -358,7 +359,7 @@ var	e = {
 									.prop("data", searchresultlist[i])
 									.append(
 										$("<td/>")
-											.attr("colspan", $("#quickfind_results thead tr th").size())
+											.attr("colspan", $("#quickfind_results thead tr th").length)
 											.text(
 												searchresultlist[i].content
 											)
@@ -422,7 +423,7 @@ var	e = {
 					.addClass("loading")
 					.append(
 						$("<td/>")
-							.attr("colspan", $(tbody).parent("table").find("thead th").size())
+							.attr("colspan", $(tbody).parent("table").find("thead th").length)
 							.append(
 								$("<img/>")
 									.attr("src", "img/loading_16x16_black.gif")
@@ -527,7 +528,7 @@ var	e = {
 
 			return tr;
 		};
-
+<?php } ?>
 		// to make a table in the contents
 		e.make.textbox = function(id, text) {
 			// append table
@@ -542,6 +543,7 @@ var	e = {
 
 			return true;
 		};
+
 
 		// to verify response from server
 		e.verify_response = function(data) {
@@ -597,7 +599,7 @@ var	e = {
 
 			// find out what view that was requested
 			switch (view) {
-
+<?php if (is_logged_in()) { ?>
 				case "clientpumps":
 					// do a descriptive text
 					e.make.textbox("", e.t("Client pumps are the collection name for the underlaying downloading softwares that are remoted to download the content you want. Supported client pump softwares are") + " eMule xTreme Mod " + e.t("and") + " mlnet. " + e.t("On this page you setup the connection to these, multiple ones may be configured and controlled. Note that you need to setup the softwares itself too."));
@@ -879,7 +881,129 @@ var	e = {
 					});
 
 					return true;
+<?php } ?>
+				case "login":
 
+					e.make.textbox("", e.t("You login on this page."));
+
+					// do the form
+					$("#content")
+						.append(
+							$("<form/>")
+								.attr("id", "login_form")
+								.append(
+									$("<fieldset/>")
+
+										.append(
+											$("<label/>").text(e.t("Username") + ":")
+										)
+										.append(
+											$("<input/>")
+												.addClass("text")
+												.attr("name","username")
+										)
+										.append(
+											$("<span/>")
+												.addClass("description")
+												.text(e.t("The username to login with."))
+										)
+										.append(
+											$("<br/>")
+										)
+										.append(
+											$("<label/>").text(e.t("Password") + ":")
+										)
+										.append(
+											$("<input/>")
+												.addClass("text")
+												.attr({
+													name: "password",
+													type: "password"
+												})
+										)
+										.append(
+											$("<span/>")
+												.addClass("description")
+												.text(e.t("The password to login with."))
+										)
+										.append(
+											$("<br/>")
+										)
+										.append(
+											$("<button/>")
+												.addClass("marginated")
+												.text(e.t("Login"))
+												.attr("id", "button_submit_insert_or_update_parmeters")
+										)
+										.append(
+											$("<br/>")
+										)
+								)
+						)<?php
+if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAINNAME') && constant('BASE_DOMAINNAME') !== false) { ?>
+								.append(
+									$("<br/>")
+								)
+								.append(
+									$("<p/>")
+										.append(
+											$("<a/>")
+												.attr("href", "http://www.<?php echo BASE_DOMAINNAME?>/?section=visum&id_sites=<?php echo ID_VISUM?>")
+												.text(e.t("Login with Visum here."))
+										)
+								)<?php
+} ?>;
+
+					// e.lock_form("#login_form", true);
+
+					$("#login_form").submit(function(evt) {
+						var data = $(this).serializeArray();
+						var post = {};
+
+						// lock down the form
+						e.lock_form(this, true);
+
+						// flatten serialized array
+						Object.keys(data).forEach(function(i) {
+							post[data[i].name] = data[i].value;
+						});
+
+						post.action = "login";
+						post.logintype = "local";
+						post.format = "json";
+
+						e.requests.push($.postJSON(".", post, function(data) {
+							if (!e.verify_response(data)) {
+								e.lock_form("#login_form", false);
+								return false;
+							}
+							e.lock_form("#login_form", false);
+							// e.reload_page();
+							window.location = '.';
+						}));
+
+						evt.preventDefault();
+						return false;
+					});
+
+					return true;
+<?php if (is_logged_in()) { ?>
+				case "logout":
+
+						e.requests.push(
+							$.postJSON(
+							".",
+							{
+								action: "logout"
+							},
+							function(data) {
+							if (!e.verify_response(data)) {
+								return false;
+							}
+							window.location = '.';
+						}));
+
+						return false;
 				case "quickfind":
 
 					e.make.textbox("", e.t("Here you can do a direct search using the configured client pump softwares."));
@@ -2224,6 +2348,7 @@ var	e = {
 					});
 
 					return true;
+<?php } ?>
 			}
 
 			return false;
@@ -2240,6 +2365,8 @@ var	e = {
 			evt.preventDefault();
 			return false;
 		});
+
+<?php if (is_logged_in()) { ?>
 
 		// the find box
 		$("#findbox #find").keyup(function() {
@@ -2268,7 +2395,7 @@ var	e = {
 					}
 
 					// no find results table available?
-					if (!$("#content table#findresult").size()) {
+					if (!$("#content table#findresult").length) {
 
 						// then empty and put in a table
 						$("#content")
@@ -2340,10 +2467,13 @@ var	e = {
 				return true;
 			}, 250);
 		});
+<?php } ?>
 
 		// switch page to something
 		e.switch_page(view);
 
+<?php if (is_logged_in()) { ?>
 		e.tools.determine_incognito_mode();
+<?php } ?>
 	});
 }());

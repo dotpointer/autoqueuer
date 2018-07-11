@@ -19,15 +19,9 @@
 # 2017-09-12 22:27:00 - dropping project name in file
 # 2017-09-22 00:08:00 - adding redownload
 # 2018-03-22 01:53:00 - adding version parameter and no-referrer meta tag
+# 2018-07-11 18:37:00 - adding login
 
 session_start();
-
-# simple pin lock
-$pin = isset($_REQUEST['pin']) ? $_REQUEST['pin'] : (isset($_SESSION['pin']) ? $_SESSION['pin'] : '');
-if ($pin != '1') {
-	die();
-}
-$_SESSION['pin'] = $pin;
 
 require_once('include/functions.php');
 
@@ -52,10 +46,12 @@ $id 						= isset($_REQUEST['id']) ? $_REQUEST['id'] : false;
 $id_clientpumps 			= isset($_REQUEST['id_clientpumps']) ? $_REQUEST['id_clientpumps'] : false;
 $id_files 					= isset($_REQUEST['id_files']) ? $_REQUEST['id_files'] : array();
 $id_searches 				= isset($_REQUEST['id_searches']) ? $_REQUEST['id_searches'] : false;
+$logintype					= isset($_REQUEST['logintype']) ? $_REQUEST['logintype'] : false;
 $method 					= isset($_REQUEST['method']) ? $_REQUEST['method'] : '';
 $movetopath 				= isset($_REQUEST['movetopath']) ? $_REQUEST['movetopath'] : '';
 $nickname 					= isset($_REQUEST['nickname']) ? $_REQUEST['nickname'] : '';
 $password 					= isset($_REQUEST['password']) ? $_REQUEST['password'] : '';
+$password_retype			= isset($_REQUEST['password_retype']) ? $_REQUEST['password_retype'] : '';
 $path_incoming 				= isset($_REQUEST['path_incoming']) ? $_REQUEST['path_incoming'] : '';
 $port 						= isset($_REQUEST['port']) ? $_REQUEST['port'] : 0;
 $redownload					= isset($_REQUEST['redownload']) ? $_REQUEST['redownload'] : false;
@@ -68,6 +64,10 @@ $type 						= isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
 $username 					= isset($_REQUEST['username']) ? $_REQUEST['username'] : '';
 $version					= isset($_REQUEST['version']) ? (int)$_REQUEST['version'] : 1;
 $view 						= isset($_REQUEST['view']) ? $_REQUEST['view'] : '';
+
+if ($view === '' && !is_logged_in()) {
+	$view = 'login';
+}
 
 # get actions
 require_once('index_action.php');
@@ -88,7 +88,7 @@ foreach ($clientpumpclasses as $k => $v) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<meta name="referrer" content="no-referrer" />
 
-	<title><?php echo PROJECT_TITLE ?></title>
+	<title><?php echo is_logged_in() ? PROJECT_TITLE : t('Login'); ?></title>
 
 	<link rel="stylesheet" href="include/screen.css" type="text/css" media="screen" />
 
@@ -98,18 +98,33 @@ foreach ($clientpumpclasses as $k => $v) {
 
 	<script type="text/javascript">
 		var
+<?php
+if (is_logged_in()) {
+?>
 			clientpumptypes = <?php echo json_encode($clientpumptypes)?>,
 			methods = <?php echo json_encode($methods)?>,
 			types = <?php echo json_encode($types)?>,
+<?php
+}
+?>
 			view = '<?php echo $view?>';
 	</script>
 	<script type="text/javascript" src="include/load.php?nocache=<?php echo time();?>"></script>
+<?php
+if (is_logged_in()) {
+?>
 	<script type="text/javascript">
 		e.logmessage_type_descriptions_short = <?php echo json_encode($logmessage_type_descriptions_short)?>;
 	</script>
+<?php
+}
+?>
 </head>
 <body>
 	<div id="main">
+<?php
+if (is_logged_in()) {
+?>
 		<div id="header">
 			<img src="img/pumpjack.png" id="logo" alt="<?php echo PROJECT_TITLE ?>" />
 			<h1>
@@ -117,8 +132,14 @@ foreach ($clientpumpclasses as $k => $v) {
 			</h1>
 			<div id="subtitle"><?php echo t('Control Panel'); ?></div>
 		</div>
+<?php
+}
+?>
 		<div id="menu">
 			<ul>
+<?php
+if (is_logged_in()) {
+?>
 				<li>
 					<a href="?view=quickfind"><?php echo t('Find'); ?></a>
 				</li>
@@ -142,12 +163,29 @@ foreach ($clientpumpclasses as $k => $v) {
 				<li>
 					<a href="?view=parameters"><?php echo t('Parameters'); ?></a>
 				</li>
+				<li>
+					<a href="?view=logout"><?php echo t('Logout'); ?></a>
+				</li>
+<?php
+} else {
+?>
+				<li>
+					<a href="?view=login"><?php echo t('Login'); ?></a>
+				</li>
+<?php
+}
+?>
 			</ul>
 
+<?php
+if (is_logged_in()) {
+?>
 			<div id="findbox">
 				<input type="text" id="find" name="find" placeholder="<?php echo t('Find in file database'); ?>">
 			</div>
-
+<?php
+}
+?>
 			<div class="clear_both"></div>
 		</div>
 		<div id="content"></div>

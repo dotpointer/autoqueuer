@@ -8,6 +8,7 @@
 # 2017-09-22 00:32:00 - dialog texts
 # 2018-03-22 00:18:00 - button texts
 # 2018-03-24 01:03:00 - adding incognito mode warning
+# 2018-07-11 18:53:00 - adding login
 
 # store this into translations
 $translations['languages'][] = array(
@@ -15,6 +16,7 @@ $translations['languages'][] = array(
 		'sv-SE'
 	),
 	'content' => array(
+		array('Login', 'Logga in')
 	),
 	'content_logged_in' => array(
 		array('The file will be allowed to redownload if it re-appears.', 'Filen kommer tillåtas för omnerladdning om den dyker upp igen.'),
@@ -86,6 +88,7 @@ $translations['languages'][] = array(
 		array('Last time an e-mail was sent.', 'Senaste gången ett e-postmeddelande sändes.'),
 		array('Loading','Laddar'),
 		array('Log','Logg'),
+		array('Logout', 'Logga ut'),
 		array('Manage','Hantera'),
 		array('Max', 'Max'),
 		array('Message','Meddelande'),
