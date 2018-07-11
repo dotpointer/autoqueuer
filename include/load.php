@@ -26,6 +26,7 @@
 	# 2018-03-22 02:20:00 - replacing dots with spaces in search
 	# 2018-03-24 01:03:00 - adding incognito mode warning
 	# 2018-07-11 18:36:00 - adding login
+	# 2018-07-11 20:00:00 - es6 javascript conversion
 
 	start_translations();
 ?>
@@ -49,7 +50,7 @@ var	e = {
 
 	// add postJSON to jQuery
 	jQuery.extend({
-		postJSON: function (url, data, callback) {
+		postJSON: (url, data, callback) => {
 			return jQuery.post(url, data, callback, "json");
 		}
 	});
@@ -58,8 +59,8 @@ var	e = {
 	$(window.document).ready(function() {
 
 		// to translate texts
-		e.t = function(s) {
-			var found = false;
+		e.t = (s) => {
+			let found = false;
 			// are the translation texts available?
 			if (typeof e.msg !== "object") {
 				return s;
@@ -67,7 +68,7 @@ var	e = {
 
 			// walk the translation texts
 			// for (i=0; i < e.msg.length; i+=1) {
-			Object.keys(e.msg).forEach(function(i) {
+			Object.keys(e.msg).forEach((i) => {
 				if (found === false && e.msg[0] !== undefined && e.msg[1] !== undefined && e.msg[i][0] === s) {
 					// return e.msg[i][1];
 					found = e.msg[i][1];
@@ -86,24 +87,22 @@ var	e = {
 		e.tools = {
 
 			// expected: yyyy-mm-dd hh:ii:ss
-			format_date: function(s) {
+			format_date: (s) => {
 				s = $.trim(s);
 				s = s.substr(0, s.length - 3);
 				s = s.substr(2, s.length);
 				return s;
 			},
 			// parse int, radix 10 (decimal)
-			pi10: function(x) {
-				return parseInt(x, 10);
-			},
+			pi10: (x) => parseInt(x, 10),
 			replace_all(search, replacement, subject) {
 				return subject.replace(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), 'g'), replacement);
 			},
 			// to split an ed2k link into parts
-			split_ed2klink: function (ed2klink) {
+			split_ed2klink: (ed2klink) => {
 
 				// get info for this file
-				var fileinfo = ed2klink.split("|");
+				let fileinfo = ed2klink.split("|");
 
 				// 0: protocol (crap)
 				// 1: type
@@ -126,10 +125,9 @@ var	e = {
 				};
 			},
 			// to format seconds - taken from https://gist.github.com/remino/1563878
-			format_seconds: function(s) {
-				var d;
-				var h;
-				var m;
+			format_seconds: (s) => {
+
+				let d, h, m;
 
 				m = Math.floor(s / 60);
 				s = s % 60;
@@ -140,9 +138,9 @@ var	e = {
 				return d + "d " + e.tools.pad_left(h,2,"0") + ":" + e.tools.pad_left(m,2,"0") + ":" + e.tools.pad_left(s,2,"0");
 			},
 			// to get file size - taken from stack overflow
-			filesize: function(file_size_in_bytes) {
-				var ix = -1;
-				var byte_units = [" kB", " MB", " GB", " TB", "PB", "EB", "ZB", "YB"];
+			filesize: (file_size_in_bytes) => {
+				let ix = -1,
+					byte_units = [" kB", " MB", " GB", " TB", "PB", "EB", "ZB", "YB"];
 
 				do {
 					file_size_in_bytes = file_size_in_bytes / 1024;
@@ -152,7 +150,7 @@ var	e = {
 				return Math.max(file_size_in_bytes, 0.1).toFixed(1) + byte_units[ix];
 			},
 			// to pad a variable from the left
-			pad_left: function(s, min, pad) {
+			pad_left: (s, min, pad) => {
 				s = s.toString();
 				while (s.length < min) {
 					s = pad + s;
@@ -167,84 +165,92 @@ var	e = {
 				fs(
 					window.TEMPORARY,
 					100,
-					function () {
+					() => {
 						e.incognito_mode = false;
 					},
-					function() {
+					() => {
 						e.incognito_mode = true;
 					}
 				);
 			},
 			// to convert a timestamp to a date
-			timestamp_to_date: function(timestamp) {
-				var a = new Date(timestamp);
+			timestamp_to_date: (timestamp) => {
+				let a = new Date(timestamp);
 				return a.getFullYear() + "-" + e.tools.pad_left(a.getMonth() + 1,2,"0")  + "-" + e.tools.pad_left(a.getDate(),2,"0") + " " + e.tools.pad_left(a.getHours(),2,"0") + ":" + e.tools.pad_left(a.getMinutes(),2,"0");
 			},
-			upperCaseFirstLetter: function(s) {
-    			return s.charAt(0).toUpperCase() + s.slice(1);
-			}
+			upperCaseFirstLetter: (s) => s.charAt(0).toUpperCase() + s.slice(1)
 		};
 
 		// functions for emule direct communication
 		e.emule = {
 			// to request a download
-			request_download: function(id_clientpumps, id) {
-				e.requests.push($.getJSON("?format=json&action=quickfind_download&id_clientpumps=" + id_clientpumps + "&id=" + id, function(data){
-					if (!e.verify_response(data)) {
-						return false;
+			request_download: (id_clientpumps, id) => {
+				e.requests.push($.getJSON(
+					"?format=json&action=quickfind_download&id_clientpumps=" + id_clientpumps + "&id=" + id,
+					(data) => {
+						if (!e.verify_response(data)) {
+							return false;
+						}
 					}
-				}));
+				));
 				return true;
 			},
 			// to request a find
-			request_find: function(input_data, callback_when_done) {
+			request_find: (input_data, callback_when_done) => {
 				input_data.action = "quickfind";
 
-				e.requests.push($.postJSON("?format=json", input_data, function(data){
-					// things below should treat the errors, therefore no error check here
-					if (typeof callback_when_done === "function") {
-						callback_when_done(data);
+				e.requests.push($.postJSON(
+					"?format=json",
+					input_data,
+					(data) => {
+						// things below should treat the errors, therefore no error check here
+						if (typeof callback_when_done === "function") {
+							callback_when_done(data);
+						}
 					}
-				}));
+				));
 				return true;
 			},
 			// to get something
-			get: function(what, params, callback_when_done) {
+			get: (what, params, callback_when_done) => {
 
-				var params_str = "";
+				let params_str = "";
 
 				if (typeof params === "object") {
-					Object.keys(params).forEach(function(ix) {
+					Object.keys(params).forEach((ix) => {
 						if (params.hasOwnProperty(ix)) {
 							params_str += "&" + ix + "=" + params[ix];
 						}
 					});
 				}
 
-				e.requests.push($.getJSON("?format=json&view=" + what + params_str, function(data){
-					if (!e.verify_response(data)) {
-						return false;
+				e.requests.push($.getJSON(
+					"?format=json&view=" + what + params_str,
+					(data) => {
+						if (!e.verify_response(data)) {
+							return false;
+						}
+						callback_when_done(data);
 					}
-					callback_when_done(data);
-				}));
+				));
 				return true;
 			}
 
 		};
 <?php } ?>
 		// to lock a form
-		e.lock_form = function(form, lock) {
+		e.lock_form = (form, lock) => {
 
-			$(form).find("input,select,button,textarea").each(function() {
+			$(form).find("input,select,button,textarea").each((index, element) => {
 				if (lock) {
-					if (!$(this).attr("disabled")) {
-						$(this)
+					if (!$(element).attr("disabled")) {
+						$(element)
 							.addClass("locked")
 							.attr("disabled", true);
 					}
 				} else {
-					if ($(this).hasClass("locked")) {
-						$(this).removeClass("locked").removeAttr("disabled");
+					if ($(element).hasClass("locked")) {
+						$(element).removeClass("locked").removeAttr("disabled");
 					}
 				}
 			});
@@ -253,43 +259,42 @@ var	e = {
 <?php if (is_logged_in()) { ?>
 
 		// to render search result list
-		e.pages.quickfind.render_results = function(searchresultlist) {
+		e.pages.quickfind.render_results = (searchresultlist) => {
 
-			var event_tr_click = null;
-			var event_tr_dblclick = null;
-			var fileinfo;
-			// var i = 0;
+			let event_tr_click,
+				event_tr_dblclick,
+				fileinfo;
 
 			$("#quickfind_results tbody")
 				.empty();
 
 			e.make.table_tr_loading("#quickfind_results tbody");
 
-			event_tr_click = function() {
+			event_tr_click = (evt) => {
 				// is the row below us a slave row?
-				if ($(this).next().hasClass("slave")) {
+				if ($(evt.target).next().hasClass("slave")) {
 					// then remove it
-					$(this).next().remove();
-					$(this).parents("tr:first").remove();
+					$(evt.target).next().remove();
+					$(evt.target).parents("tr:first").remove();
 				// or is this not already downloaded?
-				} else if ($(this).prop("data").download === undefined || !$(this).prop("data").download.length) {
-					$(this)
+				} else if ($(e.target).prop("data").download === undefined || !$(evt.target).prop("data").download.length) {
+					$(e.target)
 						.after(
 
 							$("<tr/>")
 								.addClass("slave")
 								.append(
 									$("<td/>")
-										.attr("colspan", $(this).parents("table:first").find("thead th").length)
+										.attr("colspan", $(e.target).parents("table:first").find("thead th").length)
 										.append(
 											$("<button/>")
-												.click(function() {
+												.click((evt) => {
 													e.emule.request_download(
-														$(this).parents("tr:first").prev().prop("data").id_clientpumps,
-														$(this).parents("tr:first").prev().prop("data").id
+														$(evt.target).parents("tr:first").prev().prop("data").id_clientpumps,
+														$(evt.target).parents("tr:first").prev().prop("data").id
 													);
-													$(this).parents("tr:first").prev().addClass("downloading");
-													$(this).parents("tr:first").remove();
+													$(evt.target).parents("tr:first").prev().addClass("downloading");
+													$(evt.target).parents("tr:first").remove();
 												})
 												.text(e.t("Download"))
 										)
@@ -299,16 +304,16 @@ var	e = {
 				return true;
 			};
 
-			event_tr_dblclick = function() {
+			event_tr_dblclick = (evt) => {
 				e.emule.request_download(
-					$(this).data("data").id_clientpumps,
-					$(this).data("data").id
+					$(evt.target).data("data").id_clientpumps,
+					$(evt.target).data("data").id
 				);
-				$(this).addClass("downloading");
+				$(evt.target).addClass("downloading");
 				return false;
 			};
 
-			Object.keys(searchresultlist).forEach(function(i) {
+			Object.keys(searchresultlist).forEach((i) => {
 
 				if (searchresultlist.hasOwnProperty(i)) {
 
@@ -373,11 +378,11 @@ var	e = {
 		};
 
 		// take an object or an array, iterate through it and return option elements
-		e.obj_to_options = function(obj) {
+		e.obj_to_options = (obj) => {
 
-			var tmp = $("<select/>");
+			let tmp = $("<select/>");
 
-			Object.keys(obj).forEach(function(i) {
+			Object.keys(obj).forEach((i) => {
 				if (obj.hasOwnProperty(i)) {
 					tmp
 						.append(
@@ -391,15 +396,14 @@ var	e = {
 			return tmp.children();
 		};
 
-		e.timediff = function timeDifference(current, previous) {
+		e.timediff = (current, previous) => {
 
-			var msPerMinute = 60 * 1000,
+			let msPerMinute = 60 * 1000,
 				msPerHour = msPerMinute * 60,
 				msPerDay = msPerHour * 24,
 				msPerMonth = msPerDay * 30,
-				msPerYear = msPerDay * 365;
-
-			var elapsed = current - previous;
+				msPerYear = msPerDay * 365,
+				elapsed = current - previous;
 
 			if (elapsed < msPerMinute) {
 				return Math.round(elapsed/1000) + ' ' + e.t('seconds') + ' ' + e.t('ago');
@@ -417,7 +421,7 @@ var	e = {
 		}
 
 		// to make a loading row
-		e.make.table_tr_loading = function(tbody) {
+		e.make.table_tr_loading = (tbody) => {
 			$(tbody).append(
 				$("<tr/>")
 					.addClass("loading")
@@ -433,13 +437,13 @@ var	e = {
 		};
 
 		// to make a table in the contents
-		e.make.table = function(id, columns, loading) {
-			var thead_tr = $("<tr/>");
+		e.make.table = (id, columns, loading) => {
+			let thead_tr = $("<tr/>");
 
 			loading = (loading === undefined) ? true : loading;
 
 			// walk columns and construct a header row
-			Object.keys(columns).forEach(function(i) {
+			Object.keys(columns).forEach((i) => {
 				if (columns.hasOwnProperty(i)) {
 
 					if (typeof columns[i] === "object") {
@@ -483,11 +487,11 @@ var	e = {
 		};
 
 		// to make a table tr
-		e.make.table_tr = function(tbody, data, columns, callback_maker) {
-			var tr = $("<tr/>").prop("data", data);
+		e.make.table_tr = (tbody, data, columns, callback_maker) => {
+			let tr = $("<tr/>").prop("data", data);
 
 			// walk columns
-			Object.keys(columns).forEach(function(i) {
+			Object.keys(columns).forEach((i) => {
 				if (columns.hasOwnProperty(i)) {
 
 					// what type of data is this column?
@@ -530,7 +534,7 @@ var	e = {
 		};
 <?php } ?>
 		// to make a table in the contents
-		e.make.textbox = function(id, text) {
+		e.make.textbox = (id, text) => {
 			// append table
 			$("#content")
 				.append(
@@ -546,7 +550,7 @@ var	e = {
 
 
 		// to verify response from server
-		e.verify_response = function(data) {
+		e.verify_response = (data) => {
 			// make sure response is an object
 
 			if (data === undefined || data === null || typeof data !== "object" || typeof data.status !== "string") {
@@ -574,7 +578,7 @@ var	e = {
 		};
 
 		// to reload page
-		e.reload_page = function() {
+		e.reload_page = () => {
 			if (e.view.length) {
 				return e.switch_page(e.view);
 			}
@@ -582,12 +586,12 @@ var	e = {
 		};
 
 		// to switch page
-		e.switch_page = function(view) {
+		e.switch_page = (view) => {
 
-			var tmp = "";
+			let tmp = "";
 
 			// walk previous requests and abort them all
-			Object.keys(e.requests).forEach(function(l) {
+			Object.keys(e.requests).forEach((l) => {
 				e.requests[l].abort();
 			});
 			e.requests = [];
@@ -642,8 +646,8 @@ var	e = {
 											$("<a/>")
 												.attr("href", "#")
 												.text(e.t("New client pump"))
-												.click(function(evt) {
-													$(this).parents("form:first")[0].reset();
+												.click((evt) => {
+													$(evt.target).parents("form:first")[0].reset();
 													evt.preventDefault();
 													return false;
 												})
@@ -754,21 +758,21 @@ var	e = {
 
 					e.lock_form("#insert_or_update_clientpump_form", true);
 
-					$("#insert_or_update_clientpump_form").submit(function(evt) {
-						var data = $(this).serializeArray();
-						var post = {};
+					$("#insert_or_update_clientpump_form").submit((evt) => {
+						let data = $(evt.target).serializeArray(),
+							post = {
+								action: "insert_or_update_clientpump"
+							};
 
 						// lock down the form
-						e.lock_form(this, true);
+						e.lock_form(evt.target, true);
 
 						// flatten serialized array
-						Object.keys(data).forEach(function(i) {
+						Object.keys(data).forEach((i) => {
 							post[data[i].name] = data[i].value;
 						});
 
-						post.action = "insert_or_update_clientpump";
-
-						e.requests.push($.postJSON(".", post, function(data) {
+						e.requests.push($.postJSON(".", post, (data) => {
 							if (!e.verify_response(data)) {
 								e.lock_form("#insert_or_update_clientpump_form", false);
 								return false;
@@ -782,19 +786,19 @@ var	e = {
 					});
 
 					// get searches
-					e.emule.get("clientpumps", "", function(data) {
+					e.emule.get("clientpumps", "", (data) => {
 
-						var event_a_delete = null;
-						var event_a_edit = null;
-						var div_manage = null;
+						let event_a_delete,
+							event_a_edit,
+							div_manage = null;
 
 						// when clicking on delete links
-						event_a_delete = function(evt) {
+						event_a_delete = (evt) => {
 							// get row data
-							var rowdata = $(this).parents("tr:first").prop("data");
+							let rowdata = $(evt.target).parents("tr:first").prop("data");
 
 							if (window.confirm(e.t("Are you sure that you want to delete") + " \"" + rowdata.type + "@" + rowdata.host + "\" (#" + rowdata.id + ")?")) {
-								e.requests.push($.getJSON("./?action=delete_clientpump&id_clientpumps=" + rowdata.id, function(d) {
+								e.requests.push($.getJSON("./?action=delete_clientpump&id_clientpumps=" + rowdata.id, (d) => {
 									if (!e.verify_response(d)) {
 										return false;
 									}
@@ -807,10 +811,10 @@ var	e = {
 						};
 
 						// when clicking on edit links
-						event_a_edit = function(evt) {
+						event_a_edit = (evt) => {
 
 							// get row data
-							var rowdata = $(this).parents("tr:first").prop("data");
+							let rowdata = $(evt.target).parents("tr:first").prop("data");
 
 							// load form with data
 							$("#insert_or_update_clientpump_form input[name='host']").val(rowdata.host);
@@ -827,7 +831,7 @@ var	e = {
 						};
 
 						// walk clientpumps
-						Object.keys(data.data.clientpumps).forEach(function(i) {
+						Object.keys(data.data.clientpumps).forEach((i) => {
 
 							div_manage = $("<div/>")
 								.append(
@@ -860,7 +864,7 @@ var	e = {
 								{inner_html: data.data.clientpumps[i].queuedfiles, classes: "counter"},
 								data.data.clientpumps[i].status === 1 ? e.t("On") : e.t("Off"),
 								{inner_html: div_manage.children(), classes: "manage"}
-							], function(data, tr) {
+							], (data, tr) => {
 
 								if (data.status === 1) {
 									tr.addClass("active");
@@ -884,7 +888,7 @@ var	e = {
 <?php } ?>
 				case "login":
 
-					e.make.textbox("", e.t("You login on this page."));
+					e.make.textbox("", e.t("Login here."));
 
 					// do the form
 					$("#content")
@@ -953,32 +957,28 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 										)
 								)<?php
 } ?>;
-
-					// e.lock_form("#login_form", true);
-
-					$("#login_form").submit(function(evt) {
-						var data = $(this).serializeArray();
-						var post = {};
+					$("#login_form").submit((evt) => {
+						let data = $(evt.target).serializeArray(),
+							post = {
+								action: "login",
+								format: "json",
+								logintype: "local"
+							};
 
 						// lock down the form
-						e.lock_form(this, true);
+						e.lock_form(evt.target, true);
 
 						// flatten serialized array
-						Object.keys(data).forEach(function(i) {
+						Object.keys(data).forEach((i) => {
 							post[data[i].name] = data[i].value;
 						});
 
-						post.action = "login";
-						post.logintype = "local";
-						post.format = "json";
-
-						e.requests.push($.postJSON(".", post, function(data) {
+						e.requests.push($.postJSON(".", post, (data) => {
 							if (!e.verify_response(data)) {
 								e.lock_form("#login_form", false);
 								return false;
 							}
 							e.lock_form("#login_form", false);
-							// e.reload_page();
 							window.location = '.';
 						}));
 
@@ -996,12 +996,13 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 							{
 								action: "logout"
 							},
-							function(data) {
-							if (!e.verify_response(data)) {
-								return false;
+							(data) => {
+								if (!e.verify_response(data)) {
+									return false;
+								}
+								window.location = '.';
 							}
-							window.location = '.';
-						}));
+						));
 
 						return false;
 				case "quickfind":
@@ -1197,7 +1198,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					e.lock_form("#quickfind_find_form", true);
 
 					// get current client pumps
-					e.emule.get("clientpumps", {}, function(data) {
+					e.emule.get("clientpumps", {}, (data) => {
 
 						// invalid status?
 						if (data.status !== "ok") {
@@ -1209,7 +1210,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						}
 
 						// walk client pumps
-						Object.keys(data.data.clientpumps).forEach(function(i) {
+						Object.keys(data.data.clientpumps).forEach((i) => {
 							// is this one available?
 							if (data.data.clientpumps[i].status === 1) {
 								// then add it to list of pumps
@@ -1230,10 +1231,10 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					e.make.table("quickfind_results", ["",e.t("Name"), e.t("Size"), e.t("Info")], false);
 
 					// when submitting the quickfind form
-					$("#quickfind_find_form").submit(function(evt) {
+					$("#quickfind_find_form").submit((evt) => {
 
 						// lock down the form
-						e.lock_form(this, true);
+						e.lock_form(evt.target, true);
 
 						// request the find
 						e.emule.request_find({
@@ -1245,7 +1246,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 							sizemax:		$("input[name='sizemax']").val(),
 							sizemin:		$("input[name='sizemin']").val(),
 							type: 			$("select[name='type']").val()
-						}, function(data) {
+						}, (data) => {
 
 							if (!e.verify_response(data)) {
 								e.lock_form("#quickfind_find_form", false);
@@ -1262,7 +1263,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					});
 
 					// when clicking on the update results button
-					$("#button_update_quickfind").click(function() {
+					$("#button_update_quickfind").click(() => {
 						e.lock_form("#quickfind_find_form", true);
 
 						$("#quickfind_results tbody")
@@ -1274,7 +1275,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						e.emule.get("quickfind_results", {
 								id_clientpumps: $("select[name='id_clientpumps']").val(),
 								show_download: $("select[name='show_download']").val()
-							}, function(data) {
+							}, (data) => {
 							e.pages.quickfind.render_results(data.data.searchresultlist);
 							e.lock_form("#quickfind_find_form", false);
 						});
@@ -1301,7 +1302,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					]);
 
 					// fetch results
-					e.emule.get("transfers", {version: 2}, function(data) {
+					e.emule.get("transfers", {version: 2}, (data) => {
 
 						var percentage;
 						var chunkbar = null,
@@ -1325,12 +1326,12 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 							}
 						}
 
-						Object.keys(data.data.transfers).forEach(function(i) {
+						Object.keys(data.data.transfers).forEach((i) => {
 							let search_links_container = $('<div/>');
 
 							if (data.data.transfers[i].chunkweights !== undefined) {
 								chunkbar = $("<div/>").addClass("chunkbar");
-								Object.keys(data.data.transfers[i].chunkweights).forEach(function(j) {
+								Object.keys(data.data.transfers[i].chunkweights).forEach((j) => {
 									chunkbar.append(
 										$('<div/>')
 											.addClass('chunkweight' + data.data.transfers[i].chunkweights[j].type)
@@ -1361,13 +1362,13 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 											.attr('href', '#')
 											.prop('name', data.data.transfers[i].name)
 											.prop('url', item.url)
-											.click(function(event) {
+											.click((evt) => {
 												if (!e.incognito_mode) {
 													e.incognito_mode = window.confirm(e.t('You are not in incognito mode. This link will register in the browser history. Do you want to continue anyway? (This will disable the warning for this session.)'));
 												}
 
 												if (e.incognito_mode) {
-													let data = $(this).prop('name'),
+													let data = $(evt.target).prop('name'),
 														url;
 													data = data.indexOf('.') !== -1 ? data.substring(0, data.lastIndexOf('.')) : data;
 													data = e.tools.replace_all('\_', ' ', data);
@@ -1377,12 +1378,12 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 													data = e.tools.replace_all('\#', ' ', data);
 													data = e.tools.replace_all('.', ' ', data);
 
-													url = $(this).prop('url').replace('###NAME###', encodeURIComponent($.trim(data)));
+													url = $(evt.target).prop('url').replace('###NAME###', encodeURIComponent($.trim(data)));
 
 													window.open(url);
 												}
 
-												event.preventDefault();
+												evt.preventDefault();
 												return false;
 											})
 											.text(item.title)
@@ -1409,16 +1410,16 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 														.attr('src', '?view=preview&id_clientpumps=' + data.data.transfers[i].id_clientpumps + '&filehash=' + data.data.transfers[i].ed2k)
 														.addClass('preview')
 												)
-												.click(function(event) {
+												.click((evt) => {
 
-												var opened = window.open($(this).attr('href'), '_blank');
+													let opened = window.open($(evt.target).attr('href'), '_blank');
 
 													if (opened) {
 														opened.focus();
 													} else {
 														window.alert(e.t('Failed opening new window, popups may be blocked.'));
 													}
-													event.preventDefault();
+													evt.preventDefault();
 													return false;
 												})
 										: ''
@@ -1462,28 +1463,31 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 												.prop('id', data.data.transfers[i].id)
 												.prop('id_clientpumps', data.data.transfers[i].id_clientpumps)
 												.prop('name', data.data.transfers[i].name)
-												.click(function(event) {
-														var row = $(this).parents('tr:first');
+												.click((evt) => {
+														let row = $(evt.target).parents('tr:first');
 														event.preventDefault();
 
-														if ($(this).prop('locked')) {
+														if ($(evt.target).prop('locked')) {
 															return false;
 														}
 
-														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?')) {
+														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(evt.target).prop('name') + '" (' + $(evt.target).prop('id_clientpumps') + ' / ' + $(evt.target).prop('id') + ')?')) {
 															return false;
 														}
 
-														$(this).prop('locked', true);
+														$(evt.target).prop('locked', true);
 
-														e.requests.push($.getJSON('?format=json&action=cancel&id_clientpumps=' + $(this).prop('id_clientpumps') + '&id=' + $(this).prop('id') , function(data){
-															if (!e.verify_response(data)) {
-																return false;
+														e.requests.push($.getJSON(
+															'?format=json&action=cancel&id_clientpumps=' + $(evt.target).prop('id_clientpumps') + '&id=' + $(evt.target).prop('id'),
+															(data) => {
+																if (!e.verify_response(data)) {
+																	return false;
+																}
+																row.remove(); // not sure if it's trustable that
+																// pump does not reuse it's ids when items are removed
+																// e.reload_page();
 															}
-															row.remove(); // not sure if it's trustable that
-															// pump does not reuse it's ids when items are removed
-															// e.reload_page();
-														}));
+														));
 
 														return false;
 													})
@@ -1504,28 +1508,31 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 												.prop('ed2k', data.data.transfers[i].ed2k)
 												.prop('id_clientpumps', data.data.transfers[i].id_clientpumps)
 												.prop('name', data.data.transfers[i].name)
-												.click(function(event) {
-														var row = $(this).parents('tr:first');
+												.click((evt) => {
+														let row = $(evt.target).parents('tr:first');
 														event.preventDefault();
 
-														if ($(this).prop('locked')) {
+														if ($(evt.target).prop('locked')) {
 															return false;
 														}
 
-														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(this).prop('name') + '" (' + $(this).prop('id_clientpumps') + ' / ' + $(this).prop('id') + ')?' + '\n\n' + e.t('The file will be allowed to redownload if it re-appears.'))) {
+														if (!window.confirm(e.t('Are you sure that you want to cancel') + ' "'+ $(evt.target).prop('name') + '" (' + $(evt.target).prop('id_clientpumps') + ' / ' + $(evt.target).prop('id') + ')?' + '\n\n' + e.t('The file will be allowed to redownload if it re-appears.'))) {
 															return false;
 														}
 
-														$(this).prop('locked', true);
+														$(evt.target).prop('locked', true);
 
-														e.requests.push($.getJSON('?format=json&action=cancel&id_clientpumps=' + $(this).prop('id_clientpumps') + '&id=' + $(this).prop('id') + '&redownload=1&filehash=' + $(this).prop('ed2k'), function(data){
-															if (!e.verify_response(data)) {
-																return false;
+														e.requests.push($.getJSON(
+															'?format=json&action=cancel&id_clientpumps=' + $(evt.target).prop('id_clientpumps') + '&id=' + $(evt.target).prop('id') + '&redownload=1&filehash=' + $(evt.target).prop('ed2k'),
+															(data) => {
+																if (!e.verify_response(data)) {
+																	return false;
+																}
+																row.remove(); // not sure if it's trustable that
+																// pump does not reuse it's ids when items are removed
+																// e.reload_page();
 															}
-															row.remove(); // not sure if it's trustable that
-															// pump does not reuse it's ids when items are removed
-															// e.reload_page();
-														}));
+														));
 
 														return false;
 													})
@@ -1588,8 +1595,8 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 											$("<a/>")
 												.attr("href", "#")
 												.text(e.t("New search"))
-												.click(function(evt) {
-													$(this).parents("form:first")[0].reset();
+												.click((evt) => {
+													$(evt.target).parents("form:first")[0].reset();
 													$("input[name=\"executiontimeoutbase\"],input[name=\"executiontimeoutrandbase\"]").val(259200);
 													$("input[name=\"executiontimeoutbase\"],input[name=\"executiontimeoutrandbase\"]").val(259200);
 													evt.preventDefault();
@@ -1831,21 +1838,21 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 								.attr("id", "stats")
 						);
 
-					$("#insert_or_update_search_form").submit(function(evt) {
-						var data = $(this).serializeArray();
-						var post = {};
+					$("#insert_or_update_search_form").submit((evt) => {
+						let data = $(evt.target).serializeArray(),
+							post = {
+								action: "insert_or_update_search"
+							};
 
 						// lock down the form
-						e.lock_form(this, true);
+						e.lock_form(evt.target, true);
 
 						// flatten serialized array
-						Object.keys(data).forEach(function(i) {
+						Object.keys(data).forEach((i) => {
 							post[data[i].name] = data[i].value;
 						});
 
-						post.action = "insert_or_update_search";
-
-						e.requests.push($.postJSON(".", post, function(data) {
+						e.requests.push($.postJSON(".", post, (data) => {
 							if (!e.verify_response(data)) {
 								e.lock_form("#insert_or_update_search_form", false);
 								return false;
@@ -1859,24 +1866,27 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					});
 
 					// get searches
-					e.emule.get("searches", "", function(data) {
+					e.emule.get("searches", "", (data) => {
 
-						var div_manage = null;
-						var event_a_delete = null;
-						var event_a_edit = null;
+						let div_manage = null,
+							event_a_delete,
+							event_a_edit;
 
 						// when clicking on delete links
-						event_a_delete = function(evt) {
+						event_a_delete = (evt) => {
 							// get row data
-							var rowdata = $(this).parents("tr:first").prop("data");
+							let rowdata = $(evt.target).parents("tr:first").prop("data");
 
 							if (window.confirm("Are you sure that you want to delete \"" + rowdata.search + "\" (#" + rowdata.id + ")?")) {
-								e.requests.push($.getJSON("./?action=delete_search&id_searches=" + rowdata.id, function(d) {
-									if (!e.verify_response(d)) {
-										return false;
+								e.requests.push($.getJSON(
+									"./?action=delete_search&id_searches=" + rowdata.id,
+									(d) => {
+										if (!e.verify_response(d)) {
+											return false;
+										}
+										e.reload_page();
 									}
-									e.reload_page();
-								}));
+								));
 							}
 
 							evt.preventDefault();
@@ -1884,10 +1894,10 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						};
 
 						// when clicking on edit links
-						event_a_edit = function(evt) {
+						event_a_edit = (evt) => {
 
 							// get row data
-							var rowdata = $(this).parents("tr:first").prop("data");
+							var rowdata = $(evt.target).parents("tr:first").prop("data");
 
 							// load form with data
 							$("#insert_or_update_search_form input[name='extension']").val(rowdata.extension);
@@ -1908,7 +1918,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						};
 
 						// walk searches
-						Object.keys(data.data.searches).forEach(function(i) {
+						Object.keys(data.data.searches).forEach((i) => {
 
 							div_manage = $("<div/>")
 								.append(
@@ -1943,7 +1953,8 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 								{inner_html: data.data.searches[i].queuedfiles, classes: "counter"},
 								data.data.searches[i].status === 1 ? e.t("On") : e.t("Off"),
 								{inner_html: div_manage.children(), classes: "manage"}
-							], function(data, tr) {
+							],
+							(data, tr) => {
 
 								if (data.status === 1) {
 									tr.addClass("active");
@@ -1952,13 +1963,12 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 								}
 
 								return tr;
-
 							});
 						// }
 						});
 
 						// walk stats and make li:s
-						Object.keys(data.data.stats).forEach(function(i) {
+						Object.keys(data.data.stats).forEach((i) => {
 							$("#stats")
 								.append(
 									$("<li/>")
@@ -1996,7 +2006,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					e.make.table("latest_queued", [e.t("File"), {inner_html: e.t("Search"), classes: "unimportant"}, e.t("Queued")]);
 
 					// request data
-					e.emule.get("latest_queued", "", function(data) {
+					e.emule.get("latest_queued", "", (data) => {
 
 						$("#chart").highcharts({
 							chart: {
@@ -2038,11 +2048,11 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						});
 
 						// walk the result
-						Object.keys(data.data.files_queued).forEach(function(i) {
+						Object.keys(data.data.files_queued).forEach((i) => {
 							tmp = "";
 
 							// walk the searches
-							Object.keys(data.data.searches).forEach(function(j) {
+							Object.keys(data.data.searches).forEach((j) => {
 								// does this search match this file?
 								if (data.data.files_queued[i].id_searches === data.data.searches[j].id && tmp === "") {
 									// then take the search text for this
@@ -2068,9 +2078,9 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					e.make.table("log", [e.t("Type"), e.t("Message"), e.t("Created")]);
 
 					// fetch results
-					e.emule.get("log", "", function(data) {
+					e.emule.get("log", "", (data) => {
 
-						var trmaker;
+						let trmaker;
 
 						// invalid status?
 						if (data.status !== "ok") {
@@ -2081,11 +2091,11 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 							}
 						}
 
-						trmaker = function(data, tr) {
+						trmaker = (data, tr) => {
 
 							// var i = 0;
-							var inner_html = $("<div><table><tbody></tbody></table></div>");
-							var parsed_json;
+							let inner_html = $("<div><table><tbody></tbody></table></div>"),
+								parsed_json;
 
 							// tr maker callback
 							if (data.data.toLowerCase().indexOf("running search") !== -1) {
@@ -2103,7 +2113,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 								if (typeof parsed_json === "object") {
 
 									// walk data
-									Object.keys(parsed_json).forEach(function(i) {
+									Object.keys(parsed_json).forEach((i) => {
 										if (parsed_json.hasOwnProperty(i)) {
 											// append the data
 											inner_html.find("tbody").append(
@@ -2129,7 +2139,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						};
 
 						// walk logmessages
-						Object.keys(data.data.logmessages).forEach(function(i) {
+						Object.keys(data.data.logmessages).forEach((i) => {
 							e.make.table_tr(
 								$("#log>tbody"),
 								data.data.logmessages[i],
@@ -2152,7 +2162,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					e.make.table("dumped", [e.t("Check"), e.t("File"), e.t("Created")]);
 
 					// fetch results
-					e.emule.get("dumped", "", function(data) {
+					e.emule.get("dumped", "", (data) => {
 
 						// invalid status?
 						if (data.status !== "ok") {
@@ -2163,7 +2173,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 							}
 						}
 
-						Object.keys(data.data.files_dumped).forEach(function(i) {
+						Object.keys(data.data.files_dumped).forEach((i) => {
 							$("#dumped tbody")
 								.append(
 									$("<tr/>")
@@ -2294,21 +2304,21 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 
 					e.lock_form("#insert_or_update_parameters_form", true);
 
-					$("#insert_or_update_parameters_form").submit(function(evt) {
-						var data = $(this).serializeArray();
-						var post = {};
+					$("#insert_or_update_parameters_form").submit((evt) => {
+						let data = $(evt.target).serializeArray(),
+							post = {};
 
 						// lock down the form
-						e.lock_form(this, true);
+						e.lock_form(evt.target, true);
 
 						// flatten serialized array
-						Object.keys(data).forEach(function(i) {
+						Object.keys(data).forEach((i) => {
 							post[data[i].name] = data[i].value;
 						});
 
 						post.action = "insert_or_update_parameters";
 
-						e.requests.push($.postJSON(".", post, function(data) {
+						e.requests.push($.postJSON(".", post, (data) => {
 							if (!e.verify_response(data)) {
 								e.lock_form("#insert_or_update_parameters_form", false);
 								return false;
@@ -2322,7 +2332,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					});
 
 					// get current client pumps
-					e.emule.get("parameters", {}, function(data) {
+					e.emule.get("parameters", {}, (data) => {
 
 						// invalid status?
 						if (data.status !== "ok") {
@@ -2334,7 +2344,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 						}
 
 						// walk parameters
-						Object.keys(data.data.parameters).forEach(function(i) {
+						Object.keys(data.data.parameters).forEach((i) => {
 							if (data.data.parameters.hasOwnProperty(i)) {
 								if (i === "email_last_sent") {
 									$("#insert_or_update_parameters_form [name=\"" + i + "\"]").text(data.data.parameters[i]);
@@ -2355,11 +2365,11 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 		};
 
 		// menu handler
-		$("#menu ul a").click(function(evt) {
+		$("#menu ul a").click((evt) => {
 			$("#menu ul li.selected").removeClass("selected");
-			$(this).parents("li:first").addClass("selected");
+			$(evt.target).parents("li:first").addClass("selected");
 
-			var a = $(this).attr("href");
+			let a = $(evt.target).attr("href");
 			a = a.substr(a.indexOf("=") + 1, a.length);
 			e.switch_page(a);
 			evt.preventDefault();
@@ -2369,16 +2379,16 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 <?php if (is_logged_in()) { ?>
 
 		// the find box
-		$("#findbox #find").keyup(function() {
+		$("#findbox #find").keyup(() => {
 			if (e.timeouts.findbox !== undefined) {
 				window.clearTimeout(e.timeouts.findbox);
 			}
 
 			// make a key press timeout
-			e.timeouts.findbox = window.setTimeout(function() {
+			e.timeouts.findbox = window.setTimeout(() => {
 				// run request
 
-				var find = $.trim($("#findbox #find").val());
+				let find = $.trim($("#findbox #find").val());
 
 				// nothing to search for?
 				if (!find.length) {
@@ -2387,8 +2397,8 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					return true;
 				}
 
-				e.requests.push($.getJSON("?format=json&view=find&find=" + $("#findbox #find").val(), function(data){
-					var tbody = $("<tbody/>");
+				e.requests.push($.getJSON("?format=json&view=find&find=" + $("#findbox #find").val(), (data) => {
+					let tbody = $("<tbody/>");
 
 					if (!e.verify_response(data)) {
 						return false;
@@ -2431,7 +2441,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
 					}
 
 					// walk results
-					Object.keys(data.data.findresult).forEach(function(i) {
+					Object.keys(data.data.findresult).forEach((i) => {
 						if (data.data.findresult.hasOwnProperty(i)) {
 
 							// append this result to the table body
