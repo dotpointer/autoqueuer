@@ -20,6 +20,7 @@
 # 2017-09-22 00:08:00 - adding redownload
 # 2018-03-22 01:53:00 - adding version parameter and no-referrer meta tag
 # 2018-07-11 18:37:00 - adding login
+# 2018-07-12 19:53:00 - updating jquery from 1.8.3 to 3.3.1
 
 session_start();
 
@@ -92,7 +93,7 @@ foreach ($clientpumpclasses as $k => $v) {
 
 	<link rel="stylesheet" href="include/screen.css" type="text/css" media="screen" />
 
-	<script type="text/javascript" src="include/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="include/jquery-3.3.1.min.js"></script>
 	<script type="text/javascript "src="include/highcharts.js"></script>
 	<script type="text/javascript" src="include/exporting.js"></script>
 
