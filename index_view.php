@@ -22,739 +22,740 @@
 # 2017-09-19 19:25:00 - editing message handling
 # 2018-03-22 01:52:00 - adding search links to transfers
 # 2018-07-11 18:38:00 - adding login
+# 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
 
 # make sure there is something above this file
 if (!isset($view)) exit;
 
 switch ($view) {
-	case 'preview':
+  case 'preview':
 
-		# make sure user is logged in
-		if (!is_logged_in()) {
-			die('Login required.');
-		}
+    # make sure user is logged in
+    if (!is_logged_in()) {
+      die('Login required.');
+    }
 
-		if (!is_numeric($id_clientpumps) || !strlen($filehash)) {
-			cl('Missing parameters id_clientpumps or filehash.', VERBOSE_ERROR);
-			fwrite(STDERR, messages(true));
-			die(1);
-		}
+    if (!is_numeric($id_clientpumps) || !strlen($filehash)) {
+      cl('Missing parameters id_clientpumps or filehash.', VERBOSE_ERROR);
+      fwrite(STDERR, messages(true));
+      die(1);
+    }
 
-		$filehash = preg_replace("/[^a-zA-Z0-9]+/i", "", $filehash);;
-		$id_clientpumps = (int)$id_clientpumps;
-		$previewfile = PREVIEW_DIR.$id_clientpumps.'/'.$filehash.'.preview.jpg';
+    $filehash = preg_replace("/[^a-zA-Z0-9]+/i", "", $filehash);;
+    $id_clientpumps = (int)$id_clientpumps;
+    $previewfile = PREVIEW_DIR.$id_clientpumps.'/'.$filehash.'.preview.jpg';
 
-		if (!file_exists($previewfile)) {
-			cl('File does not exist. Make sure subfolder below the pump id folders is readable by web server.', VERBOSE_ERROR);
-			fwrite(STDERR, messages(true));
-			die(1);
-		}
+    if (!file_exists($previewfile)) {
+      cl('File does not exist. Make sure subfolder below the pump id folders is readable by web server.', VERBOSE_ERROR);
+      fwrite(STDERR, messages(true));
+      die(1);
+    }
 
-		header('Content-Disposition: inline; filename='.$filehash.'.preview.jpg');
-		header('Content-Type: image/jpeg');
-		header('Content-Length: '.filesize($previewfile));
-		readfile($previewfile);
-		die();
+    header('Content-Disposition: inline; filename='.$filehash.'.preview.jpg');
+    header('Content-Type: image/jpeg');
+    header('Content-Length: '.filesize($previewfile));
+    readfile($previewfile);
+    die();
 }
 
 # is format json?
 if ($format === 'json') {
 
-	# output json header
-	header('Content-Type: application/json');
-
-	# find out what to view if any
-	switch ($view) {
-
-		case 'clientpumps': # list of client pumps
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array()
-			);
-
-			# get all clientpumps
-			$sql = 'SELECT
-							*
-					FROM
-						clientpumps';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-
-			foreach ($result as $k => $v) {
-				unset($result[$k]['password']);
-			}
-
-			$output['data']['clientpumps'] = $result;
-
-			# cast
-			foreach ($output['data']['clientpumps'] as $key => $row) {
-				$output['data']['clientpumps'][$key] = caster(
-					$output['data']['clientpumps'][$key],
-					array(
-						'status',
-						'id',
-						'queuedfiles',
-						'searches'
-					)
-				);
-			}
-
-			die(json_encode($output));
-
-		case 'dumped': # list of dumped files
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-
-			$output = array(
-						'status' => 'ok',
-						'data' => array()
-					);
-
-			$sql = 'SELECT
-						files.id,
-						files.name,
-						files.created
-					FROM
-						files
-					WHERE
-						files.id_collections=-2
-					ORDER BY created DESC';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-
-			# $output['data']['files_dumped'] = array();
-			$output['data']['files_dumped'] = $result;
-
-			# cast
-			foreach ($output['data']['files_dumped'] as $key => $row) {
-				$output['data']['files_dumped'][$key] = caster($output['data']['files_dumped'][$key], array('id'));
-			}
-
-			die(json_encode($output));
-
-		case 'find': # to get results from db-findbox
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array(
-					'searchresultlist' => array()
-				)
-			);
-
-			# searches
-			$sql = 'SELECT
-						*
-					FROM
-						files
-					 WHERE
-					 	name LIKE "%'.dbres($link, $find).'%" OR
-					 	ed2khash="'.dbres($link, $find).'"
-					 ORDER BY
-					 	created
-					 DESC';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-
-			$output['data']['findresult'] = $result;
-
-			die(json_encode($output));
-
-		case 'latest_queued': # to get latest queued files
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array()
-			);
-
-			# get latest queued files
-			$sql = 'SELECT
-						files.name,
-						files.id_searches,
-						files.created
-					FROM
-						files
-					WHERE
-						NOT files.id_searches = 0
-					ORDER BY
-						created DESC
-					LIMIT 30';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-
-			$output['data']['files_queued'] = $result;
-
-			# cast
-			foreach ($output['data']['files_queued'] as $key => $row) {
-				$output['data']['files_queued'][$key] = caster(
-					$output['data']['files_queued'][$key],
-					array('id_searches')
-				);
-			}
-
-			# searches
-			$sql = 'SELECT
-						id,
-						search
-					FROM
-						searches
-					 WHERE status > '.SEARCHES_STATUS_DELETED;
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-			$output['data']['searches'] = $result;
-
-			# cast data
-			foreach ($output['data']['searches'] as $key => $row) {
-				$output['data']['searches'][$key] = caster(
-					$output['data']['searches'][$key],
-					array('id')
-				);
-			}
-
-			# stats for graph
-			$sql = '
-				SELECT
-					count(files.id) AS files_queued,
-					searches.search
-				FROM
-					files,
-					searches
-				WHERE
-					files.id_searches=searches.id AND NOT files.id_searches=0
-				GROUP BY
-					searches.id ORDER BY
-				files.created DESC
-				';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-
-			$output['data']['files_queued_stats'] = $result;
-
-			# chart pie colors
-			$colors = array(
-				'#013a17',
-				'#046e57',
-				'#16777e',
-				'#458e87',
-				'#6fb6cc',
-				'#49738b',
-				'#59636f',
-				'#2a7cb6',
-				'#194d75',
-				'#04326d'
-			);
-
-			# prepare it for highcharts
-			foreach ($output['data']['files_queued_stats'] as $k => $v) {
-				$output['data']['files_queued_stats'][$k] = array(
-					'name' => $v['search'],
-					'y' => (int)$v['files_queued'],
-					'color' => array_key_exists($k, $colors) ? $colors[$k] : '#ffffff'
-				);
-			}
-
-			die(json_encode($output));
-
-		case 'log': # to get logmessages
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array()
-			);
-
-			# get logmessages
-			$sql = 'SELECT
-						type,
-						data,
-						created
-					FROM
-						logmessages
-					ORDER BY
-						id DESC, created DESC
-					LIMIT 30';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-
-			$output['data']['logmessages'] = $result;
-
-			# cast
-			foreach ($output['data']['logmessages'] as $key => $row) {
-				$output['data']['logmessages'][$key] = caster(
-					$output['data']['logmessages'][$key],
-					array('id')
-				);
-			}
-			die(json_encode($output));
-
-		case 'parameters': # list of parameters
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array(
-					'parameters' => get_parameters($link)
-				)
-			);
-
-			die(json_encode($output));
-
-		case 'quickfind_results': # to get results from quick find
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array(
-					'searchresultlist' => array()
-				)
-			);
-
-			$r = array();
-			# walk client pumps
-			foreach ($clientpumps as $pumpname => $pump) {
-
-				# skip inactive pumps
-				if (!(int)$pump['data']['status']) continue;
-
-				# skip pumps that we are not interested in, if a pump id has been sent in
-				if ($id_clientpumps !== false && (int)$id_clientpumps !== (int)$pump['data']['id']) {
-					continue;
-				}
-
-				# request pump data
-				$rtmp = $pump['pump']->results();
-
-				# did it fail?
-				if ($rtmp === false) {
-					cl('Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].').', VERBOSE_ERROR);
-					die(json_encode(array(
-						'status' => 'error',
-						'data' => array(
-							'message' => messages(false)
-						)
-					)));
-				}
-
-				# enrichen data
-				foreach ($rtmp as $k => $v) {
-					$rtmp[$k]['pumpname'] = $pumpname;
-					$rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
-				}
-
-				# merge together
-				$r = array_merge($r, $rtmp);
-			}
-
-			$output['data']['searchresultlist'] = web_check_results($conn, $r, $link, $show_download);
-
-			die(json_encode($output));
-
-		case 'searches': # to get list of searches
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array()
-			);
-
-			# get stats
-			$sql = 'SELECT
-						collections.host,
-						collections.hostpath,
-						collections.rootpath,
-						COUNT(files.id) AS fileamount
-					FROM
-						files,
-						collections
-					WHERE
-						files.id_collections = collections.id
-					GROUP BY
-						files.id_collections';
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-			$output['data']['stats'] = $result;
-
-			# get searches
-			$sql = 'SELECT
-						*
-					FROM
-						searches
-					WHERE
-						status > '.SEARCHES_STATUS_DELETED.'
-					ORDER BY status DESC, search ASC
-					'
-					;
-			cl('SQL: '.$sql, VERBOSE_DEBUG);
-			$result = db_query($link, $sql);
-			if ($result === false) {
-				cl(db_error($link), VERBOSE_ERROR);
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => messages(false)
-					)
-				)));
-			}
-			$output['data']['searches'] = $result;
-
-			# cast searches
-			foreach ($output['data']['searches'] as $key => $row) {
-				$output['data']['searches'][$key] = caster(
-					$output['data']['searches'][$key],
-					array(
-						'executions',
-						'executiontimeout',
-						'executiontimeoutbase',
-						'executiontimeoutrandbase',
-						'id',
-						'queuedfiles',
-						'resultscans',
-						'status'
-					),
-					array(
-						'sizemin',
-						'sizemax'
-					)
-				);
-			}
-
-			# cast stats
-			foreach ($output['data']['stats'] as $key => $row) {
-				$output['data']['stats'][$key] = caster(
-					$output['data']['stats'][$key],
-					array(
-						'fileamount'
-					)
-				);
-			}
-
-			die(json_encode($output));
-
-		case 'transfers': # to get transfer list
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array(
-				'status' => 'ok',
-				'data' => array()
-			);
-
-			$r = array();
-			# walk client pumps
-			foreach ($clientpumps as $pumpname => $pump) {
-
-				# skip inactive pumps
-				if (!(int)$pump['data']['status']) continue;
-
-				# request pump data
-				$rtmp = $pump['pump']->transfers();
-
-				# did it fail?
-				if ($rtmp === false) {
-					cl('Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].').', VERBOSE_ERROR);
-					cl(db_error($link), VERBOSE_ERROR);
-					die(json_encode(array(
-						'status' => 'error',
-						'data' => array(
-							'message' => messages(false)
-						)
-					)));
-				}
-
-				$actions = array();
-
-				if (method_exists($pump['pump'], 'cancel')) {
-					$actions[] = 'cancel';
-				}
-
-				# enrichen data with preview information
-				foreach ($rtmp as $k => $v) {
-					$rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
-					$rtmp[$k]['pumpname'] = $pumpname;
-					if (isset($rtmp[$k]['ed2k'])) {
-						$rtmp[$k]['preview'] = file_exists(PREVIEW_DIR.(int)$pump['data']['id'].'/'.$rtmp[$k]['ed2k'].'.preview.jpg');
-					} else {
-						$rtmp[$k]['preview'] = false;
-					}
-					$rtmp[$k]['actions'] = $actions;
-				}
-
-				# merge together
-				$r = array_merge($r, $rtmp);
-			}
-
-			# version 1
-			if ($version === 1) {
-				$output['data'] = $r;
-			# version 2
-			} else if ($version === 2) {
-						$output['data']['transfers'] = $r;
-
-				# get parameters
-				$sql = 'SELECT
-							*
-						FROM
-							parameters
-						WHERE
-							parameter="search_links"
-						'
-						;
-				cl('SQL: '.$sql, VERBOSE_DEBUG);
-				$result = db_query($link, $sql);
-				if ($result === false) {
-					cl(db_error($link), VERBOSE_ERROR);
-					die(json_encode(array(
-						'status' => 'error',
-						'data' => array(
-							'message' => messages(false)
-						)
-					)));
-				}
-							if (count($result) && isset($result[0])) {
-					$output['data']['search_links'] = $result[0]['value'];
-				}
-			}
-					die(json_encode($output));
-	/*
-		case 'transfer_compare': # to get transfer list
-		case 'transfers_compare':
-
-			# make sure user is logged in
-			if (!is_logged_in()) {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Login required.'
-					)
-				)));
-			}
-
-			$output = array('status' => 'ok', 'data' => array());
-
-			# downloading the file list takes too much time
-			set_time_limit(0);
-
-			# get emule connection
-			$conn = curl_get_connection();
-			if (!is_array($conn)) break;
-
-			# fetch search results from eMule
-			$r = curl_do($conn['c'], array(CURLOPT_URL => EMULEWEBURL.'?'.http_build_query(array(
-				'ses' => $conn['ses'],
-				'w' => 'transfer',
-				'sort' => 1,
-				'sortAsc' => 0
-			))));
-
-			$r = parse_response($r); # convert to XML
-			if ($r['status'] != 'ok') {
-				die(json_encode(array(
-					'status' => 'error',
-					'data' => array(
-						'message' => 'Fetch search result request failed.'
-					)
-				)));
-			}
-
-			$transfers = isset($r['filelist']['file']) ? $r['filelist']['file'] : array();
-
-			# walk files in transfer
-			foreach ($transfers as $transferfile) {
-
-				# echo $transferfile['fname']."\n";
-				$name = strrpos($transferfile['fname'], '.') !== false ? substr($transferfile['fname'], 0, strrpos($transferfile['fname'], '.') + 1) : $transferfile['fname'];
-
-				# find similar files not in download
-				$sql = 'SELECT
-							*
-						FROM
-							files
-						 WHERE
-						 		name LIKE "'.dbres($link, $name).'%"
-						 	AND
-						 		LENGTH(name) >= LENGTH("'.dbres($link, $transferfile['fname']).'") - 1
-					 		AND
-						 		LENGTH(name) <= LENGTH("'.dbres($link, $transferfile['fname']).'") + 1
-						 	AND
-						 		size >= '.(float)dbres($link, $transferfile['fsize']).'
-						 	AND
-						 		id_collections != "'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'"
-					';
-				cl('SQL: '.$sql, VERBOSE_DEBUG);
-				$result = db_query($link, $sql);
-				if ($result === false) die(json_encode(array('status' => 'error', 'data' => array('message' => db_error($link)))));
-				if (count($result)) {
-					echo 'Possible double: '.$transferfile['fname'].' '.$transferfile['fsize']."\n";
-					foreach ($result as $dbfile) {
-						echo '- '.$dbfile['name'];
-						echo ' '.$dbfile['size'];
-						echo ' '.((int)$dbfile['existing']===1 ? ' EXISTERAR ' : 'BORTA');
-						echo ' '.((int)$dbfile['id_collections'] ===FILES_ID_COLLECTIONS_DUMPED ? ' DUMPAD ' : $dbfile['id_collections']);
-						echo "\n";
-					}
-				}
-			}
-
-			die (json_encode($output));
-			*/
-	}
-
-	die();
+  # output json header
+  header('Content-Type: application/json');
+
+  # find out what to view if any
+  switch ($view) {
+
+    case 'clientpumps': # list of client pumps
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array()
+      );
+
+      # get all clientpumps
+      $sql = 'SELECT
+              *
+          FROM
+            clientpumps';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+
+      foreach ($result as $k => $v) {
+        unset($result[$k]['password']);
+      }
+
+      $output['data']['clientpumps'] = $result;
+
+      # cast
+      foreach ($output['data']['clientpumps'] as $key => $row) {
+        $output['data']['clientpumps'][$key] = caster(
+          $output['data']['clientpumps'][$key],
+          array(
+            'status',
+            'id',
+            'queuedfiles',
+            'searches'
+          )
+        );
+      }
+
+      die(json_encode($output));
+
+    case 'dumped': # list of dumped files
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+
+      $output = array(
+            'status' => 'ok',
+            'data' => array()
+          );
+
+      $sql = 'SELECT
+            files.id,
+            files.name,
+            files.created
+          FROM
+            files
+          WHERE
+            files.id_collections=-2
+          ORDER BY created DESC';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+
+      # $output['data']['files_dumped'] = array();
+      $output['data']['files_dumped'] = $result;
+
+      # cast
+      foreach ($output['data']['files_dumped'] as $key => $row) {
+        $output['data']['files_dumped'][$key] = caster($output['data']['files_dumped'][$key], array('id'));
+      }
+
+      die(json_encode($output));
+
+    case 'find': # to get results from db-findbox
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array(
+          'searchresultlist' => array()
+        )
+      );
+
+      # searches
+      $sql = 'SELECT
+            *
+          FROM
+            files
+           WHERE
+            name LIKE "%'.dbres($link, $find).'%" OR
+            ed2khash="'.dbres($link, $find).'"
+           ORDER BY
+            created
+           DESC';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+
+      $output['data']['findresult'] = $result;
+
+      die(json_encode($output));
+
+    case 'latest_queued': # to get latest queued files
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array()
+      );
+
+      # get latest queued files
+      $sql = 'SELECT
+            files.name,
+            files.id_searches,
+            files.created
+          FROM
+            files
+          WHERE
+            NOT files.id_searches = 0
+          ORDER BY
+            created DESC
+          LIMIT 30';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+
+      $output['data']['files_queued'] = $result;
+
+      # cast
+      foreach ($output['data']['files_queued'] as $key => $row) {
+        $output['data']['files_queued'][$key] = caster(
+          $output['data']['files_queued'][$key],
+          array('id_searches')
+        );
+      }
+
+      # searches
+      $sql = 'SELECT
+            id,
+            search
+          FROM
+            searches
+           WHERE status > '.SEARCHES_STATUS_DELETED;
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+      $output['data']['searches'] = $result;
+
+      # cast data
+      foreach ($output['data']['searches'] as $key => $row) {
+        $output['data']['searches'][$key] = caster(
+          $output['data']['searches'][$key],
+          array('id')
+        );
+      }
+
+      # stats for graph
+      $sql = '
+        SELECT
+          count(files.id) AS files_queued,
+          searches.search
+        FROM
+          files,
+          searches
+        WHERE
+          files.id_searches=searches.id AND NOT files.id_searches=0
+        GROUP BY
+          searches.id ORDER BY
+        files.created DESC
+        ';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+
+      $output['data']['files_queued_stats'] = $result;
+
+      # chart pie colors
+      $colors = array(
+        '#013a17',
+        '#046e57',
+        '#16777e',
+        '#458e87',
+        '#6fb6cc',
+        '#49738b',
+        '#59636f',
+        '#2a7cb6',
+        '#194d75',
+        '#04326d'
+      );
+
+      # prepare it for highcharts
+      foreach ($output['data']['files_queued_stats'] as $k => $v) {
+        $output['data']['files_queued_stats'][$k] = array(
+          'name' => $v['search'],
+          'y' => (int)$v['files_queued'],
+          'color' => array_key_exists($k, $colors) ? $colors[$k] : '#ffffff'
+        );
+      }
+
+      die(json_encode($output));
+
+    case 'log': # to get logmessages
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array()
+      );
+
+      # get logmessages
+      $sql = 'SELECT
+            type,
+            data,
+            created
+          FROM
+            logmessages
+          ORDER BY
+            id DESC, created DESC
+          LIMIT 30';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+
+      $output['data']['logmessages'] = $result;
+
+      # cast
+      foreach ($output['data']['logmessages'] as $key => $row) {
+        $output['data']['logmessages'][$key] = caster(
+          $output['data']['logmessages'][$key],
+          array('id')
+        );
+      }
+      die(json_encode($output));
+
+    case 'parameters': # list of parameters
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array(
+          'parameters' => get_parameters($link)
+        )
+      );
+
+      die(json_encode($output));
+
+    case 'quickfind_results': # to get results from quick find
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array(
+          'searchresultlist' => array()
+        )
+      );
+
+      $r = array();
+      # walk client pumps
+      foreach ($clientpumps as $pumpname => $pump) {
+
+        # skip inactive pumps
+        if (!(int)$pump['data']['status']) continue;
+
+        # skip pumps that we are not interested in, if a pump id has been sent in
+        if ($id_clientpumps !== false && (int)$id_clientpumps !== (int)$pump['data']['id']) {
+          continue;
+        }
+
+        # request pump data
+        $rtmp = $pump['pump']->results();
+
+        # did it fail?
+        if ($rtmp === false) {
+          cl('Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].').', VERBOSE_ERROR);
+          die(json_encode(array(
+            'status' => 'error',
+            'data' => array(
+              'message' => messages(false)
+            )
+          )));
+        }
+
+        # enrichen data
+        foreach ($rtmp as $k => $v) {
+          $rtmp[$k]['pumpname'] = $pumpname;
+          $rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
+        }
+
+        # merge together
+        $r = array_merge($r, $rtmp);
+      }
+
+      $output['data']['searchresultlist'] = web_check_results($conn, $r, $link, $show_download);
+
+      die(json_encode($output));
+
+    case 'searches': # to get list of searches
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array()
+      );
+
+      # get stats
+      $sql = 'SELECT
+            collections.host,
+            collections.hostpath,
+            collections.rootpath,
+            COUNT(files.id) AS fileamount
+          FROM
+            files,
+            collections
+          WHERE
+            files.id_collections = collections.id
+          GROUP BY
+            files.id_collections';
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+      $output['data']['stats'] = $result;
+
+      # get searches
+      $sql = 'SELECT
+            *
+          FROM
+            searches
+          WHERE
+            status > '.SEARCHES_STATUS_DELETED.'
+          ORDER BY status DESC, search ASC
+          '
+          ;
+      cl('SQL: '.$sql, VERBOSE_DEBUG);
+      $result = db_query($link, $sql);
+      if ($result === false) {
+        cl(db_error($link), VERBOSE_ERROR);
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => messages(false)
+          )
+        )));
+      }
+      $output['data']['searches'] = $result;
+
+      # cast searches
+      foreach ($output['data']['searches'] as $key => $row) {
+        $output['data']['searches'][$key] = caster(
+          $output['data']['searches'][$key],
+          array(
+            'executions',
+            'executiontimeout',
+            'executiontimeoutbase',
+            'executiontimeoutrandbase',
+            'id',
+            'queuedfiles',
+            'resultscans',
+            'status'
+          ),
+          array(
+            'sizemin',
+            'sizemax'
+          )
+        );
+      }
+
+      # cast stats
+      foreach ($output['data']['stats'] as $key => $row) {
+        $output['data']['stats'][$key] = caster(
+          $output['data']['stats'][$key],
+          array(
+            'fileamount'
+          )
+        );
+      }
+
+      die(json_encode($output));
+
+    case 'transfers': # to get transfer list
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array(
+        'status' => 'ok',
+        'data' => array()
+      );
+
+      $r = array();
+      # walk client pumps
+      foreach ($clientpumps as $pumpname => $pump) {
+
+        # skip inactive pumps
+        if (!(int)$pump['data']['status']) continue;
+
+        # request pump data
+        $rtmp = $pump['pump']->transfers();
+
+        # did it fail?
+        if ($rtmp === false) {
+          cl('Failed fetching data from pump '.$pumpname.' (#'.$pump['data']['id'].').', VERBOSE_ERROR);
+          cl(db_error($link), VERBOSE_ERROR);
+          die(json_encode(array(
+            'status' => 'error',
+            'data' => array(
+              'message' => messages(false)
+            )
+          )));
+        }
+
+        $actions = array();
+
+        if (method_exists($pump['pump'], 'cancel')) {
+          $actions[] = 'cancel';
+        }
+
+        # enrichen data with preview information
+        foreach ($rtmp as $k => $v) {
+          $rtmp[$k]['id_clientpumps'] = (int)$pump['data']['id'];
+          $rtmp[$k]['pumpname'] = $pumpname;
+          if (isset($rtmp[$k]['ed2k'])) {
+            $rtmp[$k]['preview'] = file_exists(PREVIEW_DIR.(int)$pump['data']['id'].'/'.$rtmp[$k]['ed2k'].'.preview.jpg');
+          } else {
+            $rtmp[$k]['preview'] = false;
+          }
+          $rtmp[$k]['actions'] = $actions;
+        }
+
+        # merge together
+        $r = array_merge($r, $rtmp);
+      }
+
+      # version 1
+      if ($version === 1) {
+        $output['data'] = $r;
+      # version 2
+      } else if ($version === 2) {
+            $output['data']['transfers'] = $r;
+
+        # get parameters
+        $sql = 'SELECT
+              *
+            FROM
+              parameters
+            WHERE
+              parameter="search_links"
+            '
+            ;
+        cl('SQL: '.$sql, VERBOSE_DEBUG);
+        $result = db_query($link, $sql);
+        if ($result === false) {
+          cl(db_error($link), VERBOSE_ERROR);
+          die(json_encode(array(
+            'status' => 'error',
+            'data' => array(
+              'message' => messages(false)
+            )
+          )));
+        }
+              if (count($result) && isset($result[0])) {
+          $output['data']['search_links'] = $result[0]['value'];
+        }
+      }
+          die(json_encode($output));
+  /*
+    case 'transfer_compare': # to get transfer list
+    case 'transfers_compare':
+
+      # make sure user is logged in
+      if (!is_logged_in()) {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Login required.'
+          )
+        )));
+      }
+
+      $output = array('status' => 'ok', 'data' => array());
+
+      # downloading the file list takes too much time
+      set_time_limit(0);
+
+      # get emule connection
+      $conn = curl_get_connection();
+      if (!is_array($conn)) break;
+
+      # fetch search results from eMule
+      $r = curl_do($conn['c'], array(CURLOPT_URL => EMULEWEBURL.'?'.http_build_query(array(
+        'ses' => $conn['ses'],
+        'w' => 'transfer',
+        'sort' => 1,
+        'sortAsc' => 0
+      ))));
+
+      $r = parse_response($r); # convert to XML
+      if ($r['status'] != 'ok') {
+        die(json_encode(array(
+          'status' => 'error',
+          'data' => array(
+            'message' => 'Fetch search result request failed.'
+          )
+        )));
+      }
+
+      $transfers = isset($r['filelist']['file']) ? $r['filelist']['file'] : array();
+
+      # walk files in transfer
+      foreach ($transfers as $transferfile) {
+
+        # echo $transferfile['fname']."\n";
+        $name = strrpos($transferfile['fname'], '.') !== false ? substr($transferfile['fname'], 0, strrpos($transferfile['fname'], '.') + 1) : $transferfile['fname'];
+
+        # find similar files not in download
+        $sql = 'SELECT
+              *
+            FROM
+              files
+             WHERE
+                name LIKE "'.dbres($link, $name).'%"
+              AND
+                LENGTH(name) >= LENGTH("'.dbres($link, $transferfile['fname']).'") - 1
+              AND
+                LENGTH(name) <= LENGTH("'.dbres($link, $transferfile['fname']).'") + 1
+              AND
+                size >= '.(float)dbres($link, $transferfile['fsize']).'
+              AND
+                id_collections != "'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'"
+          ';
+        cl('SQL: '.$sql, VERBOSE_DEBUG);
+        $result = db_query($link, $sql);
+        if ($result === false) die(json_encode(array('status' => 'error', 'data' => array('message' => db_error($link)))));
+        if (count($result)) {
+          echo 'Possible double: '.$transferfile['fname'].' '.$transferfile['fsize']."\n";
+          foreach ($result as $dbfile) {
+            echo '- '.$dbfile['name'];
+            echo ' '.$dbfile['size'];
+            echo ' '.((int)$dbfile['existing']===1 ? ' EXISTERAR ' : 'BORTA');
+            echo ' '.((int)$dbfile['id_collections'] ===FILES_ID_COLLECTIONS_DUMPED ? ' DUMPAD ' : $dbfile['id_collections']);
+            echo "\n";
+          }
+        }
+      }
+
+      die (json_encode($output));
+      */
+  }
+
+  die();
 }
 ?>

@@ -6,443 +6,443 @@
     font-style: normal;
 }
 a {
-	color: inherit;
+  color: inherit;
 }
 body {
-	font-family: Tahoma, sans-serif;
-	font-size: 11px;
-	margin: 0;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  margin: 0;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	body {
-		font-size: 16px;
-	}
+  body {
+    font-size: 16px;
+  }
 }
 br {
-	clear: both;
+  clear: both;
 }
 fieldset {
-	background-color: #f0f0f0;
-	border: 1px solid #c0c0c0;
-	margin: 10px 0 0 0;
+  background-color: #f0f0f0;
+  border: 1px solid #c0c0c0;
+  margin: 10px 0 0 0;
 }
 fieldset a {
-	float: left;
-	margin-top: 5px;
+  float: left;
+  margin-top: 5px;
 }
 h1 {
-	float: left;
-	clear: none;
-	margin-bottom: 10px;
-	margin-left: 5px;
-	margin-top: 16px;
+  float: left;
+  clear: none;
+  margin-bottom: 10px;
+  margin-left: 5px;
+  margin-top: 16px;
 }
 h2 {
-	background-color: #000;
-	clear: left;
-	font-size: 14px;
-	color: #fff;
-	padding-left: 20px;
-	margin-bottom: 0;
-	margin-top: 0;
+  background-color: #000;
+  clear: left;
+  font-size: 14px;
+  color: #fff;
+  padding-left: 20px;
+  margin-bottom: 0;
+  margin-top: 0;
 }
 h1 {
-	font-family: 'russo_oneregular', serif;
-	font-weight: bold;
-	text-transform: uppercase;
+  font-family: 'russo_oneregular', serif;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 h2,
 h3 {
-	font-family: Georgia, serif;
+  font-family: Georgia, serif;
 }
 h1 a,
 h2 a,
 h3 a {
-	color: inherit;
-	text-decoration: inherit;
+  color: inherit;
+  text-decoration: inherit;
 }
 input, select, textarea {
-	border: 1px solid #ccc;
-	border-radius: 2px;
-	float: left;
-	font-family: Tahoma, sans-serif;
-	font-size: 11px;
-	padding: 2px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  float: left;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 2px;
 }
 input.text, select {
-	width: 150px;
+  width: 150px;
 }
 select {
-	width: 155px;
+  width: 155px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	input.text {
-		width: 150px;
-	}
+  input.text {
+    width: 150px;
+  }
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	input, select, textarea {
-		font-size: 16px;
-	}
+  input, select, textarea {
+    font-size: 16px;
+  }
 }
 button {
-	float: left;
-	margin-left: 5px;
-	background-color: #f0f0f0;
-	border: 1px solid #c0c0c0;
-	color: #000;
-	display: inline-block;
-	font-family: Tahoma, sans-serif;
-	font-size: 11px;
-	padding: 2px 7px;
-	cursor: pointer;
+  float: left;
+  margin-left: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #c0c0c0;
+  color: #000;
+  display: inline-block;
+  font-family: Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 2px 7px;
+  cursor: pointer;
 }
 button:hover {
-		background-color: #fff;
+    background-color: #fff;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	button {
-		font-size: 16px;
-	}
+  button {
+    font-size: 16px;
+  }
 }
 input.submit {
-	padding-left: 15px;
-	padding-right: 15px;
-	margin-left: 187px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-left: 187px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	input.submit {
-		margin-left: 105px;
-	}
+  input.submit {
+    margin-left: 105px;
+  }
 }
 label {
-	clear: both;
-	float: left;
-	padding-top: 5px;
-	padding-right: 10px;
-	text-align: right;
-	width: 175px;
-	margin-bottom: 5px;
+  clear: both;
+  float: left;
+  padding-top: 5px;
+  padding-right: 10px;
+  text-align: right;
+  width: 175px;
+  margin-bottom: 5px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	label {
-		width: 105px;
-	}
+  label {
+    width: 105px;
+  }
 }
 span.suffix {
-	clear: none;
-	padding-left: 5px;
-	padding-right: 5px;
-	width: auto;
+  clear: none;
+  padding-left: 5px;
+  padding-right: 5px;
+  width: auto;
 }
 fieldset .marginated {
-	margin-left: 187px;
+  margin-left: 187px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	fieldset .marginated {
-		margin-left: 117px;
-	}
+  fieldset .marginated {
+    margin-left: 117px;
+  }
 }
 table {
-	border: 1px solid #c0c0c0;
-	border-collapse: collapse;
-	margin: 0;
-	margin-top: 10px;
-	width: 100%;
+  border: 1px solid #c0c0c0;
+  border-collapse: collapse;
+  margin: 0;
+  margin-top: 10px;
+  width: 100%;
 }
 table thead th {
-	background-color: #c0c0c0;
-	border: 1px solid #c0c0c0;
-	color: #000;
-	padding: 4px;
+  background-color: #c0c0c0;
+  border: 1px solid #c0c0c0;
+  color: #000;
+  padding: 4px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	table thead th {
-		font-size: 11px;
-	}
+  table thead th {
+    font-size: 11px;
+  }
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	table thead th.unimportant {
-		display: none;
-	}
+  table thead th.unimportant {
+    display: none;
+  }
 }
 table thead th.date {
-	width: 100px;
+  width: 100px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	table tbody td.unimportant {
-		display: none;
-	}
+  table tbody td.unimportant {
+    display: none;
+  }
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	table tbody td {
-		word-wrap: break-word;
-		font-size: 11px;
-	}
+  table tbody td {
+    word-wrap: break-word;
+    font-size: 11px;
+  }
 }
 table tbody td img.preview {
-	width: 160px;
-	border: 1px solid #000;
+  width: 160px;
+  border: 1px solid #000;
 }
 table tbody td span.ed2k {
-		color: #b0b0b0;
+    color: #b0b0b0;
 }
 table tbody td.counter {
-	font-family: monospace;
-	text-align: center;
+  font-family: monospace;
+  text-align: center;
 }
 table tbody td.date {
-	text-align: center;
+  text-align: center;
 }
 table tbody td.manage {
-	text-align: center;
+  text-align: center;
 }
 table tbody td.manage a {
-	margin-left: 5px;
-	margin-right: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 table tbody td.day {
-	border: 1px solid #000;
-	font-weight: bold;
-	padding-bottom: 0px;
-	padding-top: 0px;
-	text-align: left;
+  border: 1px solid #000;
+  font-weight: bold;
+  padding-bottom: 0px;
+  padding-top: 0px;
+  text-align: left;
 }
 table tbody tr.slave,
 table tbody tr.slave:nth-child(odd) {
-	background-color: #c0c0c0;
-	padding-left: 10px;
-	padding-right: 10px;
+  background-color: #c0c0c0;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 table tbody tr.slave td {
-	text-align: center;
+  text-align: center;
         box-shadow: inset 0px 0px 19px 3px #f0f0f0;
 }
 table tbody tr.slave td button {
-	float: none;
-	width: 100%;
+  float: none;
+  width: 100%;
 }
 table tbody tr:nth-child(odd) {
-	background-color: #eee;
+  background-color: #eee;
 }
 table tbody tr:nth-child(odd):hover {
-	background-color: #ddd;
+  background-color: #ddd;
 }
 table tbody tr {
-	background-color: #fff;
+  background-color: #fff;
 }
 table tbody tr:hover {
-	background-color: #ddd;
+  background-color: #ddd;
 }
 table tbody tr.active {
-	background-color: #E7FFD7;
+  background-color: #E7FFD7;
 }
 table tbody tr.active:hover {
-	background-color: #adbfa1;
+  background-color: #adbfa1;
 }
 table tbody tr.active:nth-child(odd) {
-	background-color: #DDFFC6;
+  background-color: #DDFFC6;
 }
 table tbody tr.active:nth-child(odd):hover {
-	background-color: #a6bf95;
+  background-color: #a6bf95;
 }
 table tbody tr.inactive {
-	background-color: #FFEFEF;
+  background-color: #FFEFEF;
 }
 table tbody tr.inactive:hover {
-	background-color: #bfb3b3;
+  background-color: #bfb3b3;
 }
 table tbody tr.inactive:nth-child(odd) {
-	background-color: #FFD7D7;
+  background-color: #FFD7D7;
 }
 table tbody tr.inactive:nth-child(odd):hover {
-	background-color: #bfa1a1;
+  background-color: #bfa1a1;
 }
 table tbody tr.logcategory_search {
-	background-color: #acf;
+  background-color: #acf;
 }
 table tbody tr.logcategory_search:nth-child(odd) {
-	background-color: #D2E4FF;
+  background-color: #D2E4FF;
 }
 table tbody tr.logcategory_scan {
-	background-color: #ffa;
+  background-color: #ffa;
 }
 table tbody tr.logcategory_queued {
-	background-color: #afa;
+  background-color: #afa;
 }
 table tbody tr td {
-	padding: 4px;
+  padding: 4px;
 }
 
 
 table tbody tr td div.previewcontainer {
-		text-align: center;
+    text-align: center;
 }
 
 table tbody tr td .hot {
-		color: red;
+    color: red;
 }
 
 table tbody tr.clickable {
-	cursor: pointer;
+  cursor: pointer;
 }
 table tbody tr.downloading {
-	background-color: #00ff00;
+  background-color: #00ff00;
 }
 table tbody tr td.first {
-	padding-left: 20px;
+  padding-left: 20px;
 }
 table tbody tr.loading td {
-	text-align: center;
+  text-align: center;
 }
 
 table tbody tr td a.button {
-		background-color: #f0f0f0;
-		border: 1px solid #c0c0c0;
-		color: #000;
-		display: inline-block;
-		font-family: Tahoma, sans-serif;
-		font-size: 11px;
-		margin: 1px;
-		padding: 2px 7px;
-		text-decoration: none;
+    background-color: #f0f0f0;
+    border: 1px solid #c0c0c0;
+    color: #000;
+    display: inline-block;
+    font-family: Tahoma, sans-serif;
+    font-size: 11px;
+    margin: 1px;
+    padding: 2px 7px;
+    text-decoration: none;
 }
 table tbody tr td a.unimportant {
-		color: #c0c0c0;
+    color: #c0c0c0;
 }
 
 table tbody tr td a.button:hover {
-	background-color: #fff;
+  background-color: #fff;
 }
 .chunkbar {
-	background-color: #000;
-	border: 1px solid #000;
-	height: 14px;
-	position: relative;
-	width: 100px;
+  background-color: #000;
+  border: 1px solid #000;
+  height: 14px;
+  position: relative;
+  width: 100px;
 }
 .chunkbar .chunkweight0,
 .chunkbar .chunkweight1,
 .chunkbar .chunkweight2,
 .chunkbar .chunkweight3
 {
-	background-color: #000;
-	height: 100%;
-	position: relative;
-	float: left;z-index: 0;
+  background-color: #000;
+  height: 100%;
+  position: relative;
+  float: left;z-index: 0;
 }
 /* missing */
 .chunkbar .chunkweight0 {
-	background-color: #000;
+  background-color: #000;
 }
 /* partial */
 .chunkbar .chunkweight1 {
-	background-color: #0086cf;
+  background-color: #0086cf;
 }
 /* complete */
 .chunkbar .chunkweight2 {
-	background-color: #0086cf;
+  background-color: #0086cf;
 }
 /* verified */
 .chunkbar .chunkweight3 {
-	background-color: #0086cf;
+  background-color: #0086cf;
 }
 .progressbar {
-	background-color: #000;
-	border: 1px solid #000;
-	height: 14px;
-	position: relative;
-	width: 100px;
+  background-color: #000;
+  border: 1px solid #000;
+  height: 14px;
+  position: relative;
+  width: 100px;
 }
 .progressbar .progressbar_text {
-	color: #fff;
-	height: 100%;
-	position: absolute;
-	text-align: center;
-	width: 100%;z-index: 1;
+  color: #fff;
+  height: 100%;
+  position: absolute;
+  text-align: center;
+  width: 100%;z-index: 1;
 }
 .progressbar .progressbar_bar {
-	background-color: #0086cf;
-	height: 100%;
-	position: absolute;z-index: 0;
+  background-color: #0086cf;
+  height: 100%;
+  position: absolute;z-index: 0;
 }
 .active {
-	background-color: #0f0;
+  background-color: #0f0;
 }
 .inactive {
-	background-color: #f00;
+  background-color: #f00;
 }
 /* --- header ------------------------------------------------------ */
 #main #header {
-	height: 59px;
-	position: relative;
-	overflow: hidden;
+  height: 59px;
+  position: relative;
+  overflow: hidden;
 }
 #main #header #logo {
-	float: left;
-	padding-left: 20px;
-	padding-right: 20px;
+  float: left;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 #main #header #subtitle {
-	font-weight: bold;
-	font-family: Tahoma, sans-serif;
-	font-size: 9px;
-	left: 142px;
-	position: absolute;
-	text-style: caps;
-	top: 40px;
+  font-weight: bold;
+  font-family: Tahoma, sans-serif;
+  font-size: 9px;
+  left: 142px;
+  position: absolute;
+  text-style: caps;
+  top: 40px;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	#main #header #subtitle {
-		top: 47px;
-		left: 202px;
-	}
+  #main #header #subtitle {
+    top: 47px;
+    left: 202px;
+  }
 }
 /* --- menu ------------------------------------------------------ */
 #main #menu {
-	background-color: #000;
-	border-top: 1px solid #000;
-	border-bottom: 1px solid #000;
-	color: #fff;
+  background-color: #000;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  color: #fff;
 }
 #main #menu ul {
-	float: left;
-	margin: 0;
-	padding: 0;
+  float: left;
+  margin: 0;
+  padding: 0;
 }
 #main #menu ul li {
-	display: inline-block;
-	padding: 5px 10px 5px 10px;
-	text-align: center;
+  display: inline-block;
+  padding: 5px 10px 5px 10px;
+  text-align: center;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	#main #menu ul li {
-		padding: 5px 0px 5px 0px;
-	}
+  #main #menu ul li {
+    padding: 5px 0px 5px 0px;
+  }
 }
 #main #menu ul li.selected {
-	background-color: #0086cf
+  background-color: #0086cf
 }
 #main #menu ul li a {
-	text-decoration: none;
+  text-decoration: none;
 }
 /* --- content ------------------------------------------------------ */
 #main #content #chart {
-	height: 300px;
+  height: 300px;
 }
 .clear_both {
-	clear: both;
+  clear: both;
 }
 #findbox {
-	float: right;
+  float: right;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px), only screen and (min-device-width : 480px) and (max-device-width : 800px), only screen and (max-width: 500px) {
-	#findbox {
-		display: none;
-	}
+  #findbox {
+    display: none;
+  }
 }
 fieldset a {
-	margin-left: 10px;
+  margin-left: 10px;
 }
 fieldset span.value {
     padding: 6px 0px 6px 0;
@@ -454,9 +454,9 @@ fieldset span.description {
     display: inline-block;
 }
 p {
-	padding: 10px;
-	margin: 10px;
-	max-width: 1024px;
-	background-color: #f0f0f0;
+  padding: 10px;
+  margin: 10px;
+  max-width: 1024px;
+  background-color: #f0f0f0;
     border: 1px solid #c0c0c0;
 }

@@ -21,6 +21,7 @@
 # 2018-03-22 01:53:00 - adding version parameter and no-referrer meta tag
 # 2018-07-11 18:37:00 - adding login
 # 2018-07-12 19:53:00 - updating jquery from 1.8.3 to 3.3.1
+# 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
 
 session_start();
 
@@ -67,7 +68,7 @@ $version					= isset($_REQUEST['version']) ? (int)$_REQUEST['version'] : 1;
 $view 						= isset($_REQUEST['view']) ? $_REQUEST['view'] : '';
 
 if ($view === '' && !is_logged_in()) {
-	$view = 'login';
+  $view = 'login';
 }
 
 # get actions
@@ -79,117 +80,117 @@ require_once('index_view.php');
 $clientpumptypes = array();
 # walk client pumps to get pump types, used in select box
 foreach ($clientpumpclasses as $k => $v) {
-	$clientpumptypes[$k] = $k;
+  $clientpumptypes[$k] = $k;
 }
 
 ?><!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	<meta name="referrer" content="no-referrer" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="referrer" content="no-referrer" />
 
-	<title><?php echo is_logged_in() ? PROJECT_TITLE : t('Login'); ?></title>
+  <title><?php echo is_logged_in() ? PROJECT_TITLE : t('Login'); ?></title>
 
-	<link rel="stylesheet" href="include/screen.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="include/screen.css" type="text/css" media="screen" />
 
-	<script type="text/javascript" src="include/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript "src="include/highcharts.js"></script>
-	<script type="text/javascript" src="include/exporting.js"></script>
+  <script type="text/javascript" src="include/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript "src="include/highcharts.js"></script>
+  <script type="text/javascript" src="include/exporting.js"></script>
 
-	<script type="text/javascript">
-		var
+  <script type="text/javascript">
+    var
 <?php
 if (is_logged_in()) {
 ?>
-			clientpumptypes = <?php echo json_encode($clientpumptypes)?>,
-			methods = <?php echo json_encode($methods)?>,
-			types = <?php echo json_encode($types)?>,
+      clientpumptypes = <?php echo json_encode($clientpumptypes)?>,
+      methods = <?php echo json_encode($methods)?>,
+      types = <?php echo json_encode($types)?>,
 <?php
 }
 ?>
-			view = '<?php echo $view?>';
-	</script>
-	<script type="text/javascript" src="include/load.php?nocache=<?php echo time();?>"></script>
+      view = '<?php echo $view?>';
+  </script>
+  <script type="text/javascript" src="include/load.php?nocache=<?php echo time();?>"></script>
 <?php
 if (is_logged_in()) {
 ?>
-	<script type="text/javascript">
-		e.logmessage_type_descriptions_short = <?php echo json_encode($logmessage_type_descriptions_short)?>;
-	</script>
+  <script type="text/javascript">
+    e.logmessage_type_descriptions_short = <?php echo json_encode($logmessage_type_descriptions_short)?>;
+  </script>
 <?php
 }
 ?>
 </head>
 <body>
-	<div id="main">
+  <div id="main">
 <?php
 if (is_logged_in()) {
 ?>
-		<div id="header">
-			<img src="img/pumpjack.png" id="logo" alt="<?php echo PROJECT_TITLE ?>" />
-			<h1>
-				<a href="?"><?php echo PROJECT_TITLE ?></a>
-			</h1>
-			<div id="subtitle"><?php echo t('Control Panel'); ?></div>
-		</div>
+    <div id="header">
+      <img src="img/pumpjack.png" id="logo" alt="<?php echo PROJECT_TITLE ?>" />
+      <h1>
+        <a href="?"><?php echo PROJECT_TITLE ?></a>
+      </h1>
+      <div id="subtitle"><?php echo t('Control Panel'); ?></div>
+    </div>
 <?php
 }
 ?>
-		<div id="menu">
-			<ul>
+    <div id="menu">
+      <ul>
 <?php
 if (is_logged_in()) {
 ?>
-				<li>
-					<a href="?view=quickfind"><?php echo t('Find'); ?></a>
-				</li>
-				<li>
-					<a href="?view=transfers"><?php echo t('Transfers'); ?></a>
-				</li>
-				<li>
-					<a href="?view=searches"><?php echo t('Schedule'); ?></a>
-				</li>
-				<li>
-					<a href="?view=clientpumps"><?php echo t('Pumps'); ?></a>
-				</li>
-				<li>
-					<a href="?view=log"><?php echo t('Log'); ?></a></li>
-				<li>
-					<a href="?view=latest_queued"><?php echo t('Queued'); ?></a>
-				</li>
-				<li>
-					<a href="?view=dumped"><?php echo t('Dump'); ?></a>
-				</li>
-				<li>
-					<a href="?view=parameters"><?php echo t('Parameters'); ?></a>
-				</li>
-				<li>
-					<a href="?view=logout"><?php echo t('Logout'); ?></a>
-				</li>
+        <li>
+          <a href="?view=quickfind"><?php echo t('Find'); ?></a>
+        </li>
+        <li>
+          <a href="?view=transfers"><?php echo t('Transfers'); ?></a>
+        </li>
+        <li>
+          <a href="?view=searches"><?php echo t('Schedule'); ?></a>
+        </li>
+        <li>
+          <a href="?view=clientpumps"><?php echo t('Pumps'); ?></a>
+        </li>
+        <li>
+          <a href="?view=log"><?php echo t('Log'); ?></a></li>
+        <li>
+          <a href="?view=latest_queued"><?php echo t('Queued'); ?></a>
+        </li>
+        <li>
+          <a href="?view=dumped"><?php echo t('Dump'); ?></a>
+        </li>
+        <li>
+          <a href="?view=parameters"><?php echo t('Parameters'); ?></a>
+        </li>
+        <li>
+          <a href="?view=logout"><?php echo t('Logout'); ?></a>
+        </li>
 <?php
 } else {
 ?>
-				<li>
-					<a href="?view=login"><?php echo t('Login'); ?></a>
-				</li>
+        <li>
+          <a href="?view=login"><?php echo t('Login'); ?></a>
+        </li>
 <?php
 }
 ?>
-			</ul>
+      </ul>
 
 <?php
 if (is_logged_in()) {
 ?>
-			<div id="findbox">
-				<input type="text" id="find" name="find" placeholder="<?php echo t('Find in file database'); ?>">
-			</div>
+      <div id="findbox">
+        <input type="text" id="find" name="find" placeholder="<?php echo t('Find in file database'); ?>">
+      </div>
 <?php
 }
 ?>
-			<div class="clear_both"></div>
-		</div>
-		<div id="content"></div>
-	</div>
+      <div class="clear_both"></div>
+    </div>
+    <div id="content"></div>
+  </div>
 </body>
 </html>
