@@ -60,8 +60,8 @@ your download application.
 Requirements / tested on
 ------------------------
 
-	MariaDB (or MySQL)
-	PHP 5.6 / 7.0 with cURL, MySQL/MariaDB
-	ffmpeg (to get previews)
-	nginx (or other web server)
-	MLDonkey (or eMuleXtreme, but support is a bit outdated)
+  MariaDB (or MySQL)
+  PHP 5.6 / 7.0 with cURL, MySQL/MariaDB
+  ffmpeg (to get previews)
+  nginx (or other web server)
+  MLDonkey (or eMuleXtreme, but support is a bit outdated)

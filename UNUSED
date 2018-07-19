@@ -15,53 +15,53 @@
 # to change collection of files that has been downloaded, but skipped and does not exist
 # function mark_dumped_files($c, $link_unused, $ses) {
 
-	# this only works with eMule which can provide a list of downloads with:
-	# - files completed
-	# - ed2k-hashes in transfer list
+  # this only works with eMule which can provide a list of downloads with:
+  # - files completed
+  # - ed2k-hashes in transfer list
 #	return true;
 /*
-	global $link;
+  global $link;
 
-	# request transfer list from eMule
-	cl('Requesting transfer list', VERBOSE_DEBUG);
-	$r = curl_do($c, array(CURLOPT_URL => EMULEWEBURL.'?'.http_build_query(array(
-		'ses' => $ses,
-		'w' => 'transfer'
-	))));
-	$r = parse_response($r); # convert to XML
+  # request transfer list from eMule
+  cl('Requesting transfer list', VERBOSE_DEBUG);
+  $r = curl_do($c, array(CURLOPT_URL => EMULEWEBURL.'?'.http_build_query(array(
+    'ses' => $ses,
+    'w' => 'transfer'
+  ))));
+  $r = parse_response($r); # convert to XML
 
-	# if it failed, end here
-	if ($r['status'] !== 'ok' || !isset($r['filelist'], $r['filelist']['file'])) {
-		cl('Request failed'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-		die(1);
-	}
+  # if it failed, end here
+  if ($r['status'] !== 'ok' || !isset($r['filelist'], $r['filelist']['file'])) {
+    cl('Request failed'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+    die(1);
+  }
 
-	# walk files in the download list and collect the hashes
-	$hashes = array();
-	cl('Walking files to collect hashes', VERBOSE_DEBUG);
-	foreach ($r['filelist']['file'] as $k => $v) {
-		$hashes[] = '"'.dbres($link, $v['ed2khash']).'"';
-	}
+  # walk files in the download list and collect the hashes
+  $hashes = array();
+  cl('Walking files to collect hashes', VERBOSE_DEBUG);
+  foreach ($r['filelist']['file'] as $k => $v) {
+    $hashes[] = '"'.dbres($link, $v['ed2khash']).'"';
+  }
 
-	# get files that has not been moved, belongs to the download collection, does not exist and is not in download directory
-	$sql = 'UPDATE files
-			SET id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DUMPED).'"
-		WHERE
-			moved=0 AND
-			id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'" AND
-			existing=0 AND
-			ed2khash NOT IN ('.implode($hashes, ",").')
+  # get files that has not been moved, belongs to the download collection, does not exist and is not in download directory
+  $sql = 'UPDATE files
+      SET id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DUMPED).'"
+    WHERE
+      moved=0 AND
+      id_collections="'.dbres($link, FILES_ID_COLLECTIONS_DOWNLOAD).'" AND
+      existing=0 AND
+      ed2khash NOT IN ('.implode($hashes, ",").')
 
-		';
-	cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
-	$r = db_query($link, $sql);
-	if ($r === false) {
-		cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-		die(1);
-	}
+    ';
+  cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
+  $r = db_query($link, $sql);
+  if ($r === false) {
+    cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+    die(1);
+  }
 
-	return true;
-	*/
+  return true;
+  */
 #}
 
 # check if host responds to ping
@@ -74,7 +74,7 @@
 #	    }
 
 #	    cl('Pinging '.$host, VERBOSE_DEBUG);
-		# do it quiet, send only 1 packet, wait 3 sec for it to return
+    # do it quiet, send only 1 packet, wait 3 sec for it to return
 #	    $cmd = 'ping -w3 -qc1 '.$host.' 2>&- 1>&-';
 #	    cl('Running: '.$cmd, VERBOSE_DEBUG_DEEP);
 #	    $t = microtime();
