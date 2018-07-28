@@ -27,6 +27,7 @@
   # 2017-09-22 12:15:00 - bugfix, remove thumbnail only if it exists
   # 2017-09-28 00:07:00 - sorting transfer list descending on modify date
   # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+  # 2018-07-28 14:59:00 - updating videosheet location
 
   # general notice: data from mlnet already is in UTF-8!
 
@@ -371,7 +372,7 @@
         #if (!file_exists($normalthumbpath)) {
           unset($c, $r);
           # run video sheet to make it
-          $c = 'php '.DPTOOLS_DIR.'videosheet --filename='.escapeshellarg($origfile).' --format=jpeg --number=4 --column=2 --quality=75 --thumbsize=512,-1 --gridonly --skipnoduration --output='.escapeshellarg($normalthumbpath);
+          $c = 'php '.dirname(__FILE__).'/../videosheet --filename='.escapeshellarg($origfile).' --format=jpeg --number=4 --column=2 --quality=75 --thumbsize=512,-1 --gridonly --skipnoduration --output='.escapeshellarg($normalthumbpath);
           passthru($c, $r);
 
           if ($r === 0 && file_exists($normalthumbpath)) {

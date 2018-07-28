@@ -69,24 +69,7 @@
   2018-07-11 18:35:00 - adding login
   2018-07-13 19:31:26 - indentation change, tab to 2 spaces
   2018-07-28 14:38:00 - cleanup
-
-  # SQL setup
-  CREATE DATABASE autoqueuer;
-  USE autoqueuer;
-
-  CREATE TABLE clientpumps(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, username TINYTEXT NOT NULL, password TINYTEXT NOT NULL, host TINYTEXT NOT NULL, port INT NOT NULL, `type` TINYTEXT NOT NULL, status int not null default 1, searched datetime not null default '0000-00-00 00:00:00', searches BIGINT NOT NULL DEFAULT 0, queuedfiles BIGINT NOT NULL DEFAULT 0, path_incoming TEXT NOT NULL DEFAULT '', updated DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00', created DATETIME NOT NULL);
-  CREATE TABLE collections(id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, host TEXT NOT NULL, hostpath TEXT NOT NULL, username TEXT NOT NULL, password TEXT NOT NULL, rootpath TEXT NOT NULL,  enabled int not null default 1, updated DATETIME NOT NULL, created DATETIME NOT NULL);
-  CREATE TABLE files (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_collections bigint not null default 0, id_searches INT NOT NULL DEFAULT 0, name TINYTEXT NOT NULL, path TINYTEXT NOT NULL, ed2khash VARCHAR(32) NOT NULL, size BIGINT NOT NULL DEFAULT 0, verified INT NOT NULL DEFAULT 1, existing INT NOT NULL DEFAULT 0, fakecheck INT NOT NULL, moved INT NOT NULL DEFAULT 0, fakecheck int not null default 0, redownload int not null default 0, modified DATETIME NOT NULL, created DATETIME NOT NULL, updated DATETIME NOT NULL DEFAULT 0);
-  CREATE TABLE files_unfinished (id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_clientpumps BIGINT NOT NULL, name TINYTEXT NOT NULL, size BIGINT NOT NULL, renewable INT NOT NULL DEFAULT 0, modified DATETIME NOT NULL, created DATETIME NOT NULL);
-  CREATE TABLE logmessages (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_logmessages_parent BIGINT NOT NULL DEFAULT  0, id_files INT NOT NULL DEFAULT 0, type INT NOT NULL DEFAULT 0, message TEXT NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
-  CREATE TABLE moverules(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, regex TEXT NOT NULL, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, matches INT NOT NULL DEFAULT 0,  cmdaftermove TINYTEXT NOT NULL, filessincelastmail INT NOT NULL DEFAULT 0, status INT NOT NULL DEFAULT 1);
-  CREATE TABLE parameters(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, parameter TINYTEXT NOT NULL, value TEXT NOT NULL);
-  CREATE TABLE searches (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_clientpumps INT NOT NULL DEFAULT 0, search TINYTEXT NOT NULL, type TINYTEXT NOT NULL, sizemin BIGINT NOT NULL DEFAULT 0, sizemax BIGINT NOT NULL DEFAULT 0, extension TINYTEXT NOT NULL, method TINYTEXT NOT NULL, executiontimeout BIGINT NOT NULL DEFAULT 3600, executiontimeoutbase BIGINT NOT NULL DEFAULT 3600, executiontimeoutrandbase BIGINT NOT NULL DEFAULT 3600, status int not null default 0, executions BIGINT NOT NULL DEFAULT 0, resultscans INT NOT NULL DEFAULT 0, queuedfiles INT NOT NULL DEFAULT 0, filessincelastmail INT NOT NULL DEFAULT 0, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, executed DATETIME NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
-
-  CREATE INDEX ed2khash ON files(ed2khash(32));
-
-  # ALTER TABLE collections ADD url TINYTEXT NOT NULL AFTER rootpath;
-  # ALTER TABLE collections ADD name TINYTEXT NOT NULL AFTER id;
+  2018-07-28 15:11:00 - removing moved sql setup and unwanted requirement
 */
 
   # open this file and edit to setup
@@ -193,7 +176,6 @@
   $verbose = VERBOSE_ERROR; # level of verbosity, 0=off, 1=errors, 2=info, 3=debug, 4=debug deep
 
   # get common functionality
-  require_once('config.php');
   require_once('base3.php');
 
   # eMule-defined search types - shortened
