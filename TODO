@@ -183,26 +183,26 @@ emulehelper - ja vad? namnbyte? = autoqueue bra
 
 - resultscans, ska vara 2, under detta incrementera och sök filer
 
+- filer i fel kategorier....
 
+select * from files where id_searches=2 and id_collections = -1 and not name like '%word%';
+ update files set id_searches=2 where id_collections=-1 and name like '%word%' and not id_searches=2;
 
+-- 3 felrader, satt till 0
 
+select * from files where id_searches=4 and id_collections = -1 and not name like '%word%';
+ update files set id_searches=4 where id_collections=-1 and name like '%word%' and not id_searches=4;
 
+-- 13 felrader, satt till 0
 
+select * from files where id_searches=5 and id_collections = -1 and not name like '%word%';
+update files set id_searches=5 where id_collections=-1 and name like '%word%' and not id_searches=5;
 
+-- 32 felrader, satt till 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+select * from files where id_searches=6 and id_collections = -1 and not name like '%word%';
+update files set id_searches=6 where id_collections=-1 and name like '%word%' and not id_searches=6;
+-- 18 felrader, satt till 0
 
 - kolla verbose så vi inte pajar nåt
 

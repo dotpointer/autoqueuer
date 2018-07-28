@@ -68,6 +68,7 @@
   2017-09-28 23:15:00 - adjusting mashed message output to add newline at the end of each line
   2018-07-11 18:35:00 - adding login
   2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+  2018-07-28 14:38:00 - cleanup
 
   # SQL setup
   CREATE DATABASE autoqueuer;
@@ -83,8 +84,6 @@
   CREATE TABLE searches (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, id_clientpumps INT NOT NULL DEFAULT 0, search TINYTEXT NOT NULL, type TINYTEXT NOT NULL, sizemin BIGINT NOT NULL DEFAULT 0, sizemax BIGINT NOT NULL DEFAULT 0, extension TINYTEXT NOT NULL, method TINYTEXT NOT NULL, executiontimeout BIGINT NOT NULL DEFAULT 3600, executiontimeoutbase BIGINT NOT NULL DEFAULT 3600, executiontimeoutrandbase BIGINT NOT NULL DEFAULT 3600, status int not null default 0, executions BIGINT NOT NULL DEFAULT 0, resultscans INT NOT NULL DEFAULT 0, queuedfiles INT NOT NULL DEFAULT 0, filessincelastmail INT NOT NULL DEFAULT 0, movetopath TEXT NOT NULL, movetochgrp TINYTEXT NOT NULL, movetochmod VARCHAR(4) NOT NULL, executed DATETIME NOT NULL, updated DATETIME NOT NULL, created DATETIME NOT NULL);
 
   CREATE INDEX ed2khash ON files(ed2khash(32));
-
-
 
   # ALTER TABLE collections ADD url TINYTEXT NOT NULL AFTER rootpath;
   # ALTER TABLE collections ADD name TINYTEXT NOT NULL AFTER id;
