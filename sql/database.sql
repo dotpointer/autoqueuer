@@ -150,6 +150,7 @@ CREATE TABLE `moverules` (
   `movetochmod` varchar(4) NOT NULL,
   `matches` int(11) NOT NULL DEFAULT '0',
   `cmdaftermove` tinytext NOT NULL,
+  `sendmail` int(11) NOT NULL DEFAULT '1',
   `filessincelastmail` int(11) NOT NULL DEFAULT '0',
   `status` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
@@ -195,6 +196,7 @@ CREATE TABLE `searches` (
   `executions` bigint(20) NOT NULL DEFAULT '0',
   `resultscans` int(11) NOT NULL DEFAULT '0',
   `queuedfiles` int(11) NOT NULL DEFAULT '0',
+  `sendmail` int(11) NOT NULL DEFAULT '1',
   `filessincelastmail` int(11) NOT NULL DEFAULT '0',
   `movetopath` text NOT NULL,
   `movetochgrp` tinytext NOT NULL,

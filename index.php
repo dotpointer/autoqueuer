@@ -22,6 +22,7 @@
 # 2018-07-11 18:37:00 - adding login
 # 2018-07-12 19:53:00 - updating jquery from 1.8.3 to 3.3.1
 # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+# 2018-11-16 21:20:00 - adding sendmail setting
 
 session_start();
 
@@ -57,6 +58,7 @@ $password_retype			= isset($_REQUEST['password_retype']) ? $_REQUEST['password_r
 $path_incoming 				= isset($_REQUEST['path_incoming']) ? $_REQUEST['path_incoming'] : '';
 $port 						= isset($_REQUEST['port']) ? $_REQUEST['port'] : 0;
 $redownload					= isset($_REQUEST['redownload']) ? $_REQUEST['redownload'] : false;
+$sendmail 					= isset($_REQUEST['sendmail']) ? $_REQUEST['sendmail'] : false;
 $search 					= isset($_REQUEST['search']) ? $_REQUEST['search'] : false;
 $show_download 				= isset($_REQUEST['show_download']) ? (int)$_REQUEST['show_download'] : 0;
 $sizemax 					= isset($_REQUEST['sizemax']) ? $_REQUEST['sizemax'] : 0;

@@ -70,6 +70,8 @@
   2018-07-13 19:31:26 - indentation change, tab to 2 spaces
   2018-07-28 14:38:00 - cleanup
   2018-07-28 15:11:00 - removing moved sql setup and unwanted requirement
+  2018-11-16 21:20:00 - adding sendmail setting to searches and moverules
+
 */
 
   # open this file and edit to setup
@@ -948,7 +950,8 @@
           searches.movetopath,
           searches.movetochgrp,
           searches.movetochmod,
-          searches.search
+          searches.search,
+          searches.sendmail
         FROM
           files,
           searches
@@ -972,7 +975,7 @@
         cl('Matched '.count($r).' entries in DB by filename', VERBOSE_DEBUG);
         # make sure target path ends with /
         $r[0]['movetopath'] = substr($r[0]['movetopath'], -1) === '/' ? $r[0]['movetopath'] : $r[0]['movetopath'].'/';
-        if (move_file($file['fullpath'], $r[0]['movetopath'].$filename, $r[0], $link)) {
+        if (move_file($file['fullpath'], $r[0]['movetopath'].$filename, $r[0], $link) && (int)$r[0]['sendmail'] === 1) {
 
           # email
           $sql = 'UPDATE searches SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $r[0]['id_searches']).'"';
@@ -1033,7 +1036,7 @@
         # make sure target path ends with /
         $r[0]['movetopath'] = substr($r[0]['movetopath'], -1) === '/' ? $r[0]['movetopath'] : $r[0]['movetopath'].'/';
         # try to move file
-        if (move_file($file['fullpath'], $r[0]['movetopath'].$filename, $r[0], $link)) {
+        if (move_file($file['fullpath'], $r[0]['movetopath'].$filename, $r[0], $link) && (int)$r[0]['sendmail'] === 1) {
 
           # email
           $sql = 'UPDATE searches SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $r[0]['id_searches']).'"';
@@ -1130,14 +1133,16 @@
               ), $link
             )) {
 
-              # email
-              $sql = 'UPDATE moverules SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $moverule['id']).'"';
-              cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
-              $result_update_moverules = db_query($link, $sql);
-              if ($result_update_moverules === false) {
-                cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-                fwrite(STDERR, messages(true));
-                die(1);
+              if ((int)$moverule['sendmail'] === 1) {
+                # email
+                $sql = 'UPDATE moverules SET filessincelastmail=filessincelastmail+1 WHERE id="'.dbres($link, $moverule['id']).'" AND sendmail=1';
+                cl('SQL: '.$sql, VERBOSE_DEBUG_DEEP);
+                $result_update_moverules = db_query($link, $sql);
+                if ($result_update_moverules === false) {
+                  cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
+                  fwrite(STDERR, messages(true));
+                  die(1);
+                }
               }
 
               if (strlen($moverule['cmdaftermove'])) {
@@ -1182,7 +1187,7 @@
         cl('Skipping invalid mail address: '.$parameters['email_address'], VERBOSE_DEBUG);
       } else {
 
-                $sql = 'SELECT nickname, filessincelastmail FROM searches WHERE filessincelastmail>0';
+                $sql = 'SELECT nickname, filessincelastmail FROM searches WHERE filessincelastmail>0 AND sendmail=1';
                 $r = db_query($link, $sql);
                 if ($r === false) {
                     cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
@@ -1193,7 +1198,7 @@
                 $filessincelastmail = $r;
 
                 # sum the move rules
-                $sql = 'SELECT nickname, filessincelastmail FROM moverules WHERE filessincelastmail>0';
+                $sql = 'SELECT nickname, filessincelastmail FROM moverules WHERE filessincelastmail>0 AND sendmail=1';
                 $r = db_query($link, $sql);
                 if ($r === false) {
                     cl(db_error($link).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);

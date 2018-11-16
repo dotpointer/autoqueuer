@@ -23,6 +23,7 @@
 # 2018-03-22 01:52:00 - adding search links to transfers
 # 2018-07-11 18:38:00 - adding login
 # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+# 2018-11-16 21:20:00 - adding sendmail setting to searches
 
 # make sure there is something above this file
 if (!isset($view)) exit;
@@ -558,6 +559,7 @@ if ($format === 'json') {
             'id',
             'queuedfiles',
             'resultscans',
+            'sendmail',
             'status'
           ),
           array(

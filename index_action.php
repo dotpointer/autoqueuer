@@ -21,6 +21,7 @@
 # 2017-09-22 00:08:00 - adding redownload
 # 2018-07-11 18:37:00 - adding login
 # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+# 2018-11-16 21:20:00 - adding sendmail setting to searches
 
 if (!isset($action)) exit;
 
@@ -544,6 +545,7 @@ switch ($action) {
       'movetopath' => $movetopath,
       'nickname' => $nickname,
       'search' => $search,
+      'sendmail' => $sendmail,
       'sizemax' => $sizemax,
       'sizemin' => $sizemin,
       'status' => $status,

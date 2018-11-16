@@ -29,6 +29,7 @@ require_once('functions.php');
 # 2018-07-11 20:00:00 - es6 javascript conversion
 # 2018-07-12 19:52:00 - jslint, updating jquery from 1.8.3 to 3.3.1
 # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+# 2018-11-16 21:20:00 - adding sendmail setting to searches
 
 start_translations();
 ?>
@@ -1605,6 +1606,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
             e.t("Researchable"),
             e.t("Execs."),
             e.t("Files"),
+            e.t("Mail"),
             e.t("Status"),
             e.t("Manage")
           ]);
@@ -1836,6 +1838,27 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
                       $("<br/>")
                     )
                     .append(
+                      $("<label/>").text(e.t("Mail") + ":")
+                    )
+                    .append(
+                      $("<select/>")
+                        .attr("name","sendmail")
+                        .append(
+                          e.obj_to_options({
+                            "0": e.t("Inactive"),
+                            "1": e.t("Active")
+                          })
+                        )
+                    )
+                    .append(
+                      $("<span/>")
+                        .addClass("description")
+                        .text(e.t("Whether to send mails about it or not."))
+                    )
+                    .append(
+                      $("<br/>")
+                    )
+                    .append(
                       $("<label/>").text(e.t("Status") + ":")
                     )
                     .append(
@@ -1938,6 +1961,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
               $("#insert_or_update_search_form input[name='executiontimeoutrandbase']").val(rowdata.executiontimeoutrandbase);
               $("#insert_or_update_search_form input[name='id_searches']").val(rowdata.id);
               $("#insert_or_update_search_form input[name='search']").val(rowdata.search);
+              $("#insert_or_update_search_form select[name='sendmail']").val(rowdata.sendmail);
               $("#insert_or_update_search_form input[name='sizemin']").val(rowdata.sizemin);
               $("#insert_or_update_search_form input[name='sizemax']").val(rowdata.sizemax);
               $("#insert_or_update_search_form select[name='status']").val(rowdata.status);
@@ -1983,6 +2007,7 @@ if (defined('ID_VISUM') && constant('ID_VISUM') !== false && defined('BASE_DOMAI
                 {inner_html: !Number.isNaN(Date.parse(data.data.searches[i].executed)) ? e.tools.timestamp_to_date(Date.parse(data.data.searches[i].executed) + (data.data.searches[i].executiontimeout * 1000)) : "", classes: "date"},
                 {inner_html: data.data.searches[i].executions, classes: "counter"},
                 {inner_html: data.data.searches[i].queuedfiles, classes: "counter"},
+                data.data.searches[i].sendmail === 1 ? e.t("On") : e.t("Off"),
                 data.data.searches[i].status === 1 ? e.t("On") : e.t("Off"),
                 {inner_html: div_manage.children(), classes: "manage"}
               ],
