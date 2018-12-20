@@ -30,8 +30,9 @@ require_once('functions.php');
 # 2018-07-12 19:52:00 - jslint, updating jquery from 1.8.3 to 3.3.1
 # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
 # 2018-11-16 21:20:00 - adding sendmail setting to searches
+# 2018-12-20 18:25:00 - moving translation to Base translate
 
-start_translations();
+start_translations(dirname(__FILE__).'/locales/');
 ?>
 /*jslint white: true, this: true, browser: true, long: true */
 /*global clientpumptypes,window,$,jQuery,toggler,Highcharts,files_queued_stats,

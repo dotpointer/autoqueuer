@@ -23,12 +23,13 @@
 # 2018-07-12 19:53:00 - updating jquery from 1.8.3 to 3.3.1
 # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
 # 2018-11-16 21:20:00 - adding sendmail setting
+# 2018-12-20 18:25:00 - moving translation to Base translate
 
 session_start();
 
 require_once('include/functions.php');
 
-start_translations();
+start_translations(dirname(__FILE__).'/include/locales/');
 
 $opacity_lower_level = 0.4;
 
@@ -97,7 +98,7 @@ foreach ($clientpumpclasses as $k => $v) {
   <link rel="stylesheet" href="include/screen.css" type="text/css" media="screen" />
 
   <script type="text/javascript" src="include/jquery-3.3.1.min.js"></script>
-  <script type="text/javascript "src="include/highcharts.js"></script>
+  <script type="text/javascript" src="include/highcharts.js"></script>
   <script type="text/javascript" src="include/exporting.js"></script>
 
   <script type="text/javascript">
