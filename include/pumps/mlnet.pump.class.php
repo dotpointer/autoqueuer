@@ -28,6 +28,7 @@
   # 2017-09-28 00:07:00 - sorting transfer list descending on modify date
   # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
   # 2018-07-28 14:59:00 - updating videosheet location
+  # 2019-09-15 17:25:00 - bugfix, error message
 
   # general notice: data from mlnet already is in UTF-8!
 
@@ -172,7 +173,7 @@
       ));
       if ($data === false) {
         # then raise error
-        cl('Settings page request failed, invalid response: '.var_export($r, true), VERBOSE_ERROR);
+        cl('Settings page request failed, invalid response: '.var_export($data, true), VERBOSE_ERROR);
         return false;
       }
 
