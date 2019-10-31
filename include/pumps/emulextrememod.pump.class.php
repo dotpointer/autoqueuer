@@ -15,6 +15,7 @@
   # 2017-09-12 22:18:00 - dropping project name in file
   # 2017-09-19 19:25:00 - editing message handling
   # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+  # 2019-10-31 21:03:00 - bugfix, php continue changes
 
   class eMuleXtremeModPump {
 
@@ -380,7 +381,7 @@
             # invalid response?
             if (!isset($file['ed2klink'])||!isset($file['type'])) {
               cl('Invalid filelist response - no ED2k-link or type, file structure was: '.var_export($file, true), VERBOSE_ERROR);
-              continue;
+              continue 2;
             }
 
             # extract file info from ed2k link
@@ -390,16 +391,16 @@
             if (!count($fileinfo)) {
               # logmessage('Invalid response - ED2k-link is invalid, contents of it: '.$file['ed2klink'], $link);
               cl('Invalid response - ED2k-link is invalid, contents of it: '.var_export($file['ed2klink'], true), VERBOSE_ERROR);
-              continue;
+              continue 2;
             }
 
             cl('Checking "'.$fileinfo['name'].'" ('.$fileinfo['size'].' b, '.$fileinfo['ed2k'].')', VERBOSE_DEBUG);
 
             # is filter enabled?
             if (is_array($filter)) {
-              if (isset($filter['min']) && $filter['min'] > $fileinfo['size']) continue;
-              if (isset($filter['max']) && $filter['max'] < $fileinfo['size']) continue;
-              if (isset($filter['type']) && $filter['type'] != $fileinfo['type']) continue;
+              if (isset($filter['min']) && $filter['min'] > $fileinfo['size']) continue 2;
+              if (isset($filter['max']) && $filter['max'] < $fileinfo['size']) continue 2;
+              if (isset($filter['type']) && $filter['type'] != $fileinfo['type']) continue 2;
             }
 
             # add it to list of files
@@ -410,9 +411,9 @@
 
             # is filter enabled?
             if (is_array($filter)) {
-              if (isset($filter['min']) && $filter['min'] > $file['fsize']) continue;
-              if (isset($filter['max']) && $filter['max'] < $file['fsize']) continue;
-              if (isset($filter['type']) && $filter['type'] != $file['filetype']) continue;
+              if (isset($filter['min']) && $filter['min'] > $file['fsize']) continue 2;
+              if (isset($filter['max']) && $filter['max'] < $file['fsize']) continue 2;
+              if (isset($filter['type']) && $filter['type'] != $file['filetype']) continue 2;
             }
 
             # cleanup the mess

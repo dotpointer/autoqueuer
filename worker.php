@@ -21,7 +21,7 @@
   2014-04-02			- trying to shut up curl error 28 operation timed out
   2014-07-12 17:03:08 - v2, heavy update with indexing from mediaarchive, mounting from transfer, base2 replaces base
   2014-07-22 			- multi-client with clientpumps, search with name+size check
-    2015-03-10 22:59:48 - replacing filesize and ed2khash with _custom editions for 32-bit 2GB PHP file size limit
+  2015-03-10 22:59:48 - replacing filesize and ed2khash with _custom editions for 32-bit 2GB PHP file size limit
   2015-07-24 23:27:00 - textual fixes
   2015-07-27 18:40:14 - updating indexer, adding fakecheck and more detailed debug messages and deep debug level for SQL and execs
   2015-07-28 00:49:48 - bugfix for indexer where size was not updated on hash update
@@ -40,6 +40,7 @@
   2017-09-28 23:14:00 - adding fake check command
   2018-05-05 01:39:00 - bugfix, removing error when no searches are available
   2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+  2019-10-31 21:03:00 - bugfix, php continue changes
 
   command search - searches and trigger downloads, could be put in a cronjob every 3:th, 6:th hour or so
   command download - checks result and trigger downloads - could be put about 5 min after the search has been triggered
@@ -352,7 +353,7 @@ foreach ($arguments as $k => $v) {
         # parse the URL from where to get the files
         if (!($collection['url'] = parse_url($collection['url']))) {
           cl('Malformed URL format of destination '.$collection['url'].' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-          continue 2;
+          continue 3; # leave foreach + switch
         }
 
         # find out what type of source this is
@@ -363,7 +364,7 @@ foreach ($arguments as $k => $v) {
             # job rootpath - eg /mnt/project/share
             if (!($rootpath = make_dir(MOUNT_ROOTPATH.$collection['name']))) {
               cl('Path '.MOUNT_ROOTPATH.$collection['name'].' could not be created, or is not a directory'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-              continue 3;
+              continue 4; # leave switch + foreach + switch
             }
 
             # are there options for this supplied?
@@ -372,7 +373,7 @@ foreach ($arguments as $k => $v) {
             # try to mount
             if (!($collection['fullpath'] = mountcifs($collection['url'], $rootpath, $options))) {
               cl('Could not mount '.$collection['name'].' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-              continue 3;
+              continue 4; # leave switch + foreach + switch
             }
 
             $rootpath = $collection['fullpath'];
@@ -387,14 +388,14 @@ foreach ($arguments as $k => $v) {
             $collection['fullpath'] = substr($collection['url']['path'], -1) !== '/' ? $collection['url']['path'].'/' : $collection['url']['path'];
             if (!is_dir($collection['fullpath'])) {
               cl('Local path '.$collection['fullpath'].' not found'.' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-              continue 3;
+              continue 4; # leave switch + foreach + switch
             }
 
             $rootpath = $collection['fullpath'];
             break;
           default:
             cl('Unknown scheme: '.strtolower($collection['url']['scheme']).' ('.__FILE__.':'.__LINE__.')', VERBOSE_ERROR);
-            continue 3;
+            continue 4; # leave switch + foreach + switch
         }
 
         if (!file_exists($rootpath) || !is_dir($rootpath)) {
