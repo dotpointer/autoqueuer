@@ -72,12 +72,8 @@
   2018-07-28 15:11:00 - removing moved sql setup and unwanted requirement
   2018-11-16 21:20:00 - adding sendmail setting to searches and moverules
   2018-12-20 18:25:00 - moving translation to Base translate
+  2020-02-05 18:35:00 - adding console and file log output
 */
-
-  # open this file and edit to setup
-  require_once('setup.php');
-
-  # --- end of setup ---------------------------------------------------
 
   # file movement statuses
   define('FILES_MOVED_NOT_MOVED', 0);
@@ -172,10 +168,15 @@
   define('SITE_SHORTNAME', 'autoqueuer');
 
   $conn = false;
+  $logfile = '';
+  $logfilelevel = VERBOSE_INFO;
   $loglevel = VERBOSE_INFO;
   $messages = array();
   $pingresults = array(); # to store ping results
   $verbose = VERBOSE_ERROR; # level of verbosity, 0=off, 1=errors, 2=info, 3=debug, 4=debug deep
+
+  # open this file and edit to setup
+  require_once('setup.php');
 
   # get common functionality
   require_once('base3.php');
@@ -296,10 +297,13 @@
 
   # console log - debug printing
   function cl($s, $level=1, $log_to_db=true) {
-    global $verbose;
-    global $loglevel;
+
     global $link;
+    global $logfile;
+    global $logfilelevel;
+    global $loglevel;
     global $messages;
+    global $verbose;
 
     # do not log passwords from mountcifs
     $s = preg_replace('/password=\".*\" \"\/\//', 'password="*****" "//', $s);
@@ -318,15 +322,27 @@
       break;
     }
 
+    $date = date('Y-m-d H:i:s');
+
     # post to local array
     $messages[] = array(
-      'date' => date('Y-m-d H:i:s'),
+      'date' => $date,
       'level' => $level,
       'msg' => $s
     );
 
+    # is the verbosity level bove or equal to what to print
+    if ($verbose >= $level) {
+      echo $date.' '.$l.' '.$s."\n";
+    }
+
+    # is there a log file set and the message level is above or equal to what to log
+    if (strlen($logfile) && $logfilelevel >= $level) {
+      file_put_contents($logfile, $date.' '.$l.' '.$s."\n", FILE_APPEND);
+    }
+
     if ($log_to_db && $loglevel && $loglevel >= $level) {
-      $sql = 'INSERT INTO logmessages (type, data, updated, created) VALUES('.LOGMESSAGE_TYPE_TEXT.', "'.dbres($link, $s).'","'.date('Y-m-d H:i:s').'","'.date('Y-m-d H:i:s').'")';
+      $sql = 'INSERT INTO logmessages (type, data, updated, created) VALUES('.$level.', "'.dbres($link, $s).'","'.$date.'","'.$date.'")';
       # no logging here - endless loop
       $result = db_query($link, $sql);
     }

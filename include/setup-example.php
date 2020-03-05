@@ -6,6 +6,7 @@
   # 2017-09-19 20:48:00 - initial version, extracted from functions
   # 2018-07-11 18:42:40
   # 2018-07-13 19:31:26 - indentation change, tab to 2 spaces
+  # 2020-02-05 18:35:00 - adding console and file log output
 
   # project name
   define('PROJECT_FILENAME', 'autoqueuer');
@@ -29,6 +30,12 @@
   # eMule setup - eMule MUST have special XML-template loaded as web interface
   # define('EMULEHOST', 'hostname');
   # define('EMULEWEBURL', 'http://'.EMULEHOST.':4711/');
+
+  # log settings
+  # $logfile = '';
+  # $logfilelevel = VERBOSE_INFO;
+  # $loglevel = VERBOSE_INFO;
+  # $verbose = VERBOSE_ERROR;
 
   # bad words detected in filenames
   $blacklist = array('.exe','.zip', '.com', '.rar');
